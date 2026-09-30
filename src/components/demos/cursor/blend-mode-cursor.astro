@@ -58,8 +58,11 @@
     pointer-events: none;
   }
   @media (prefers-color-scheme: dark) {
-    .bm-dot {
+    :global(:root:not([data-theme='light'])) .bm-dot {
       background: var(--ink);
     }
+  }
+  :global(:root[data-theme='dark']) .bm-dot {
+    background: var(--ink);
   }
 </style>

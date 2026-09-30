@@ -67,6 +67,11 @@ type UiStrings = {
   // 페이지 맨 위·맨 아래로 바로 가는 아이콘 버튼의 이름(aria-label·툴팁)
   toTop: string;
   toBottom: string;
+  // 헤더 테마 토글 — 누르면 바뀔 모드를 말한다(aria-label·툴팁)
+  toLight: string;
+  toDark: string;
+  // 전체 페이지 오른쪽 카테고리 레일(섹션 바로 가기)의 이름 — 스크린리더용
+  sectionsLabel: string;
   back: string;
   // 404 페이지: 제목, 안내, 전체 페이지 링크
   notFoundTitle: string;
@@ -117,6 +122,9 @@ export const ui: Record<Locale, UiStrings> = {
     searchSeeAll: 'See all results for “{q}”',
     toTop: 'Back to top',
     toBottom: 'Go to bottom',
+    toLight: 'Switch to light mode',
+    toDark: 'Switch to dark mode',
+    sectionsLabel: 'Jump to a category',
     back: 'Back',
     notFoundTitle: 'Page not found',
     notFoundBody: 'This page does not exist or has moved. Browse all motions or search by name.',
@@ -168,6 +176,9 @@ export const ui: Record<Locale, UiStrings> = {
     searchSeeAll: 'Ver todos los resultados de «{q}»',
     toTop: 'Volver arriba',
     toBottom: 'Ir al final',
+    toLight: 'Cambiar a modo claro',
+    toDark: 'Cambiar a modo oscuro',
+    sectionsLabel: 'Ir a una categoría',
     back: 'Volver',
     notFoundTitle: 'Página no encontrada',
     notFoundBody: 'Esta página no existe o se ha movido. Explora todas las animaciones o busca por nombre.',
@@ -219,6 +230,9 @@ export const ui: Record<Locale, UiStrings> = {
     searchSeeAll: 'Alle Ergebnisse für „{q}“ anzeigen',
     toTop: 'Nach oben',
     toBottom: 'Nach unten',
+    toLight: 'Zum hellen Modus wechseln',
+    toDark: 'Zum dunklen Modus wechseln',
+    sectionsLabel: 'Zu einer Kategorie springen',
     back: 'Zurück',
     notFoundTitle: 'Seite nicht gefunden',
     notFoundBody: 'Diese Seite gibt es nicht oder sie wurde verschoben. Sieh dir alle Animationen an oder suche nach dem Namen.',
@@ -270,6 +284,9 @@ export const ui: Record<Locale, UiStrings> = {
     searchSeeAll: 'Voir tous les résultats pour « {q} »',
     toTop: 'Haut de page',
     toBottom: 'Bas de page',
+    toLight: 'Passer en mode clair',
+    toDark: 'Passer en mode sombre',
+    sectionsLabel: 'Aller à une catégorie',
     back: 'Retour',
     notFoundTitle: 'Page introuvable',
     notFoundBody: 'Cette page n’existe pas ou a été déplacée. Parcourez toutes les animations ou cherchez par nom.',
@@ -321,6 +338,9 @@ export const ui: Record<Locale, UiStrings> = {
     searchSeeAll: 'Ver todos os resultados para "{q}"',
     toTop: 'Voltar ao topo',
     toBottom: 'Ir para o fim',
+    toLight: 'Mudar para o modo claro',
+    toDark: 'Mudar para o modo escuro',
+    sectionsLabel: 'Ir para uma categoria',
     back: 'Voltar',
     notFoundTitle: 'Página não encontrada',
     notFoundBody: 'Esta página não existe ou foi movida. Veja todas as animações ou pesquise pelo nome.',
@@ -372,6 +392,9 @@ export const ui: Record<Locale, UiStrings> = {
     searchSeeAll: '「{q}」のすべての結果を見る',
     toTop: 'ページの先頭へ',
     toBottom: 'ページの末尾へ',
+    toLight: 'ライトモードに切り替え',
+    toDark: 'ダークモードに切り替え',
+    sectionsLabel: 'カテゴリへ移動',
     back: '戻る',
     notFoundTitle: 'ページが見つかりません',
     notFoundBody: 'このページは存在しないか、移動しました。すべてのモーションを見るか、名前で検索してください。',
@@ -423,6 +446,9 @@ export const ui: Record<Locale, UiStrings> = {
     searchSeeAll: '"{q}" 검색 결과 모두 보기',
     toTop: '맨 위로',
     toBottom: '맨 아래로',
+    toLight: '라이트 모드로 전환',
+    toDark: '다크 모드로 전환',
+    sectionsLabel: '카테고리로 이동',
     back: '돌아가기',
     notFoundTitle: '페이지를 찾을 수 없습니다',
     notFoundBody: '없거나 옮겨진 페이지입니다. 전체 모션을 둘러보거나 이름으로 검색하세요.',
@@ -473,6 +499,9 @@ export const ui: Record<Locale, UiStrings> = {
     searchSeeAll: '查看“{q}”的全部结果',
     toTop: '回到顶部',
     toBottom: '前往底部',
+    toLight: '切换到浅色模式',
+    toDark: '切换到深色模式',
+    sectionsLabel: '跳转到分类',
     back: '返回',
     notFoundTitle: '找不到页面',
     notFoundBody: '此页面不存在或已移动。浏览全部动效，或按名称搜索。',
@@ -523,6 +552,9 @@ export const ui: Record<Locale, UiStrings> = {
     searchSeeAll: '查看「{q}」的所有結果',
     toTop: '回到頂端',
     toBottom: '前往底部',
+    toLight: '切換到淺色模式',
+    toDark: '切換到深色模式',
+    sectionsLabel: '跳到分類',
     back: '返回',
     notFoundTitle: '找不到頁面',
     notFoundBody: '此頁面不存在或已移動。瀏覽全部動效，或依名稱搜尋。',

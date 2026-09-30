@@ -24,9 +24,12 @@
     place-items: center;
   }
   @media (prefers-color-scheme: dark) {
-    .skeleton-shimmer {
+    :global(:root:not([data-theme='light'])) .skeleton-shimmer {
       --glint: color-mix(in srgb, var(--demo-muted), var(--muted) 35%);
     }
+  }
+  :global(:root[data-theme='dark']) .skeleton-shimmer {
+    --glint: color-mix(in srgb, var(--demo-muted), var(--muted) 35%);
   }
   .ss-card {
     display: grid;

@@ -36,6 +36,8 @@ const ogImage = new URL('/og-image.png', site).href;
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <!-- 스크립트가 켜져 있음을 그리기 전에 알린다 — 스크립트가 나중에 보여 주는 검색창 자리를 미리 잡아 화면이 밀리지 않게 한다(CLS) -->
     <script is:inline>document.documentElement.classList.add('js');</script>
+    <!-- 헤더 토글로 고른 테마(라이트·다크)를 그리기 전에 적용한다 — 고른 적 없으면 OS 설정을 따른다(global.css). 저장소를 못 쓰면 OS 설정 -->
+    <script is:inline>try { var theme = localStorage.getItem('theme'); if (theme === 'light' || theme === 'dark') document.documentElement.dataset.theme = theme; } catch (e) {}</script>
     <title>{title}</title>
     {fontLinks.map((href) => <link rel="stylesheet" href={href} />)}
     <meta name="description" content={description} />

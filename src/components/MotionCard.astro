@@ -8,9 +8,12 @@ import CircleArrowRight from '@lucide/astro/icons/circle-arrow-right';
 interface Props {
   motion: Motion;
   locale: Locale;
+  // 제목 수준 — 전체 페이지는 카테고리 제목(h2) 아래라 h3
+  headingLevel?: 2 | 3;
 }
 
-const { motion, locale } = Astro.props;
+const { motion, locale, headingLevel = 2 } = Astro.props;
+const Heading = headingLevel === 3 ? 'h3' : 'h2';
 const t = ui[locale];
 const promptId = `prompt-${motion.id}`;
 const nameId = `name-${motion.id}`;
@@ -37,9 +40,9 @@ const detailHref = pageHref(locale, motionSubpath(motion.id));
   <div class="head">
     <!-- 제목이 상세 페이지 링크다. 오른쪽 아이콘은 링크라는 표시(스크린리더에는 숨기고, 링크 이름은 제목 글자) -->
     <!-- 툴팁("자세히 보기")은 링크 오른쪽 끝, 아이콘 위에 뜬다 -->
-    <h2 class="name" id={nameId}>
+    <Heading class="name" id={nameId}>
       <a class="name-link" href={detailHref} data-tooltip={t.viewDetails}><span lang="en">{motion.name}</span>{localName && ` (${localName})`}<CircleArrowRight class="name-icon" size={24} stroke-width={2} aria-hidden="true" /></a>
-    </h2>
+    </Heading>
     {motion.aliases.length > 0 && (
       <p class="aliases"><span class="label">{t.aliases}</span> <span lang="en">{motion.aliases.join(', ')}</span></p>
     )}

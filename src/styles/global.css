@@ -20,8 +20,9 @@
   color-scheme: light;
 }
 
+/* 다크: 헤더 토글로 고른 값(data-theme)이 먼저, 고른 적 없으면 OS 설정. 두 블록의 값은 같아야 한다 */
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme='light']) {
     --bg: #121214;
     --surface: #1b1b1f;
     --stage: #232328;
@@ -35,6 +36,20 @@
     --highlight: #1f4f49;
     color-scheme: dark;
   }
+}
+:root[data-theme='dark'] {
+  --bg: #121214;
+  --surface: #1b1b1f;
+  --stage: #232328;
+  --ink: #ececef;
+  --muted: #a4a4ae;
+  --line: #313138;
+  --demo-muted: #45454d;
+  --accent: #3cc4b4;
+  --accent-strong: #6fd6ca;
+  --on-accent: #17171b;
+  --highlight: #1f4f49;
+  color-scheme: dark;
 }
 
 *,
@@ -126,6 +141,11 @@ body {
   left: 0;
 }
 /* 위아래로 붙은 버튼(맨 위·맨 아래로 가기)은 툴팁을 왼쪽 옆에 띄워 서로 가리지 않게 한다 */
+/* 화면 맨 위에 있는 요소(헤더 테마 토글)는 툴팁을 아래에 띄운다 — 위로 띄우면 화면 밖으로 잘린다 */
+[data-tooltip][data-tooltip-side='bottom']::after {
+  top: calc(100% + 6px);
+  bottom: auto;
+}
 [data-tooltip][data-tooltip-side='left']::after {
   top: 50%;
   right: calc(100% + 8px);

@@ -257,6 +257,7 @@ function setupSearch() {
     terms: card.dataset.search!.split('|').map(normalize),
     words: card.dataset.words!.split(' '),
   }));
+  const sections = document.querySelectorAll<HTMLElement>('[data-section]');
 
   const apply = (raw: string) => {
     const query = normalize(raw);
@@ -267,6 +268,13 @@ function setupSearch() {
       entry.card.hidden = !match;
       if (match) count++;
     }
+    // 카테고리 섹션: 남은 카드가 없으면 섹션째 숨기고, 제목 옆 개수를 남은 수로 바꾼다. 레일은 이벤트를 받아 눈금을 맞춘다
+    for (const section of sections) {
+      const left = section.querySelectorAll('[data-motion-card]:not([hidden])').length;
+      section.hidden = left === 0;
+      section.querySelector('[data-section-count]')!.textContent = String(left);
+    }
+    document.dispatchEvent(new Event('motions:filtered'));
     result.hidden = !query;
     similar.hidden = true;
     if (query) {
@@ -356,8 +364,102 @@ function setupPageJump() {
   update();
 }
 
+// 전체 페이지 오른쪽 카테고리 레일: 지금 보고 있는 섹션의 눈금을 표시한다. 눈금을 누르면 링크 기본 동작으로 즉시 옮긴다(부드러운 스크롤 없음)
+// 지금 섹션 = 화면 위에서 35% 선을 지난 마지막 섹션. 맨 아래에 닿으면 마지막 섹션이 짧아도 그 섹션이다
+function setupRail() {
+  const rail = document.querySelector<HTMLElement>('[data-rail]');
+  if (!rail) return;
+  const items = [...rail.querySelectorAll<HTMLAnchorElement>('[data-rail-link]')].map((link) => ({
+    link,
+    item: link.parentElement!,
+    section: document.getElementById(link.hash.slice(1))!,
+  }));
+  let current: HTMLAnchorElement | undefined;
+  let frame = 0;
+  const update = () => {
+    frame = 0;
+    // 검색으로 숨은 섹션은 눈금도 숨긴다
+    for (const { item, section } of items) item.hidden = section.hidden;
+    const visible = items.filter(({ section }) => !section.hidden);
+    const line = window.innerHeight * 0.35;
+    const atBottom = window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 2;
+    let active = visible[0];
+    for (const entry of visible) {
+      if (entry.section.getBoundingClientRect().top <= line) active = entry;
+    }
+    if (atBottom && visible.length) active = visible[visible.length - 1];
+    if (active?.link === current) return;
+    current?.removeAttribute('aria-current');
+    active?.link.setAttribute('aria-current', 'true');
+    current = active?.link;
+  };
+  const schedule = () => {
+    if (!frame) frame = requestAnimationFrame(update);
+  };
+  // 맥 Dock 처럼: 포인터 높이에서 가까운 항목일수록 이름·눈금을 키운다(최대 1.6배, 60px 밖은 그대로)
+  const magnify = (y: number | null) => {
+    for (const { link } of items) {
+      const box = link.getBoundingClientRect();
+      const distance = y === null ? Infinity : Math.abs(box.top + box.height / 2 - y);
+      link.style.setProperty('--s', String(1 + 0.6 * Math.max(0, 1 - distance / 60)));
+    }
+  };
+  // 1.6배로 커진 가장 긴 이름이 카드(섹션 오른쪽 끝)에 닿으면 좁은 여백 — 가리킨 카테고리 이름 하나만 배지로 보여 준다
+  const grid = document.querySelector<HTMLElement>('[data-grid]')!;
+  const names = [...rail.querySelectorAll<HTMLElement>('.rail-name')];
+  const fit = () => {
+    const room = rail.querySelector('.rail-tick')!.getBoundingClientRect().left - grid.getBoundingClientRect().right - 8;
+    rail.classList.toggle('is-compact', Math.max(...names.map((name) => name.offsetWidth)) * 1.6 > room);
+  };
+  rail.addEventListener('pointerenter', fit);
+  rail.addEventListener('pointermove', (event) => magnify(event.clientY));
+  rail.addEventListener('pointerleave', () => magnify(null));
+  rail.addEventListener('focusin', (event) => {
+    fit();
+    const box = (event.target as HTMLElement).getBoundingClientRect();
+    magnify(box.top + box.height / 2);
+  });
+  rail.addEventListener('focusout', () => magnify(null));
+  window.addEventListener('scroll', schedule, { passive: true });
+  window.addEventListener('resize', schedule);
+  document.addEventListener('motions:filtered', schedule);
+  update();
+}
+
+// 헤더 테마 토글: 누르면 지금 모드(고른 값, 없으면 OS 설정)의 반대로 바꾸고 저장한다. 처음 적용은 Base.astro 의 head 스크립트
+function setupTheme() {
+  const button = document.querySelector<HTMLButtonElement>('[data-theme-toggle]');
+  if (!button) return;
+  const root = document.documentElement;
+  const osDark = matchMedia('(prefers-color-scheme: dark)');
+  const mode = () => root.dataset.theme ?? (osDark.matches ? 'dark' : 'light');
+  const render = () => {
+    const current = mode();
+    const label = current === 'dark' ? button.dataset.labelLight! : button.dataset.labelDark!;
+    button.dataset.mode = current;
+    button.setAttribute('aria-label', label);
+    button.dataset.tooltip = label;
+  };
+  button.addEventListener('click', () => {
+    const next = mode() === 'dark' ? 'light' : 'dark';
+    root.dataset.theme = next;
+    try {
+      localStorage.setItem('theme', next);
+    } catch {
+      // 저장소를 못 쓰면 이 페이지에서만 바뀐다
+    }
+    render();
+  });
+  // 고른 적 없으면 OS 설정이 바뀔 때 아이콘도 따라간다
+  osDark.addEventListener('change', render);
+  render();
+  button.hidden = false;
+}
+
 export function initSite() {
+  setupTheme();
   setupPageJump();
+  setupRail();
   setupLangMenu();
   revealCurrentChip();
   // 웹폰트가 늦게 들어오면 칩 폭이 바뀌므로 한 번 더 맞춘다

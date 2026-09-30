@@ -8,6 +8,8 @@ import Globe from '@lucide/astro/icons/globe';
 import CircleX from '@lucide/astro/icons/circle-x';
 import CircleChevronUp from '@lucide/astro/icons/circle-chevron-up';
 import CircleChevronDown from '@lucide/astro/icons/circle-chevron-down';
+import Sun from '@lucide/astro/icons/sun';
+import Moon from '@lucide/astro/icons/moon';
 
 // 모든 페이지의 틀: 헤더(언어 선택) → 검색 → 카테고리 칩 → 본문 → 공통 프롬프트 모달 → 푸터
 interface Props {
@@ -42,6 +44,20 @@ const chips = [
   <header class="site-header">
     <div class="wrap header-row">
       <a class="brand" href={pageHref(locale, '')}>{siteName}</a>
+      <div class="header-tools">
+      <!-- 테마 토글: 지금 모드의 반대 아이콘(다크면 해, 라이트면 달)을 보여 준다. 스크립트가 있어야 동작하므로 스크립트가 보여 준다 -->
+      <button
+        type="button"
+        class="theme-toggle"
+        hidden
+        data-theme-toggle
+        data-tooltip-side="bottom"
+        data-label-light={t.toLight}
+        data-label-dark={t.toDark}
+      >
+        <Sun class="icon-sun" size={18} aria-hidden="true" />
+        <Moon class="icon-moon" size={18} aria-hidden="true" />
+      </button>
       <!-- 9개 언어라 한 줄로 늘어놓지 않고 드롭다운으로 연다 (JS 없이 동작하는 details). 같은 페이지의 다른 언어로 간다 -->
       <nav class="lang" aria-label={t.languageLabel}>
         <details class="lang-menu" data-lang-menu>
@@ -65,6 +81,7 @@ const chips = [
           </ul>
         </details>
       </nav>
+      </div>
     </div>
   </header>
 
@@ -195,6 +212,32 @@ const chips = [
     letter-spacing: -0.01em;
     color: var(--ink);
     text-decoration: none;
+  }
+  .header-tools {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  /* 언어 선택과 같은 테두리 버튼. 아이콘은 스크립트가 붙이는 data-mode(지금 모드)로 고른다 */
+  .theme-toggle {
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    color: var(--ink);
+    background: none;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: border-color 150ms ease-out;
+  }
+  .theme-toggle:hover {
+    border-color: var(--ink);
+  }
+  .theme-toggle[data-mode='dark'] :global(.icon-moon),
+  .theme-toggle:not([data-mode='dark']) :global(.icon-sun) {
+    display: none;
   }
   .lang-menu {
     position: relative;
@@ -563,12 +606,11 @@ const chips = [
     flex-direction: column;
     gap: 8px;
   }
-  /* 본문(최대 1200px) 오른쪽 여백이 버튼이 들어갈 만큼 넓으면 여백에 둔다.
-     버튼 중심 = 카드 오른쪽 끝(화면 끝에서 여백 g + 32px)과 여백 가운데(g / 2)의 중간 = 0.75g + 16px, g = (100vw - 1200px) / 2 */
-  @media (min-width: 1320px) {
+  /* 태블릿 이상은 화면 오른쪽 끝에서 24px 안쪽 — 전체 페이지 카테고리 레일과 같은 축. 카드와 겹치는 폭이면 그대로 카드 위에 떠 있다 */
+  @media (min-width: 768px) {
     .page-jump {
-      right: calc((100vw - 1200px) * 0.375 - 4px);
-      bottom: 32px;
+      right: 24px;
+      bottom: 24px;
     }
   }
   /* 원 테두리는 아이콘(CircleChevronUp/Down)이 그린다 — 모달 닫기·돌아가기와 같은 방식 */
@@ -591,6 +633,13 @@ const chips = [
   }
   .jump:hover {
     color: var(--ink);
+  }
+  /* 올리면 원 모양 그대로 오른쪽 아래로 옅은 그림자 — 버튼 상자(box-shadow)가 아니라 아이콘 모양을 따르는 drop-shadow (2026-09-30 사용자 지시) */
+  .jump :global(svg) {
+    transition: filter 150ms ease-out;
+  }
+  .jump:hover :global(svg) {
+    filter: drop-shadow(2px 2px 4px rgb(0 0 0 / 0.25));
   }
   .site-footer {
     padding: 24px 0 32px;
