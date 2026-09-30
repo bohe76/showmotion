@@ -1,0 +1,57 @@
+---
+// Wobble Card 데모 — 포인터가 카드 위에 있으면(.is-active) 카드는 포인터 쪽으로(--mx, --my), 안쪽 내용은 반대쪽으로 살짝 움직이며 조금 커진다
+---
+<div class="wobble-card" data-demo-root aria-hidden="true">
+  <div class="wc-card">
+    <div class="wc-content">
+      <span class="wc-letter">A</span>
+      <span class="wc-bar"></span>
+      <span class="wc-bar wc-bar--short"></span>
+    </div>
+  </div>
+</div>
+
+<style>
+  .wobble-card {
+    position: relative;
+  }
+  .wc-card {
+    position: absolute;
+    inset: 16% 18%;
+    overflow: hidden;
+    background: var(--accent);
+    border-radius: 12px;
+    transition: transform 200ms ease-out;
+  }
+  .wc-content {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 9%;
+    transition: transform 200ms ease-out;
+  }
+  .wobble-card.is-active .wc-card {
+    transform: translate(calc((var(--mx, 0.5) - 0.5) * 24px), calc((var(--my, 0.5) - 0.5) * 24px));
+  }
+  .wobble-card.is-active .wc-content {
+    transform: translate(calc((var(--mx, 0.5) - 0.5) * -24px), calc((var(--my, 0.5) - 0.5) * -24px)) scale(1.03);
+  }
+  .wc-letter {
+    margin-bottom: auto;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--on-accent);
+  }
+  .wc-bar {
+    width: 70%;
+    height: 8px;
+    background: var(--on-accent);
+    border-radius: 4px;
+    opacity: 0.6;
+  }
+  .wc-bar--short {
+    width: 45%;
+  }
+</style>

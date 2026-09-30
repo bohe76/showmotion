@@ -1,0 +1,136 @@
+---
+// Curtain / Panel Wipe 데모 — 누를 때마다(.is-on 토글) 색 띠 네 개가 차례로 내려와 페이지를 덮고, 덮인 사이에 페이지가 바뀐 뒤 띠가 아래로 빠지며 새 페이지를 드러낸다(.is-playing)
+// 띠 하나 1000ms(0~40% 덮기, 40~60% 머무름, 60~100% 빠짐), 띠마다 50ms 지연 → 마지막 띠가 덮는 550ms와 첫 띠가 빠지는 600ms 사이(575ms)에 페이지를 바꾼다
+const stripes = [0, 1, 2, 3];
+---
+<div class="curtain-wipe" data-demo-root aria-hidden="true">
+  <div class="cw-frame">
+    <div class="cw-page cw-page--a">
+      <span class="cw-bar"></span>
+      <span class="cw-hero">A</span>
+      <span class="cw-line"></span>
+      <span class="cw-line cw-line--short"></span>
+    </div>
+    <div class="cw-page cw-page--b">
+      <span class="cw-bar"></span>
+      <div class="cw-tiles">
+        <span class="cw-tile">B</span>
+        <span class="cw-tile"></span>
+      </div>
+      <span class="cw-line cw-line--short"></span>
+      <span class="cw-line"></span>
+    </div>
+    <div class="cw-stripes">
+      {stripes.map((i) => <span class="cw-stripe" style={`--i: ${i}`}></span>)}
+    </div>
+  </div>
+</div>
+
+<style>
+  .curtain-wipe {
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+  }
+  .cw-frame {
+    position: relative;
+    width: 60%;
+    height: 80%;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+  }
+  .cw-page {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    align-content: start;
+    gap: 10px;
+    padding: 12px;
+    background: var(--surface);
+    /* 띠가 모두 덮은 순간에 바뀐다 — 길이 0 + 지연으로 그 순간까지 이전 값을 유지 */
+    transition: visibility 0s linear 575ms;
+  }
+  .cw-page--b {
+    background: var(--stage);
+    visibility: hidden;
+  }
+  .curtain-wipe.is-on .cw-page--a {
+    visibility: hidden;
+  }
+  .curtain-wipe.is-on .cw-page--b {
+    visibility: visible;
+  }
+  .cw-bar {
+    width: 40%;
+    height: 8px;
+    border-radius: 2px;
+    background: var(--ink);
+  }
+  .cw-hero {
+    display: grid;
+    place-items: center;
+    aspect-ratio: 16 / 7;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--on-accent);
+    background: var(--accent);
+    border-radius: 4px;
+  }
+  .cw-tiles {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .cw-tile {
+    display: grid;
+    place-items: center;
+    aspect-ratio: 4 / 3;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--ink);
+    background: var(--demo-muted);
+    border-radius: 4px;
+  }
+  .cw-tile:first-child {
+    color: var(--on-accent);
+    background: var(--accent-strong);
+  }
+  .cw-line {
+    height: 8px;
+    border-radius: 2px;
+    background: var(--demo-muted);
+  }
+  .cw-line--short {
+    width: 60%;
+  }
+  .cw-stripes {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    pointer-events: none;
+  }
+  /* 겹치는 가장자리에 틈이 보이지 않게 띠를 1px 넓힌다 */
+  .cw-stripe {
+    margin-right: -1px;
+    background: var(--accent);
+    transform: translateY(-100%);
+  }
+  .curtain-wipe.is-playing .cw-stripe {
+    animation: curtain-panel-wipe-sweep 1000ms cubic-bezier(0.65, 0, 0.35, 1) both;
+    animation-delay: calc(var(--i) * 50ms);
+  }
+  @keyframes curtain-panel-wipe-sweep {
+    0% {
+      transform: translateY(-100%);
+    }
+    40%,
+    60% {
+      transform: translateY(0);
+    }
+    100% {
+      transform: translateY(100%);
+    }
+  }
+</style>

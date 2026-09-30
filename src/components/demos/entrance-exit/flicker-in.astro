@@ -1,0 +1,63 @@
+---
+// Flicker In 데모 — .is-playing 이 붙으면 고장 난 네온처럼 몇 번 깜박인 뒤 켜진 채로 남는다
+---
+<div class="flicker-in" data-demo-root aria-hidden="true">
+  <div class="fli-word">ABCD</div>
+</div>
+
+<style>
+  .flicker-in {
+    display: grid;
+    place-items: center;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    container-type: inline-size;
+  }
+  .fli-word {
+    color: var(--accent);
+    font-size: 12cqw;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    line-height: 1;
+    white-space: nowrap;
+  }
+  /* 깜박임은 초당 3회 미만으로 둔다 (WCAG 2.3.1 번쩍임 기준) */
+  .flicker-in.is-playing .fli-word {
+    animation: flicker-in-blink 2000ms linear both;
+  }
+  @keyframes flicker-in-blink {
+    0%,
+    10% {
+      opacity: 0;
+    }
+    10.1%,
+    14% {
+      opacity: 1;
+    }
+    14.1%,
+    28% {
+      opacity: 0;
+    }
+    28.1%,
+    34% {
+      opacity: 1;
+    }
+    34.1%,
+    46% {
+      opacity: 0;
+    }
+    46.1%,
+    58% {
+      opacity: 1;
+    }
+    58.1%,
+    64% {
+      opacity: 0;
+    }
+    64.1%,
+    100% {
+      opacity: 1;
+    }
+  }
+</style>

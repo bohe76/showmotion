@@ -1,0 +1,54 @@
+---
+// Flip In 데모 — .is-playing 이 붙으면 가로축으로 누운(옆면) 상태에서 앞으로 젖혀지며 살짝 흔들리고 정면에 멈춘다 (Flip In X)
+---
+<div class="flip-in" data-demo-root aria-hidden="true">
+  <div class="fpi-block">A</div>
+</div>
+
+<style>
+  .flip-in {
+    display: grid;
+    place-items: center;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    container-type: inline-size;
+  }
+  .fpi-block {
+    display: grid;
+    place-items: center;
+    width: 30%;
+    aspect-ratio: 1;
+    border-radius: 6px;
+    background: var(--accent);
+    color: var(--on-accent);
+    font-size: 12cqw;
+    font-weight: 700;
+    line-height: 1;
+  }
+  .flip-in.is-playing .fpi-block {
+    animation: flip-in-x 900ms both;
+  }
+  @keyframes flip-in-x {
+    0% {
+      opacity: 0;
+      transform: perspective(400px) rotateX(90deg);
+      animation-timing-function: ease-in;
+    }
+    40% {
+      transform: perspective(400px) rotateX(-20deg);
+      animation-timing-function: ease-in;
+    }
+    60% {
+      opacity: 1;
+      transform: perspective(400px) rotateX(10deg);
+    }
+    80% {
+      transform: perspective(400px) rotateX(-5deg);
+    }
+    100% {
+      opacity: 1;
+      transform: perspective(400px) rotateX(0);
+    }
+  }
+</style>

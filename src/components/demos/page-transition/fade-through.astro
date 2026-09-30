@@ -1,0 +1,113 @@
+---
+// Fade Through 데모 — 누를 때마다(.is-on 토글) 지금 페이지가 먼저 완전히 사라진 뒤, 새 페이지가 살짝 작은 크기에서 커지며 떠오른다
+// 사라지는 쪽: 투명도만 짧게(크기는 다 사라진 뒤 되돌린다). 나타나는 쪽: 사라짐이 끝난 뒤(지연) 투명도·크기를 함께
+---
+<div class="fade-through" data-demo-root aria-hidden="true">
+  <div class="ft-frame">
+    <div class="ft-page ft-page--a">
+      <span class="ft-bar"></span>
+      <span class="ft-hero">A</span>
+      <span class="ft-line"></span>
+      <span class="ft-line ft-line--short"></span>
+    </div>
+    <div class="ft-page ft-page--b">
+      <span class="ft-bar"></span>
+      <div class="ft-tiles">
+        <span class="ft-tile">B</span>
+        <span class="ft-tile"></span>
+      </div>
+      <span class="ft-line ft-line--short"></span>
+      <span class="ft-line"></span>
+    </div>
+  </div>
+</div>
+
+<style>
+  .fade-through {
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+  }
+  .ft-frame {
+    position: relative;
+    width: 60%;
+    height: 80%;
+    overflow: hidden;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+  }
+  .ft-page {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    align-content: start;
+    gap: 10px;
+    padding: 12px;
+    background: var(--surface);
+  }
+  /* 보이는 쪽이 될 때의 전환 — 사라짐이 끝난 뒤 떠오른다 */
+  .ft-page--a,
+  .fade-through.is-on .ft-page--b {
+    opacity: 1;
+    transform: scale(1);
+    transition:
+      opacity 250ms ease-out 150ms,
+      transform 250ms cubic-bezier(0.22, 1, 0.36, 1) 150ms;
+  }
+  /* 숨는 쪽이 될 때의 전환 — 투명도만 빠르게, 크기는 다 숨은 뒤 되돌린다 */
+  .ft-page--b,
+  .fade-through.is-on .ft-page--a {
+    opacity: 0;
+    transform: scale(0.92);
+    transition:
+      opacity 150ms ease-in,
+      transform 0s linear 150ms;
+  }
+  .ft-page--b {
+    background: var(--stage);
+  }
+  .ft-bar {
+    width: 40%;
+    height: 8px;
+    border-radius: 2px;
+    background: var(--ink);
+  }
+  .ft-hero {
+    display: grid;
+    place-items: center;
+    aspect-ratio: 16 / 7;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--on-accent);
+    background: var(--accent);
+    border-radius: 4px;
+  }
+  .ft-tiles {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .ft-tile {
+    display: grid;
+    place-items: center;
+    aspect-ratio: 4 / 3;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--ink);
+    background: var(--demo-muted);
+    border-radius: 4px;
+  }
+  .ft-tile:first-child {
+    color: var(--on-accent);
+    background: var(--accent-strong);
+  }
+  .ft-line {
+    height: 8px;
+    border-radius: 2px;
+    background: var(--demo-muted);
+  }
+  .ft-line--short {
+    width: 60%;
+  }
+</style>

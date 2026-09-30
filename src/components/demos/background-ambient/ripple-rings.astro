@@ -1,0 +1,50 @@
+---
+// Ripple Rings 데모 — 가운데 블록에서 고리 4개가 같은 간격으로 차례로 퍼지며 흐려진다
+// 고리마다 주기의 1/4씩 늦게 시작해(음수 지연) 처음부터 고르게 퍼져 있다
+const rings = [0, 1, 2, 3];
+---
+<div class="ripple-rings" data-demo-root aria-hidden="true">
+  {rings.map((i) => <span class="rr-ring" style={`animation-delay: ${-i}s`}></span>)}
+  <span class="rr-core">A</span>
+</div>
+
+<style>
+  .ripple-rings {
+    position: relative;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+  }
+  .rr-ring,
+  .rr-core {
+    grid-area: 1 / 1;
+  }
+  .rr-ring {
+    width: 80%;
+    aspect-ratio: 1;
+    border: 2px solid var(--accent);
+    border-radius: 50%;
+    opacity: 0;
+    animation: ripple-rings-spread 4s ease-out infinite;
+  }
+  .rr-core {
+    display: grid;
+    place-items: center;
+    width: 14%;
+    aspect-ratio: 1;
+    font-weight: 700;
+    color: var(--on-accent);
+    background: var(--accent);
+    border-radius: 50%;
+  }
+  @keyframes ripple-rings-spread {
+    from {
+      opacity: 0.9;
+      transform: scale(0.18);
+    }
+    to {
+      opacity: 0;
+      transform: scale(1);
+    }
+  }
+</style>

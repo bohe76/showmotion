@@ -1,0 +1,66 @@
+---
+// Icon Float Away 데모 — 마우스를 올리면(.is-active) 아이콘 A 가 위로 떠나며 흐려지고, 아래에서 아이콘 B 가 떠올라 자리를 채운다
+---
+<div class="icon-float-away" data-demo-root aria-hidden="true">
+  <div class="ifa-btn">
+    <span class="ifa-slot">
+      <span class="ifa-icon ifa-icon--out">A</span>
+      <span class="ifa-icon ifa-icon--in">B</span>
+    </span>
+    <span class="ifa-bar"></span>
+  </div>
+</div>
+
+<style>
+  .icon-float-away {
+    display: grid;
+    place-items: center;
+  }
+  .ifa-btn {
+    display: flex;
+    align-items: center;
+    gap: 10%;
+    width: 48%;
+    aspect-ratio: 3 / 1;
+    padding: 0 9%;
+    background: var(--accent);
+    border-radius: 6px;
+  }
+  .ifa-slot {
+    display: grid;
+    flex: none;
+    width: 22%;
+  }
+  .ifa-icon {
+    display: grid;
+    grid-area: 1 / 1;
+    place-items: center;
+    aspect-ratio: 1;
+    font-weight: 700;
+    color: var(--accent);
+    background: var(--on-accent);
+    border-radius: 50%;
+    transition:
+      translate 400ms ease-out,
+      opacity 400ms ease-out;
+  }
+  .ifa-icon--in {
+    translate: 0 100%;
+    opacity: 0;
+  }
+  .icon-float-away.is-active .ifa-icon--out {
+    translate: 0 -160%;
+    opacity: 0;
+  }
+  .icon-float-away.is-active .ifa-icon--in {
+    translate: 0 0;
+    opacity: 1;
+  }
+  .ifa-bar {
+    flex: 1;
+    height: 8px;
+    background: var(--on-accent);
+    border-radius: 4px;
+    opacity: 0.6;
+  }
+</style>

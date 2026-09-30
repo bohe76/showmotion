@@ -1,0 +1,39 @@
+---
+// Bouncing Dots 데모 — 점 세 개가 차례로 튀어 올랐다 내려앉기를 반복한다
+const dots = [0, 1, 2];
+---
+<div class="bouncing-dots" data-demo-root aria-hidden="true">
+  <div class="bd-row">
+    {dots.map((i) => <span class="bd-dot" style={`--i: ${i}`}></span>)}
+  </div>
+</div>
+
+<style>
+  .bouncing-dots {
+    display: grid;
+    place-items: center;
+  }
+  .bd-row {
+    display: flex;
+    gap: 12px;
+  }
+  .bd-dot {
+    width: 16px;
+    height: 16px;
+    background: var(--accent);
+    border-radius: 50%;
+    animation: bouncing-dots-bounce 1.2s ease-in-out infinite;
+    animation-delay: calc(var(--i) * 0.16s);
+  }
+  /* 뒤쪽 절반은 바닥에서 쉰다 — 세 점이 다 내려앉은 뒤 다시 시작해 박자가 읽힌다 */
+  @keyframes bouncing-dots-bounce {
+    0%,
+    60%,
+    100% {
+      transform: translateY(0);
+    }
+    30% {
+      transform: translateY(-20px);
+    }
+  }
+</style>

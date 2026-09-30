@@ -1,0 +1,105 @@
+---
+// Floating Label 데모 — .is-playing 이 붙으면 칸이 포커스되고, 안쪽 라벨이 위로 올라가며 작아진 뒤 입력값이 찬다
+// 없으면 최종 상태(라벨이 올라가 있고 값이 채워진 칸)
+---
+<div class="floating-label" data-demo-root aria-hidden="true">
+  <div class="fl-field">
+    <span class="fl-label"></span>
+    <span class="fl-value">ABC</span>
+  </div>
+  <div class="fl-field fl-field--idle">
+    <span class="fl-label fl-label--idle"></span>
+  </div>
+</div>
+
+<style>
+  .floating-label {
+    display: grid;
+    place-content: center;
+    gap: 14px;
+    grid-template-columns: min(64%, 420px);
+  }
+  .fl-field {
+    position: relative;
+    height: 52px;
+    background: var(--surface);
+    border: 2px solid var(--accent);
+    border-radius: 8px;
+  }
+  .fl-field--idle {
+    border-color: var(--line);
+  }
+  /* 라벨은 막대 — 칸 안 가운데(자리 표시)에서 칸 위쪽 테두리로 옮겨 간다 */
+  .fl-label {
+    position: absolute;
+    top: 0;
+    left: 14px;
+    width: 34%;
+    height: 10px;
+    background: var(--accent);
+    border-radius: 2px;
+    outline: 4px solid var(--surface);
+    transform: translateY(-50%) scale(0.72);
+    transform-origin: left center;
+  }
+  .fl-label--idle {
+    top: 50%;
+    background: var(--demo-muted);
+    outline: 0;
+    transform: translateY(-50%);
+  }
+  .fl-value {
+    position: absolute;
+    left: 14px;
+    bottom: 10px;
+    font-size: 1.05rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    color: var(--ink);
+  }
+  .floating-label.is-playing .fl-field:not(.fl-field--idle) {
+    animation: floating-label-focus 1400ms ease-out both;
+  }
+  .floating-label.is-playing .fl-label:not(.fl-label--idle) {
+    animation: floating-label-float 1400ms ease-out both;
+  }
+  .floating-label.is-playing .fl-value {
+    animation: floating-label-type 1400ms steps(3, jump-start) both;
+  }
+  @keyframes floating-label-focus {
+    0%,
+    20% {
+      border-color: var(--line);
+    }
+    30%,
+    100% {
+      border-color: var(--accent);
+    }
+  }
+  /* 칸 가운데에서 위 테두리로 — 평소 칸 높이의 절반만큼 올라간다 */
+  @keyframes floating-label-float {
+    0%,
+    25% {
+      top: 50%;
+      background: var(--demo-muted);
+      transform: translateY(-50%) scale(1);
+      animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    50%,
+    100% {
+      top: 0;
+      background: var(--accent);
+      transform: translateY(-50%) scale(0.72);
+    }
+  }
+  /* 글자가 하나씩 입력되는 것처럼 오른쪽부터 가려 둔다 */
+  @keyframes floating-label-type {
+    0%,
+    55% {
+      clip-path: inset(0 100% 0 0);
+    }
+    100% {
+      clip-path: inset(0 0 0 0);
+    }
+  }
+</style>

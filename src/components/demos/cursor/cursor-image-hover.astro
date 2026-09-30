@@ -1,0 +1,105 @@
+---
+// Cursor Image Hover 데모 — 목록 위에서 포인터(--px, --py)를 따라 미리보기 블록이 떠다니고, 세로 위치(--my)가 가리키는 줄의 그림으로 바뀐다
+// 포인터가 없으면 가운데(B 줄)에 떠 있다
+const rows = ['A', 'B', 'C', 'D'];
+---
+<div class="cursor-image-hover" data-demo-root aria-hidden="true">
+  <ul class="ci-list">
+    {
+      rows.map((letter, i) => (
+        <li style={`--i: ${i}`}>
+          <span class="ci-letter">{letter}</span>
+          <span class="ci-bar" />
+        </li>
+      ))
+    }
+  </ul>
+  <div class="ci-preview">
+    <div class="ci-reel">
+      {rows.map((letter) => <span>{letter}</span>)}
+    </div>
+  </div>
+</div>
+
+<style>
+  .cursor-image-hover {
+    /* 포인터가 있는 줄 번호(0~3) — 목록이 위 4%~아래 20%(19%씩 네 줄)라 경계는 0.23, 0.42, 0.61 */
+    --row: calc(
+      clamp(0, (var(--my, 0.5) - 0.23) * 1000, 1) + clamp(0, (var(--my, 0.5) - 0.42) * 1000, 1) +
+        clamp(0, (var(--my, 0.5) - 0.61) * 1000, 1)
+    );
+    position: relative;
+    overflow: hidden;
+  }
+  /* 아래 20% 는 왼쪽 아래 조작 안내 자리 — 비워 둬야 낮은 카드에서 D 줄이 안내에 가려지지 않는다 */
+  .ci-list {
+    position: absolute;
+    inset: 4% 12% 20%;
+    display: grid;
+    grid-template-rows: repeat(4, 1fr);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .ci-list li {
+    display: flex;
+    align-items: center;
+    gap: 6%;
+    border-bottom: 1px solid var(--line);
+    /* 포인터가 있는 줄만 진하게 — (row - i)² 이 0 일 때만 1 */
+    opacity: calc(0.35 + clamp(0, 1 - (var(--row) - var(--i)) * (var(--row) - var(--i)), 1) * 0.65);
+    transition: opacity 200ms ease-out;
+  }
+  .ci-letter {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--ink);
+  }
+  .ci-bar {
+    width: 50%;
+    height: 10px;
+    background: var(--ink);
+    border-radius: 2px;
+  }
+  .ci-preview {
+    position: absolute;
+    top: var(--py, 50%);
+    /* 포인터 오른쪽에 붙되, 스테이지 오른쪽 끝을 넘지 않는다 */
+    left: min(calc(var(--px, 50%) + 16px), calc(100% - clamp(64px, 26%, 150px) - 8px));
+    width: clamp(64px, 26%, 150px);
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    border-radius: 6px;
+    transform: translateY(-50%);
+    pointer-events: none;
+    transition:
+      top 300ms cubic-bezier(0.22, 1, 0.36, 1),
+      left 300ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .ci-reel {
+    display: grid;
+    grid-template-rows: repeat(4, 1fr);
+    height: 400%;
+    transform: translateY(calc(var(--row) * -25%));
+    transition: transform 300ms ease-out;
+  }
+  .ci-reel span {
+    display: grid;
+    place-items: center;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--on-accent);
+    background: var(--accent);
+  }
+  .ci-reel span:nth-child(2) {
+    background: var(--accent-strong);
+  }
+  .ci-reel span:nth-child(3) {
+    color: var(--surface);
+    background: var(--ink);
+  }
+  .ci-reel span:nth-child(4) {
+    color: var(--ink);
+    background: var(--demo-muted);
+  }
+</style>

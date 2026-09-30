@@ -1,0 +1,53 @@
+---
+// Dock Magnification 데모 — 포인터가 가까운 아이콘일수록(--mx 와의 거리) 부드럽게 커지고, 이웃도 조금 커진다
+// 포인터가 없으면(.is-active 없음) 모두 같은 크기
+const icons = ['A', 'B', 'C', 'D', 'E'];
+---
+<div class="dock-magnification" data-demo-root aria-hidden="true">
+  <div class="dm-dock">
+    {icons.map((letter, i) => <span class="dm-icon" style={`--i: ${i}`}>{letter}</span>)}
+  </div>
+</div>
+
+<style>
+  .dock-magnification {
+    --on: 0;
+    position: relative;
+    container-type: inline-size;
+  }
+  .dock-magnification.is-active {
+    --on: 1;
+  }
+  /* 아래 변을 고정해 아이콘이 위로 자란다 */
+  .dm-dock {
+    position: absolute;
+    bottom: 32%;
+    left: 50%;
+    display: flex;
+    align-items: flex-end;
+    gap: 2cqi;
+    padding: 1.5cqi;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 3cqi;
+    translate: -50% 0;
+  }
+  /* 평소 아이콘 중심은 루트 폭의 28% 부터 11% 간격 — 포인터와의 거리가 가까울수록 크게 */
+  .dm-icon {
+    --center: calc(0.28 + var(--i) * 0.11);
+    --dist: max(var(--mx, 0.5) - var(--center), var(--center) - var(--mx, 0.5));
+    --size: calc(1 + var(--on) * 0.8 * max(0, 1 - var(--dist) / 0.2));
+    display: grid;
+    place-items: center;
+    width: calc(9cqi * var(--size));
+    aspect-ratio: 1;
+    font-size: calc(3.2cqi * var(--size));
+    font-weight: 700;
+    color: var(--on-accent);
+    background: var(--accent);
+    border-radius: 22%;
+    transition:
+      width 120ms ease-out,
+      font-size 120ms ease-out;
+  }
+</style>

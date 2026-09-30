@@ -1,0 +1,82 @@
+---
+// Interactive Hover Button 데모 — 마우스를 올리면(.is-active) 왼쪽 점이 버튼 전체로 번져 채워지고, 원래 글자는 오른쪽으로 빠지며 화살표와 새 글자가 들어온다
+import ArrowRight from '@lucide/astro/icons/arrow-right';
+---
+<div class="interactive-hover-button" data-demo-root aria-hidden="true">
+  <div class="ihb-btn">
+    <span class="ihb-dot"></span>
+    <span class="ihb-label">A</span>
+    <span class="ihb-next">
+      <span class="ihb-next-label">A</span>
+      <ArrowRight class="ihb-arrow" stroke-width={2.75} aria-hidden="true" />
+    </span>
+  </div>
+</div>
+
+<style>
+  .interactive-hover-button {
+    display: grid;
+    place-items: center;
+  }
+  .ihb-btn {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 8%;
+    width: 48%;
+    aspect-ratio: 3 / 1;
+    padding: 0 10%;
+    overflow: hidden;
+    font-size: 1.25rem;
+    font-weight: 700;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+  }
+  .ihb-dot {
+    flex: none;
+    width: 8%;
+    aspect-ratio: 1;
+    background: var(--accent);
+    border-radius: 50%;
+    transition: scale 400ms ease-out;
+  }
+  .ihb-label {
+    color: var(--ink);
+    transition:
+      translate 400ms ease-out,
+      opacity 400ms ease-out;
+  }
+  .ihb-next {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8%;
+    color: var(--on-accent);
+    opacity: 0;
+    translate: 30% 0;
+    transition:
+      translate 400ms ease-out,
+      opacity 400ms ease-out;
+  }
+  /* 아이콘은 Lucide 컴포넌트가 그리므로 :global 로 잡는다 — 색은 .ihb-next 의 currentColor 를 따른다 */
+  .ihb-next :global(.ihb-arrow) {
+    flex: none;
+    width: 1em;
+    height: 1em;
+  }
+  /* 점이 버튼 오른쪽 끝까지 덮어야 한다 — 30 이면 오른쪽 끝에 초승달이 남는다(점과 끝 사이 거리 ≈ 점 반지름 × 33) */
+  .interactive-hover-button.is-active .ihb-dot {
+    scale: 44;
+  }
+  .interactive-hover-button.is-active .ihb-label {
+    opacity: 0;
+    translate: 120% 0;
+  }
+  .interactive-hover-button.is-active .ihb-next {
+    opacity: 1;
+    translate: 0 0;
+  }
+</style>

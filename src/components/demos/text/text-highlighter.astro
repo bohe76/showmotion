@@ -1,0 +1,41 @@
+---
+// Text Highlighter 데모 — .is-playing 이 붙으면 형광펜 띠가 가운데 구절 뒤를 왼쪽에서 오른쪽으로 긋고, 없으면 최종 상태(칠해짐)
+// 띠는 한 가지 색 배경을 폭만 늘려 그린다 — 구절이 두 줄로 나뉘어도 줄마다 이어진다(box-decoration-break)
+---
+<div class="text-highlighter" data-demo-root aria-hidden="true">
+  <p class="th-text">ABC <span class="th-mark">DEFG HIJ</span> KL</p>
+</div>
+
+<style>
+  .text-highlighter {
+    display: grid;
+    place-items: center;
+    container-type: inline-size;
+  }
+  .th-text {
+    width: 80%;
+    margin: 0;
+    font-size: clamp(1.5rem, 8cqi, 3rem);
+    font-weight: 700;
+    line-height: 1.3;
+    text-align: center;
+    color: var(--ink);
+  }
+  .th-mark {
+    padding: 0 0.1em;
+    background: linear-gradient(var(--highlight), var(--highlight)) no-repeat 0 90% / 100% 60%;
+    box-decoration-break: clone;
+    -webkit-box-decoration-break: clone;
+  }
+  .text-highlighter.is-playing .th-mark {
+    animation: text-highlighter-swipe 800ms cubic-bezier(0.65, 0, 0.35, 1) 300ms both;
+  }
+  @keyframes text-highlighter-swipe {
+    from {
+      background-size: 0% 60%;
+    }
+    to {
+      background-size: 100% 60%;
+    }
+  }
+</style>

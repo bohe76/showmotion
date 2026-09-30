@@ -1,0 +1,10 @@
+node_modules/
+dist/
+.astro/
+.wrangler/
+.playwright-mcp/
+screenshots/
+.env
+.env.*
+.omc/
+!.omc/skills/

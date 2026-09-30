@@ -1,0 +1,46 @@
+---
+// Radial Fill 데모 — 마우스를 올리면(.is-active) 가운데에서 원이 커지며 블록을 채우고, 떼면 가운데로 줄어든다
+---
+<div class="radial-fill" data-demo-root aria-hidden="true">
+  <div class="rf-box">
+    <span class="rf-fill"></span>
+    <span class="rf-label">A</span>
+  </div>
+</div>
+
+<style>
+  .radial-fill {
+    display: grid;
+    place-items: center;
+  }
+  .rf-box {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 40%;
+    aspect-ratio: 16 / 10;
+    overflow: hidden;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--ink);
+    background: var(--surface);
+    border-radius: 6px;
+    transition: color 300ms ease-out;
+  }
+  .rf-fill {
+    position: absolute;
+    inset: 0;
+    background: var(--accent);
+    clip-path: circle(0% at 50% 50%);
+    transition: clip-path 400ms ease-out;
+  }
+  .rf-label {
+    position: relative;
+  }
+  .radial-fill.is-active .rf-box {
+    color: var(--on-accent);
+  }
+  .radial-fill.is-active .rf-fill {
+    clip-path: circle(75% at 50% 50%);
+  }
+</style>

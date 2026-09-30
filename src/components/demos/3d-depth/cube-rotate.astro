@@ -1,0 +1,77 @@
+---
+// Cube Rotate 데모 — 네 옆면(A~D)에 내용을 둔 정육면체가 누를 때마다 세로축으로 한 면(90도)씩 돌아 다음 면이 앞으로 온다
+// 살짝 위에서 내려다보게 기울여 멈춰 있을 때도 입체로 보인다 — 그래서 윗면도 둔다
+const faces = ['A', 'B', 'C', 'D'];
+---
+<div class="cube-rotate" data-demo-root aria-hidden="true">
+  <div class="cr-view">
+    <div class="cr-cube">
+      {faces.map((letter, i) => (
+        <span class="cr-face" style={`--i: ${i}`}>{letter}</span>
+      ))}
+      <span class="cr-top"></span>
+    </div>
+  </div>
+</div>
+
+<style>
+  .cube-rotate {
+    overflow: hidden;
+    container-type: inline-size;
+    cursor: pointer;
+  }
+  /* cqw 는 조상 컨테이너(루트) 기준이라, 원근은 루트 안쪽 층에 준다 */
+  .cr-view {
+    display: grid;
+    place-items: center;
+    height: 100%;
+    perspective: 120cqw;
+  }
+  /* 한 변 30cqw — 면을 반 변(15cqw)만큼 밖으로 밀고, 정육면체를 그만큼 뒤로 밀어 앞면이 원래 크기로 보인다 */
+  .cr-cube {
+    position: relative;
+    width: 30cqw;
+    aspect-ratio: 1;
+    transform-style: preserve-3d;
+    transform: translateZ(-15cqw) rotateX(-14deg) rotateY(calc(var(--step, 0) * -90deg));
+    transition: transform 800ms cubic-bezier(0.45, 0, 0.2, 1);
+  }
+  .cr-face {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    font-size: 9cqw;
+    font-weight: 700;
+    color: var(--ink);
+    background: var(--surface);
+    border: 1px solid var(--line);
+    transform: rotateY(calc(var(--i) * 90deg)) translateZ(15cqw);
+  }
+  .cr-top {
+    position: absolute;
+    inset: 0;
+    background: var(--demo-muted);
+    border: 1px solid var(--line);
+    transform: rotateX(90deg) translateZ(15cqw);
+  }
+  .cr-face:nth-child(odd) {
+    color: var(--on-accent);
+    background: var(--accent);
+    border-color: var(--accent-strong);
+  }
+</style>
+
+<script>
+  // gallery.ts 는 누를 때마다 .is-on 토글과 .is-playing 재시작만 한다 — 몇 번째 면인지는 여기서 센다
+  // 스테이지 누르기와 다시 보기 버튼 모두 is-playing 을 뗐다 다시 붙이므로, class 변화에서 is-playing 이 새로 붙은 횟수를 센다
+  document.querySelectorAll<HTMLElement>('.cube-rotate').forEach((root) => {
+    let step = 0;
+    new MutationObserver((records) => {
+      const states = records.map((record) => (record.oldValue ?? '').split(/\s+/).includes('is-playing'));
+      states.push(root.classList.contains('is-playing'));
+      for (let i = 1; i < states.length; i++) if (!states[i - 1] && states[i]) step++;
+      root.style.setProperty('--step', String(step));
+    }).observe(root, { attributes: true, attributeFilter: ['class'], attributeOldValue: true });
+  });
+</script>

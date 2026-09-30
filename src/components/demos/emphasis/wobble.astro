@@ -1,0 +1,48 @@
+---
+// Wobble 데모 — .is-playing 이 붙으면 블록이 기울며 좌우로 크게 흔들리다 점점 잦아든다, 없으면 제자리(최종 상태)
+---
+<div class="wobble" data-demo-root aria-hidden="true">
+  <div class="wb-box">A</div>
+</div>
+
+<style>
+  .wobble {
+    display: grid;
+    place-items: center;
+  }
+  .wb-box {
+    display: grid;
+    place-items: center;
+    width: clamp(72px, 28%, 150px);
+    aspect-ratio: 16 / 10;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--on-accent);
+    background: var(--accent);
+    border-radius: 6px;
+  }
+  .wobble.is-playing .wb-box {
+    animation: wobble-rock 1s both;
+  }
+  @keyframes wobble-rock {
+    0%,
+    100% {
+      transform: none;
+    }
+    15% {
+      transform: translateX(-25%) rotate(-5deg);
+    }
+    30% {
+      transform: translateX(20%) rotate(3deg);
+    }
+    45% {
+      transform: translateX(-15%) rotate(-3deg);
+    }
+    60% {
+      transform: translateX(10%) rotate(2deg);
+    }
+    75% {
+      transform: translateX(-5%) rotate(-1deg);
+    }
+  }
+</style>

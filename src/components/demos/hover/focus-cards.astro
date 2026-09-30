@@ -1,0 +1,47 @@
+---
+// Focus Cards 데모 — 포인터가 있는 카드(--mx 로 계산)만 선명하고, 나머지 카드는 흐려지고 어두워진다
+// 포인터가 없으면(.is-active 없음) 모두 선명하다
+const letters = ['A', 'B', 'C'];
+---
+<div class="focus-cards" data-demo-root aria-hidden="true">
+  <div class="fc-row">
+    {letters.map((letter, i) => <span class="fc-card" style={`--i: ${i}`}>{letter}</span>)}
+  </div>
+</div>
+
+<style>
+  .focus-cards {
+    --on: 0;
+    position: relative;
+  }
+  .focus-cards.is-active {
+    --on: 1;
+  }
+  /* 카드 줄은 루트 가로의 가운데 72% — 포인터 비율을 줄 안 비율로 바꿔 몇 번째 카드인지 구한다 */
+  .fc-row {
+    --col: clamp(0, round(down, calc((var(--mx, 0.5) - 0.14) / 0.72 * 3), 1), 2);
+    position: absolute;
+    inset: 16% 14%;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 4%;
+  }
+  /* --away: 포인터가 있는 카드면 0, 다른 카드면 1 */
+  .fc-card {
+    --away: calc(var(--on) * min(1, max(var(--col) - var(--i), var(--i) - var(--col))));
+    display: grid;
+    place-items: center;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--on-accent);
+    background: var(--accent);
+    border-radius: 8px;
+    filter: blur(calc(var(--away) * 4px));
+    opacity: calc(1 - var(--away) * 0.5);
+    scale: calc(1 - var(--away) * 0.04);
+    transition:
+      filter 300ms ease-out,
+      opacity 300ms ease-out,
+      scale 300ms ease-out;
+  }
+</style>

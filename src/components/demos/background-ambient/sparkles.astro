@@ -1,0 +1,65 @@
+---
+// Sparkles 데모 — 글자(ABC) 둘레의 흩어진 자리에서 작은 별 14개가 서로 다른 때에 반짝 커졌다 사라진다
+// 별 모양은 clip-path 로 자르고, 움직임은 scale·rotate·opacity 뿐이다
+const stars = [
+  [8, 20, 10, 0, 1.6], [22, 6, 7, 0.5, 1.9], [40, 14, 12, 1.1, 1.7], [58, 2, 8, 0.3, 2.1],
+  [76, 12, 11, 1.4, 1.8], [92, 26, 7, 0.8, 2], [4, 62, 8, 1.7, 1.9], [18, 88, 11, 0.9, 1.6],
+  [36, 80, 7, 0.2, 2.2], [54, 94, 10, 1.3, 1.7], [72, 84, 8, 0.6, 2], [90, 70, 12, 1.9, 1.8],
+  [10, 42, 6, 2.2, 1.6], [84, 46, 7, 1, 2.1],
+];
+---
+<div class="sparkles" data-demo-root aria-hidden="true">
+  <div class="sk-area">
+    <span class="sk-word">ABC</span>
+    {stars.map(([x, y, size, delay, duration]) => (
+      <span
+        class="sk-star"
+        style={`left: ${x}%; top: ${y}%; width: ${size}px; animation-delay: ${delay}s; animation-duration: ${duration}s`}
+      ></span>
+    ))}
+  </div>
+</div>
+
+<style>
+  .sparkles {
+    container-type: inline-size;
+    display: grid;
+    place-items: center;
+  }
+  .sk-area {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 64%;
+    aspect-ratio: 2 / 1;
+  }
+  .sk-word {
+    font-size: 13cqw;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    color: var(--ink);
+  }
+  .sk-star {
+    position: absolute;
+    aspect-ratio: 1;
+    background: var(--accent);
+    clip-path: polygon(50% 0, 62% 38%, 100% 50%, 62% 62%, 50% 100%, 38% 62%, 0 50%, 38% 38%);
+    opacity: 0;
+    translate: -50% -50%;
+    animation: sparkles-twinkle 1.8s ease-in-out infinite;
+  }
+  .sk-star:nth-child(3n) {
+    background: var(--ink);
+  }
+  @keyframes sparkles-twinkle {
+    0%,
+    100% {
+      opacity: 0;
+      transform: scale(0) rotate(0deg);
+    }
+    50% {
+      opacity: 1;
+      transform: scale(1) rotate(90deg);
+    }
+  }
+</style>

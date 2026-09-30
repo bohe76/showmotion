@@ -1,0 +1,49 @@
+---
+// Stroke Text Draw 데모 — .is-playing 이 붙으면 글자 윤곽선이 그려진 뒤 안쪽이 채워지고, 없으면 최종 상태(채워진 글자)
+// 점선 간격(dasharray)을 윤곽 길이보다 길게 잡고 어긋남(dashoffset)을 0 으로 줄여 선이 그려지는 것처럼 보이게 한다
+---
+<div class="stroke-text-draw" data-demo-root aria-hidden="true">
+  <svg class="std-svg" viewBox="0 0 400 130">
+    <text class="std-text" x="200" y="100" text-anchor="middle" font-size="100" font-weight="800">ABCD</text>
+  </svg>
+</div>
+
+<style>
+  .stroke-text-draw {
+    display: grid;
+    place-items: center;
+  }
+  .std-svg {
+    width: 74%;
+    height: auto;
+    overflow: visible;
+  }
+  .std-text {
+    fill: var(--accent);
+    stroke: var(--accent);
+    stroke-width: 2;
+    stroke-linejoin: round;
+  }
+  .stroke-text-draw.is-playing .std-text {
+    stroke-dasharray: 700;
+    animation:
+      stroke-text-draw-line 1.8s ease-in-out both,
+      stroke-text-draw-fill 600ms ease-out 1.5s both;
+  }
+  @keyframes stroke-text-draw-line {
+    from {
+      stroke-dashoffset: 700;
+    }
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+  @keyframes stroke-text-draw-fill {
+    from {
+      fill-opacity: 0;
+    }
+    to {
+      fill-opacity: 1;
+    }
+  }
+</style>

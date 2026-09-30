@@ -1,0 +1,46 @@
+---
+// Nudge Forward / Backward 데모 — 마우스를 올리면(.is-active) 버튼 안의 화살표가 앞(오른쪽)으로 살짝 밀려나고, 떼면 돌아온다
+import ArrowRight from '@lucide/astro/icons/arrow-right';
+---
+<div class="nudge-forward-backward" data-demo-root aria-hidden="true">
+  <div class="nfb-btn">
+    <span class="nfb-bar"></span>
+    <ArrowRight class="nfb-arrow" stroke-width={2.75} aria-hidden="true" />
+  </div>
+</div>
+
+<style>
+  .nudge-forward-backward {
+    display: grid;
+    place-items: center;
+  }
+  .nfb-btn {
+    display: flex;
+    align-items: center;
+    gap: 10%;
+    width: 48%;
+    aspect-ratio: 3 / 1;
+    padding: 0 14% 0 10%;
+    background: var(--accent);
+    border-radius: 6px;
+  }
+  .nfb-bar {
+    flex: 1;
+    height: 8px;
+    background: var(--on-accent);
+    border-radius: 4px;
+    opacity: 0.6;
+  }
+  /* 화살표 — Lucide 컴포넌트가 그리므로 :global 로 잡고, translate 로 민다 */
+  .nfb-btn :global(.nfb-arrow) {
+    flex: none;
+    width: 16%;
+    height: auto;
+    aspect-ratio: 1;
+    color: var(--on-accent);
+    transition: translate 150ms ease-out;
+  }
+  .nudge-forward-backward.is-active :global(.nfb-arrow) {
+    translate: 40% 0;
+  }
+</style>

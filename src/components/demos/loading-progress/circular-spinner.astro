@@ -1,0 +1,56 @@
+---
+// Circular Spinner 데모 — 원 둘레의 호가 늘었다 줄며 계속 돈다
+// 두 움직임을 겹친다: SVG 전체가 일정하게 돌고(rotate), 호는 길이(dasharray)와 시작점(dashoffset)이 바뀐다
+---
+<div class="circular-spinner" data-demo-root aria-hidden="true">
+  <svg class="cs-svg" viewBox="0 0 50 50">
+    <circle class="cs-track" cx="25" cy="25" r="20" />
+    <circle class="cs-arc" cx="25" cy="25" r="20" />
+  </svg>
+</div>
+
+<style>
+  .circular-spinner {
+    display: grid;
+    place-items: center;
+  }
+  .cs-svg {
+    width: 64px;
+    height: 64px;
+    animation: circular-spinner-rotate 1.8s linear infinite;
+  }
+  .cs-track,
+  .cs-arc {
+    fill: none;
+    stroke-width: 4.5;
+  }
+  .cs-track {
+    stroke: var(--line);
+  }
+  .cs-arc {
+    stroke: var(--accent);
+    stroke-linecap: round;
+    stroke-dasharray: 1 150;
+    animation: circular-spinner-dash 1.4s ease-in-out infinite;
+  }
+  @keyframes circular-spinner-rotate {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  /* 둘레 약 126 — 짧은 점에서 길게 늘어났다가, 끝이 앞쪽을 따라잡으며 다시 짧아진다 */
+  @keyframes circular-spinner-dash {
+    0% {
+      stroke-dasharray: 1 150;
+      stroke-dashoffset: 0;
+    }
+    50% {
+      stroke-dasharray: 90 150;
+      stroke-dashoffset: -35;
+    }
+    100% {
+      stroke-dasharray: 90 150;
+      stroke-dashoffset: -124;
+    }
+  }
+</style>

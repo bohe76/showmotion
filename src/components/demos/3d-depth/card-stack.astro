@@ -1,0 +1,94 @@
+---
+// Card Stack 데모 — 조금씩 어긋나 쌓인 카드 4장(A~D) 중 맨 위 카드가 누를 때마다 옆으로 빠졌다가 맨 뒤로 들어가고, 나머지가 한 칸씩 앞으로 온다
+// 카드 자리(--pos: 0 맨 앞 ~ 3 맨 뒤)는 스크립트가 누른 횟수로 정하고, 빠져나가는 카드에만 ck-leaving 을 붙인다
+const cards = ['A', 'B', 'C', 'D'];
+---
+<div class="card-stack" data-demo-root aria-hidden="true">
+  <div class="ck-deck">
+    {cards.map((letter, i) => (
+      <span class="ck-card" style={`--pos: ${i}`}>{letter}</span>
+    ))}
+  </div>
+</div>
+
+<style>
+  .card-stack {
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    cursor: pointer;
+  }
+  .ck-deck {
+    position: relative;
+    width: 44%;
+    aspect-ratio: 4 / 3;
+    margin-top: 6%;
+  }
+  .ck-card {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--ink);
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    opacity: calc(1 - var(--pos) * 0.18);
+    transform: translateY(calc(var(--pos) * -9%)) scale(calc(1 - var(--pos) * 0.07));
+    z-index: calc(10 - var(--pos));
+    transition:
+      transform 450ms cubic-bezier(0.22, 1, 0.36, 1),
+      opacity 450ms ease-out;
+  }
+  .ck-card:first-child {
+    color: var(--on-accent);
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+  /* 맨 앞에서 옆으로 빠졌다가, 절반쯤에서 맨 뒤로 내려가 제자리(--pos: 3)로 들어간다 — to 는 기본 자리 값을 쓴다 */
+  /* 전환(transition)은 애니메이션보다 우선하므로 빠지는 카드만 전환을 꺼 휘어 나가는 궤적이 가려지지 않게 한다 */
+  .ck-card.ck-leaving {
+    transition: none;
+    animation: card-stack-swipe 650ms cubic-bezier(0.3, 0, 0.3, 1);
+  }
+  @keyframes card-stack-swipe {
+    0% {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+      z-index: 11;
+    }
+    45% {
+      opacity: 1;
+      transform: translateX(70%) rotate(10deg);
+      z-index: 11;
+    }
+    50%,
+    100% {
+      z-index: 1;
+    }
+  }
+</style>
+
+<script>
+  // gallery.ts 는 누를 때마다 .is-on 토글과 .is-playing 재시작만 한다 — 몇 번째 카드가 위인지는 여기서 센다
+  // 스테이지 누르기와 다시 보기 버튼 모두 is-playing 을 뗐다 다시 붙이므로, class 변화에서 is-playing 이 새로 붙은 횟수를 센다
+  document.querySelectorAll<HTMLElement>('.card-stack').forEach((root) => {
+    const cards = [...root.querySelectorAll<HTMLElement>('.ck-card')];
+    let step = 0;
+    new MutationObserver((records) => {
+      const states = records.map((record) => (record.oldValue ?? '').split(/\s+/).includes('is-playing'));
+      states.push(root.classList.contains('is-playing'));
+      let pressed = 0;
+      for (let i = 1; i < states.length; i++) if (!states[i - 1] && states[i]) pressed++;
+      if (!pressed) return;
+      step += pressed;
+      cards.forEach((card, i) => {
+        const pos = (i - (step % cards.length) + cards.length) % cards.length;
+        card.style.setProperty('--pos', String(pos));
+        card.classList.toggle('ck-leaving', pos === cards.length - 1);
+      });
+    }).observe(root, { attributes: true, attributeFilter: ['class'], attributeOldValue: true });
+  });
+</script>

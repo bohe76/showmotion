@@ -1,0 +1,72 @@
+---
+// Direction Aware Hover 데모 — 포인터가 들어온 쪽에서 덮개가 미끄러져 들어오고(.is-active), 나간 쪽으로 빠져나간다
+// 방향은 포인터 위치(--mx, --my)에서 가장 가까운 가장자리로 정한다
+---
+<div class="direction-aware-hover" data-demo-root aria-hidden="true">
+  <div class="dah-tile">
+    A
+    <div class="dah-overlay">
+      <span class="dah-letter">B</span>
+      <span class="dah-bar"></span>
+    </div>
+  </div>
+</div>
+
+<style>
+  .direction-aware-hover {
+    position: relative;
+  }
+  .dah-tile {
+    position: absolute;
+    inset: 12% 16%;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--muted);
+    background: var(--demo-muted);
+    border-radius: 8px;
+  }
+  .dah-overlay {
+    /* 가운데에서 포인터까지의 거리(가로 --ox, 세로 --oy). 가로 끝이 더 가까우면 --horizontal 이 1
+       --oy 의 아주 작은 보정: 정확히 가운데에서 떼도 덮개가 아래로 빠지게 (0 이면 덮개가 남는다) */
+    --ox: calc(var(--mx, 0.5) - 0.5);
+    --oy: calc(var(--my, 1) - 0.5 + 0.00001);
+    --horizontal: clamp(0, calc((max(var(--ox), -1 * var(--ox)) - max(var(--oy), -1 * var(--oy))) * 1000000), 1);
+    --out-x: calc(var(--horizontal) * clamp(-1, calc(var(--ox) * 1000000), 1) * 101%);
+    --out-y: calc((1 - var(--horizontal)) * clamp(-1, calc(var(--oy) * 1000000), 1) * 101%);
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    gap: 8px;
+    padding: 8%;
+    background: var(--accent);
+    translate: var(--out-x) var(--out-y);
+    transition: translate 300ms ease-out;
+  }
+  /* 들어올 때는 transition 대신 애니메이션 — 직전에 나간 쪽이 아니라 지금 들어온 쪽에서 출발해야 한다 */
+  .direction-aware-hover.is-active .dah-overlay {
+    translate: 0 0;
+    transition: none;
+    animation: direction-aware-hover-in 300ms ease-out;
+  }
+  @keyframes direction-aware-hover-in {
+    from {
+      translate: var(--out-x) var(--out-y);
+    }
+  }
+  .dah-letter {
+    margin-bottom: auto;
+    color: var(--on-accent);
+  }
+  .dah-bar {
+    width: 60%;
+    height: 8px;
+    background: var(--on-accent);
+    border-radius: 4px;
+    opacity: 0.6;
+  }
+</style>

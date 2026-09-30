@@ -1,0 +1,56 @@
+---
+// Jello 데모 — .is-playing 이 붙으면 블록이 젤리처럼 기울었다 돌아오며 흔들림이 줄어든다, 없으면 제자리(최종 상태)
+---
+<div class="jello" data-demo-root aria-hidden="true">
+  <div class="jl-box">A</div>
+</div>
+
+<style>
+  .jello {
+    display: grid;
+    place-items: center;
+  }
+  .jl-box {
+    display: grid;
+    place-items: center;
+    width: clamp(72px, 30%, 160px);
+    aspect-ratio: 4 / 3;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--on-accent);
+    background: var(--accent);
+    border-radius: 6px;
+  }
+  .jello.is-playing .jl-box {
+    animation: jello-wobble 1s both;
+  }
+  /* 기울기를 매번 절반씩 줄여 흔들림이 가라앉게 한다 */
+  @keyframes jello-wobble {
+    0%,
+    11.1%,
+    100% {
+      transform: none;
+    }
+    22.2% {
+      transform: skew(-12.5deg, -12.5deg);
+    }
+    33.3% {
+      transform: skew(6.25deg, 6.25deg);
+    }
+    44.4% {
+      transform: skew(-3.125deg, -3.125deg);
+    }
+    55.5% {
+      transform: skew(1.5625deg, 1.5625deg);
+    }
+    66.6% {
+      transform: skew(-0.78deg, -0.78deg);
+    }
+    77.7% {
+      transform: skew(0.39deg, 0.39deg);
+    }
+    88.8% {
+      transform: skew(-0.2deg, -0.2deg);
+    }
+  }
+</style>

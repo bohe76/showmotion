@@ -1,0 +1,46 @@
+---
+// Rectangle Fill 데모 — 마우스를 올리면(.is-active) 안쪽 밝은 사각형이 가운데로 줄어들며 강조색이 네 변에서 안으로 차오른다
+---
+<div class="rectangle-fill" data-demo-root aria-hidden="true">
+  <div class="rcf-box">
+    <span class="rcf-inner"></span>
+    <span class="rcf-label">A</span>
+  </div>
+</div>
+
+<style>
+  .rectangle-fill {
+    display: grid;
+    place-items: center;
+  }
+  /* 바탕은 강조색, 그 위를 덮은 밝은 사각형이 줄어든다 (Rectangle In) */
+  .rcf-box {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 40%;
+    aspect-ratio: 16 / 10;
+    overflow: hidden;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--ink);
+    background: var(--accent);
+    border-radius: 6px;
+    transition: color 300ms ease-out;
+  }
+  .rcf-inner {
+    position: absolute;
+    inset: 0;
+    background: var(--surface);
+    transition: scale 300ms ease-out;
+  }
+  .rcf-label {
+    position: relative;
+  }
+  .rectangle-fill.is-active .rcf-box {
+    color: var(--on-accent);
+  }
+  .rectangle-fill.is-active .rcf-inner {
+    scale: 0;
+  }
+</style>

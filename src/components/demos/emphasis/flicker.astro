@@ -1,0 +1,42 @@
+---
+// Flicker 데모 — 글자 줄의 불투명도가 고르지 않은 간격으로 끊기며 반복된다 (고장 난 네온처럼)
+---
+<div class="flicker" data-demo-root aria-hidden="true">
+  <div class="fk-sign">ABC</div>
+</div>
+
+<style>
+  .flicker {
+    display: grid;
+    place-items: center;
+  }
+  .fk-sign {
+    padding: 0.35em 0.7em;
+    font-size: 2rem;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    color: var(--accent);
+    border: 2px solid var(--accent);
+    border-radius: 8px;
+    /* 간격을 일부러 불규칙하게 두어 일정한 깜빡임(Flash)과 구분한다 */
+    animation: flicker-stutter 3.2s linear infinite;
+  }
+  @keyframes flicker-stutter {
+    0%,
+    18%,
+    22%,
+    25%,
+    53%,
+    57%,
+    100% {
+      opacity: 1;
+    }
+    20%,
+    24% {
+      opacity: 0.25;
+    }
+    55% {
+      opacity: 0.4;
+    }
+  }
+</style>

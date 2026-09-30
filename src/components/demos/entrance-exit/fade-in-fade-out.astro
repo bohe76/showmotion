@@ -1,0 +1,44 @@
+---
+// Fade In / Fade Out 데모 — .is-playing 이 붙으면 제자리에서 서서히 사라졌다가(out) 다시 서서히 나타난다(in), 끝은 보이는 상태
+---
+<div class="fade-in-fade-out" data-demo-root aria-hidden="true">
+  <div class="fif-block">A</div>
+</div>
+
+<style>
+  .fade-in-fade-out {
+    display: grid;
+    place-items: center;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    container-type: inline-size;
+  }
+  .fif-block {
+    display: grid;
+    place-items: center;
+    width: 30%;
+    aspect-ratio: 1;
+    border-radius: 6px;
+    background: var(--accent);
+    color: var(--on-accent);
+    font-size: 12cqw;
+    font-weight: 700;
+    line-height: 1;
+  }
+  .fade-in-fade-out.is-playing .fif-block {
+    animation: fade-in-fade-out-cycle 2000ms ease-in-out both;
+  }
+  @keyframes fade-in-fade-out-cycle {
+    0% {
+      opacity: 1;
+    }
+    35%,
+    55% {
+      opacity: 0;
+    }
+    100% {
+      opacity: 1;
+    }
+  }
+</style>

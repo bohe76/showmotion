@@ -1,0 +1,133 @@
+---
+// Preloader Curtain Lift 데모 — .is-playing 이 붙으면 페이지를 덮은 첫 화면에서 로딩 막대가 차오른 뒤, 막이 위로 걷히며 페이지가 드러난다
+// 클래스가 없으면 최종 상태(막이 걷힌 페이지)
+---
+<div class="preloader-lift" data-demo-root aria-hidden="true">
+  <div class="pl-frame">
+    <div class="pl-page">
+      <span class="pl-bar"></span>
+      <span class="pl-hero">A</span>
+      <span class="pl-line"></span>
+      <span class="pl-line pl-line--short"></span>
+    </div>
+    <div class="pl-curtain">
+      <span class="pl-mark">A</span>
+      <span class="pl-progress"><span class="pl-fill"></span></span>
+    </div>
+  </div>
+</div>
+
+<style>
+  .preloader-lift {
+    display: grid;
+    place-items: center;
+  }
+  .pl-frame {
+    position: relative;
+    width: 60%;
+    height: 80%;
+    overflow: hidden;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+  }
+  .pl-page {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    align-content: start;
+    gap: 10px;
+    padding: 12px;
+    background: var(--surface);
+  }
+  .pl-bar {
+    width: 40%;
+    height: 8px;
+    border-radius: 2px;
+    background: var(--ink);
+  }
+  .pl-hero {
+    display: grid;
+    place-items: center;
+    aspect-ratio: 16 / 7;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--on-accent);
+    background: var(--accent);
+    border-radius: 4px;
+  }
+  .pl-line {
+    height: 8px;
+    border-radius: 2px;
+    background: var(--demo-muted);
+  }
+  .pl-line--short {
+    width: 60%;
+  }
+  .pl-curtain {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-content: center;
+    justify-items: center;
+    gap: 12px;
+    background: var(--accent);
+    transform: translateY(-100%);
+  }
+  .pl-mark {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--on-accent);
+  }
+  .pl-progress {
+    width: 64px;
+    height: 4px;
+    overflow: hidden;
+    border-radius: 2px;
+    background: var(--accent-strong);
+  }
+  .pl-fill {
+    display: block;
+    height: 100%;
+    background: var(--on-accent);
+    transform-origin: left;
+  }
+  .preloader-lift.is-playing .pl-curtain {
+    animation: preloader-curtain-lift-up 1800ms cubic-bezier(0.65, 0, 0.35, 1) both;
+  }
+  .preloader-lift.is-playing .pl-fill {
+    animation: preloader-curtain-lift-fill 1800ms ease-out both;
+  }
+  .preloader-lift.is-playing .pl-page {
+    animation: preloader-curtain-lift-page 1800ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  /* 70%까지 덮고 있다가 위로 걷힌다 */
+  @keyframes preloader-curtain-lift-up {
+    0%,
+    70% {
+      transform: translateY(0);
+    }
+    100% {
+      transform: translateY(-100%);
+    }
+  }
+  @keyframes preloader-curtain-lift-fill {
+    0% {
+      transform: scaleX(0);
+    }
+    60%,
+    100% {
+      transform: scaleX(1);
+    }
+  }
+  /* 막이 걷히는 동안 페이지가 살짝 올라와 자리 잡는다 */
+  @keyframes preloader-curtain-lift-page {
+    0%,
+    70% {
+      transform: translateY(16px);
+    }
+    100% {
+      transform: translateY(0);
+    }
+  }
+</style>

@@ -1,0 +1,68 @@
+---
+// Checkbox Check Draw 데모 — 누를 때마다(.is-on 토글) 상자가 채워지고 체크 표시가 한 획씩 그려진다. 끄면 거꾸로 지워진다
+import Check from '@lucide/astro/icons/check';
+---
+<div class="checkbox-check-draw" data-demo-root aria-hidden="true">
+  <div class="ccd-row">
+    <div class="ccd-box">
+      <Check class="ccd-svg" stroke-width={3} aria-hidden="true" />
+    </div>
+    <div class="ccd-label"></div>
+  </div>
+</div>
+
+<style>
+  .checkbox-check-draw {
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+  }
+  .ccd-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    width: 56%;
+  }
+  .ccd-box {
+    flex: none;
+    width: 48px;
+    height: 48px;
+    border: 3px solid var(--ink);
+    border-radius: 8px;
+    transition:
+      background-color 180ms ease-out,
+      border-color 180ms ease-out;
+  }
+  /* 아이콘은 Lucide 컴포넌트가 그리므로 :global 로 잡는다 */
+  .ccd-box :global(.ccd-svg) {
+    display: block;
+    width: 100%;
+    height: 100%;
+    color: var(--on-accent);
+  }
+  /* Lucide 체크 경로 길이는 약 22.6(viewBox 24 기준) — 24 로 덮으면 상자 크기와 상관없이 그대로 그려진다.
+     경로가 긴 획 끝에서 시작하므로 -24 → 0 으로 옮겨야 짧은 획부터 그려지고, 끌 때는 긴 획 끝부터 지워진다 */
+  .ccd-box :global(.ccd-svg path) {
+    stroke-dasharray: 24;
+    stroke-dashoffset: -24;
+    transition: stroke-dashoffset 160ms ease-in;
+  }
+  .ccd-label {
+    flex: 1;
+    height: 10px;
+    background: var(--demo-muted);
+    border-radius: 2px;
+    transition: opacity 200ms ease-out;
+  }
+  .checkbox-check-draw.is-on .ccd-box {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+  .checkbox-check-draw.is-on .ccd-box :global(.ccd-svg path) {
+    stroke-dashoffset: 0;
+    transition: stroke-dashoffset 320ms ease-out 80ms;
+  }
+  .checkbox-check-draw.is-on .ccd-label {
+    opacity: 0.45;
+  }
+</style>

@@ -1,0 +1,55 @@
+---
+// Particles 데모 — 크기가 다른 점 16개가 각자 다른 속도·시작점으로 느리게 떠돈다
+// 점 수를 적게 두고 transform 으로만 움직인다 — 전체 페이지에 카드가 수백 장이다
+const dots = [
+  [12, 18, 6, 14, 0], [28, 62, 4, 18, -3], [40, 24, 8, 16, -7], [55, 70, 5, 20, -2],
+  [68, 30, 6, 15, -9], [82, 58, 4, 19, -5], [20, 44, 3, 17, -11], [48, 46, 7, 22, -6],
+  [74, 14, 3, 16, -1], [90, 36, 5, 21, -8], [8, 72, 5, 18, -4], [34, 84, 3, 15, -10],
+  [62, 88, 4, 17, -12], [86, 80, 6, 20, -3], [44, 8, 4, 19, -13], [16, 30, 4, 16, -6],
+];
+---
+<div class="particles" data-demo-root aria-hidden="true">
+  {dots.map(([x, y, size, duration, delay]) => (
+    <span
+      class="pt-dot"
+      style={`left: ${x}%; top: ${y}%; width: ${size}px; height: ${size}px; animation-duration: ${duration}s; animation-delay: ${delay}s`}
+    ></span>
+  ))}
+</div>
+
+<style>
+  .particles {
+    position: relative;
+    overflow: hidden;
+    container-type: inline-size;
+  }
+  .pt-dot {
+    position: absolute;
+    background: var(--accent);
+    border-radius: 50%;
+    opacity: 0.7;
+    animation: particles-float 18s ease-in-out infinite;
+  }
+  .pt-dot:nth-child(3n) {
+    background: var(--ink);
+    opacity: 0.35;
+  }
+  .pt-dot:nth-child(2n) {
+    animation-direction: reverse;
+  }
+  @keyframes particles-float {
+    0%,
+    100% {
+      transform: translate(0, 0);
+    }
+    25% {
+      transform: translate(4cqw, -5cqw);
+    }
+    50% {
+      transform: translate(-2cqw, -9cqw);
+    }
+    75% {
+      transform: translate(-5cqw, -3cqw);
+    }
+  }
+</style>

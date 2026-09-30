@@ -1,0 +1,28 @@
+{
+  "name": "showmotion",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "check": "astro check",
+    "i18n:missing": "node scripts/missing_translations.mjs"
+  },
+  "dependencies": {
+    "@fontsource-variable/noto-sans": "^5.3.0",
+    "@fontsource-variable/noto-sans-kr": "^5.3.0",
+    "@lucide/astro": "^1.48.0",
+    "astro": "^7.3.5"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.10",
+    "postcss": "^8.5.28",
+    "typescript": "^6.0.3"
+  }
+}

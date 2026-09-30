@@ -1,0 +1,71 @@
+---
+// Success Checkmark 데모 — .is-playing 이 붙으면 원이 한 바퀴 그려지고 이어서 체크가 그려진 뒤 살짝 톡 튄다
+// 없으면 최종 상태(다 그려진 원과 체크)
+import CircleCheck from '@lucide/astro/icons/circle-check';
+---
+<div class="success-checkmark" data-demo-root aria-hidden="true">
+  <CircleCheck class="sc-svg" stroke-width={1.5} aria-hidden="true" />
+</div>
+
+<style>
+  .success-checkmark {
+    display: grid;
+    place-items: center;
+    container-type: size;
+  }
+  /* 아이콘은 Lucide 컴포넌트가 그리므로 :global 로 잡는다 */
+  .success-checkmark :global(.sc-svg) {
+    width: 34cqmin;
+    height: 34cqmin;
+    overflow: visible;
+    color: var(--accent);
+  }
+  /* 원 둘레는 약 62.8, 체크는 약 11.3(viewBox 24 기준) — 조금 긴 값으로 덮는다. 클래스가 없으면 다 그려진 상태(dashoffset 0) */
+  .success-checkmark :global(.sc-svg circle) {
+    stroke-dasharray: 63;
+    stroke-dashoffset: 0;
+    /* 12시 방향에서 시계 방향으로 그려지게 돌려 둔다 */
+    transform: rotate(-90deg);
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+  .success-checkmark :global(.sc-svg path) {
+    stroke-width: 1.8;
+    stroke-dasharray: 12;
+    stroke-dashoffset: 0;
+  }
+  .success-checkmark.is-playing :global(.sc-svg circle) {
+    animation: success-checkmark-ring 600ms cubic-bezier(0.65, 0, 0.45, 1) both;
+  }
+  .success-checkmark.is-playing :global(.sc-svg path) {
+    animation: success-checkmark-check 360ms cubic-bezier(0.65, 0, 0.45, 1) 560ms both;
+  }
+  .success-checkmark.is-playing :global(.sc-svg) {
+    animation: success-checkmark-pop 320ms ease-out 900ms both;
+  }
+  @keyframes success-checkmark-ring {
+    from {
+      stroke-dashoffset: 63;
+    }
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+  /* Lucide 체크는 긴 획 끝에서 시작하므로 음수 쪽에서 옮겨야 짧은 획부터 그려진다 */
+  @keyframes success-checkmark-check {
+    from {
+      stroke-dashoffset: -12;
+    }
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+  @keyframes success-checkmark-pop {
+    50% {
+      transform: scale(1.08);
+    }
+    to {
+      transform: scale(1);
+    }
+  }
+</style>

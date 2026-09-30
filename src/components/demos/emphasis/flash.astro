@@ -1,0 +1,74 @@
+---
+// Flash 데모 — .is-playing 이 붙으면 새로 들어온 가운데 행이 두 번 깜빡이고, 없으면 보이는 상태(최종 상태)
+const rows = [
+  { width: 68, fresh: false },
+  { width: 82, fresh: true },
+  { width: 54, fresh: false },
+];
+---
+<div class="flash" data-demo-root aria-hidden="true">
+  <ul class="fl-list">
+    {rows.map((row) => (
+      <li class:list={['fl-row', { 'fl-row--new': row.fresh }]}>
+        <span class="fl-dot"></span>
+        <span class="fl-bar" style={`width: ${row.width}%`}></span>
+      </li>
+    ))}
+  </ul>
+</div>
+
+<style>
+  .flash {
+    display: grid;
+    place-items: center;
+  }
+  .fl-list {
+    width: 64%;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    gap: 8px;
+  }
+  .fl-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+  }
+  .fl-dot {
+    flex: none;
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+    background: var(--demo-muted);
+  }
+  .fl-bar {
+    height: 8px;
+    border-radius: 2px;
+    background: var(--demo-muted);
+  }
+  .fl-row--new {
+    border-color: var(--accent);
+  }
+  .fl-row--new .fl-dot {
+    background: var(--accent);
+  }
+  .flash.is-playing .fl-row--new {
+    animation: flash-blink 1s linear both;
+  }
+  @keyframes flash-blink {
+    0%,
+    50%,
+    100% {
+      opacity: 1;
+    }
+    25%,
+    75% {
+      opacity: 0;
+    }
+  }
+</style>

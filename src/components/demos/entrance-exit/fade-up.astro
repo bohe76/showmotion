@@ -1,0 +1,60 @@
+---
+// Fade Up 데모 — .is-playing 이 붙을 때만 애니메이션, 없으면 최종 상태(보임)
+---
+<div class="fade-up" data-demo-root aria-hidden="true">
+  <div class="fu-card">
+    <div class="fu-media"></div>
+    <div class="fu-line fu-line--title"></div>
+    <div class="fu-line"></div>
+    <div class="fu-line fu-line--short"></div>
+  </div>
+</div>
+
+<style>
+  .fade-up {
+    display: grid;
+    place-items: center;
+    width: 100%;
+    height: 100%;
+  }
+  .fu-card {
+    width: 58%;
+    padding: 12px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    display: grid;
+    gap: 8px;
+  }
+  .fu-media {
+    aspect-ratio: 16 / 9;
+    background: var(--accent);
+    border-radius: 3px;
+  }
+  .fu-line {
+    height: 8px;
+    border-radius: 2px;
+    background: var(--demo-muted);
+  }
+  .fu-line--title {
+    width: 70%;
+    height: 10px;
+    background: var(--ink);
+  }
+  .fu-line--short {
+    width: 45%;
+  }
+  .fade-up.is-playing .fu-card {
+    animation: fade-up-in 600ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  @keyframes fade-up-in {
+    from {
+      opacity: 0;
+      transform: translateY(24px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+</style>

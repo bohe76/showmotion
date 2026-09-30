@@ -1,0 +1,31 @@
+---
+// Background Fade 데모 — 마우스를 올리면(.is-active) 배경과 글자 색이 새 색으로 천천히 바뀐다
+---
+<div class="background-fade" data-demo-root aria-hidden="true">
+  <div class="bf-box">A</div>
+</div>
+
+<style>
+  .background-fade {
+    display: grid;
+    place-items: center;
+  }
+  .bf-box {
+    display: grid;
+    place-items: center;
+    width: 40%;
+    aspect-ratio: 16 / 10;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--ink);
+    background: var(--demo-muted);
+    border-radius: 6px;
+    transition:
+      background-color 300ms ease-out,
+      color 300ms ease-out;
+  }
+  .background-fade.is-active .bf-box {
+    color: var(--on-accent);
+    background: var(--accent);
+  }
+</style>

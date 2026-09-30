@@ -1,0 +1,42 @@
+---
+// Swirl In 데모 — .is-playing 이 붙으면 한 점에서 한 바퀴 반 소용돌이치며 커지고 서서히 나타난다 (Swirl In Forward)
+---
+<div class="swirl-in" data-demo-root aria-hidden="true">
+  <div class="sw-block">A</div>
+</div>
+
+<style>
+  .swirl-in {
+    display: grid;
+    place-items: center;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    container-type: inline-size;
+  }
+  .sw-block {
+    display: grid;
+    place-items: center;
+    width: 30%;
+    aspect-ratio: 1;
+    border-radius: 6px;
+    background: var(--accent);
+    color: var(--on-accent);
+    font-size: 12cqw;
+    font-weight: 700;
+    line-height: 1;
+  }
+  .swirl-in.is-playing .sw-block {
+    animation: swirl-in-fwd 800ms ease-out both;
+  }
+  @keyframes swirl-in-fwd {
+    from {
+      opacity: 0;
+      transform: rotate(-540deg) scale(0);
+    }
+    to {
+      opacity: 1;
+      transform: rotate(0) scale(1);
+    }
+  }
+</style>

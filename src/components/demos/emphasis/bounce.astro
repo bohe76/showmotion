@@ -1,0 +1,60 @@
+---
+// Bounce 데모 — .is-playing 이 붙으면 블록이 바닥선 위에서 점점 낮게 튄다, 없으면 제자리(최종 상태)
+---
+<div class="bounce" data-demo-root aria-hidden="true">
+  <div class="bn-box">A</div>
+  <div class="bn-ground"></div>
+</div>
+
+<style>
+  .bounce {
+    display: grid;
+    align-content: center;
+    justify-items: center;
+  }
+  .bn-box {
+    display: grid;
+    place-items: center;
+    width: clamp(56px, 22%, 120px);
+    aspect-ratio: 1;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--on-accent);
+    background: var(--accent);
+    border-radius: 6px;
+    /* 착지할 때 아래쪽을 기준으로 눌려 보이게 한다 */
+    transform-origin: center bottom;
+  }
+  .bn-ground {
+    width: clamp(120px, 44%, 240px);
+    height: 2px;
+    background: var(--line);
+  }
+  .bounce.is-playing .bn-box {
+    animation: bounce-hop 1s both;
+  }
+  @keyframes bounce-hop {
+    0%,
+    20%,
+    53%,
+    100% {
+      transform: translateY(0);
+      animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);
+    }
+    40%,
+    43% {
+      transform: translateY(-60%) scaleY(1.1);
+      animation-timing-function: cubic-bezier(0.755, 0.05, 0.855, 0.06);
+    }
+    70% {
+      transform: translateY(-30%) scaleY(1.05);
+      animation-timing-function: cubic-bezier(0.755, 0.05, 0.855, 0.06);
+    }
+    80% {
+      transform: translateY(0) scaleY(0.95);
+    }
+    90% {
+      transform: translateY(-8%) scaleY(1.02);
+    }
+  }
+</style>

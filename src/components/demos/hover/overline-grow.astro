@@ -1,0 +1,40 @@
+---
+// Overline Grow 데모 — 마우스를 올리면(.is-active) 글자 위의 선이 가운데에서 양옆으로 자라고, 떼면 가운데로 줄어든다
+---
+<div class="overline-grow" data-demo-root aria-hidden="true">
+  <div class="og-link">
+    <span class="og-line"></span>
+    ABC
+  </div>
+</div>
+
+<style>
+  .overline-grow {
+    display: grid;
+    place-items: center;
+    container-type: inline-size;
+  }
+  .og-link {
+    position: relative;
+    padding-top: 0.3em;
+    font-size: 9cqi;
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: 0.08em;
+    color: var(--ink);
+  }
+  .og-line {
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+    height: 6px;
+    background: var(--accent);
+    border-radius: 3px;
+    scale: 0 1;
+    transition: scale 300ms ease-out;
+  }
+  .overline-grow.is-active .og-line {
+    scale: 1 1;
+  }
+</style>

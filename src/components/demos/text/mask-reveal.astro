@@ -1,0 +1,47 @@
+---
+// Mask Reveal 데모 — .is-playing 이 붙으면 줄마다 가려진 선 아래에서 위로 올라오고(--i 로 차례), 없으면 최종 상태(보임)
+const lines = ['ABCD EF', 'GHI JKLM'];
+---
+<div class="mask-reveal" data-demo-root aria-hidden="true">
+  <div class="mr-text">
+    {lines.map((line, i) => (
+      <span class="mr-line">
+        <span class="mr-inner" style={`--i: ${i}`}>{line}</span>
+      </span>
+    ))}
+  </div>
+</div>
+
+<style>
+  .mask-reveal {
+    display: grid;
+    place-items: center;
+    container-type: inline-size;
+  }
+  .mr-text {
+    font-size: clamp(1.75rem, 10cqi, 3.75rem);
+    font-weight: 800;
+    line-height: 1.15;
+    color: var(--ink);
+  }
+  /* 줄마다 넘치는 부분을 잘라 가림선 역할을 한다 */
+  .mr-line {
+    display: block;
+    overflow: hidden;
+  }
+  .mr-inner {
+    display: block;
+  }
+  .mask-reveal.is-playing .mr-inner {
+    animation: mask-reveal-up 700ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation-delay: calc(var(--i) * 140ms);
+  }
+  @keyframes mask-reveal-up {
+    from {
+      transform: translateY(105%);
+    }
+    to {
+      transform: translateY(0);
+    }
+  }
+</style>

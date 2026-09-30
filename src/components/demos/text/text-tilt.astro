@@ -1,0 +1,28 @@
+---
+// Text Tilt 데모 — 포인터가 위에 있으면(.is-active) 글자가 포인터 쪽으로 3D 로 기울고(--mx, --my), 떠나면 평평하게 돌아온다
+// 기울기를 따라 뒤에 비친 강조색 그림자로 깊이를 보인다
+---
+<div class="text-tilt" data-demo-root aria-hidden="true">
+  <span class="tt-word">ABCDEF</span>
+</div>
+
+<style>
+  .text-tilt {
+    display: grid;
+    place-items: center;
+    perspective: 700px;
+    container-type: inline-size;
+  }
+  .tt-word {
+    font-size: clamp(2rem, 13cqi, 4.5rem);
+    font-weight: 900;
+    line-height: 1.1;
+    color: var(--ink);
+    text-shadow: 0.04em 0.04em 0 var(--accent);
+    transition: transform 400ms ease-out;
+  }
+  .text-tilt.is-active .tt-word {
+    transform: rotateX(calc((0.5 - var(--my, 0.5)) * 36deg)) rotateY(calc((var(--mx, 0.5) - 0.5) * 36deg));
+    transition-duration: 120ms;
+  }
+</style>

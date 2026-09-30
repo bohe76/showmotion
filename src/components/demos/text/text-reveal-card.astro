@@ -1,0 +1,55 @@
+---
+// Text Reveal Card 데모 — 포인터 가로 위치(--mx)까지 카드 윗겹이 걷혀 아래 숨은 글자가 드러나고, 경계에 세로선이 따라간다
+// 카드는 스테이지 가운데 76% 폭(왼쪽 12%부터)이라 --mx 를 카드 안 비율로 바꿔 쓴다. 포인터가 없으면 가운데(반쯤 드러남)
+---
+<div class="text-reveal-card" data-demo-root aria-hidden="true">
+  <div class="trc-card">
+    <span class="trc-base">ABCDEF</span>
+    <span class="trc-hidden">GHIJKL</span>
+    <span class="trc-edge"></span>
+  </div>
+</div>
+
+<style>
+  .text-reveal-card {
+    display: grid;
+    place-items: center;
+    container-type: inline-size;
+    --reveal: clamp(0%, calc((var(--mx, 0.5) - 0.12) / 0.76 * 100%), 100%);
+  }
+  .trc-card {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 76%;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    font-size: clamp(1.75rem, 10cqi, 3.75rem);
+    font-weight: 800;
+    line-height: 1;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+  }
+  .trc-base {
+    color: var(--demo-muted);
+  }
+  .trc-hidden {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    color: var(--accent);
+    background: var(--surface);
+    clip-path: inset(0 calc(100% - var(--reveal)) 0 0);
+  }
+  .trc-edge {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: var(--reveal);
+    width: 2px;
+    background: var(--accent);
+    transform: translateX(-50%);
+  }
+</style>

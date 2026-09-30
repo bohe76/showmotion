@@ -1,0 +1,105 @@
+---
+// Swipe to Delete 데모 — 가로로 끄는 동안(.is-dragging) 가운데 줄이 왼쪽 이동량(--dx)을 따라 밀리며 뒤의 동작 버튼(보관·삭제)이 드러나고,
+// 놓으면 제자리로 미끄러져 돌아온다
+import Archive from '@lucide/astro/icons/archive';
+import Trash from '@lucide/astro/icons/trash';
+---
+<div class="swipe-to-delete" data-demo-root aria-hidden="true">
+  <div class="std-list">
+    <div class="std-row"><span class="std-dot"></span><span class="std-line"></span></div>
+    <div class="std-slot">
+      <div class="std-actions">
+        <span class="std-action std-action--archive"><Archive class="std-icon" size={18} aria-hidden="true" /></span>
+        <span class="std-action std-action--delete"><Trash class="std-icon" size={18} aria-hidden="true" /></span>
+      </div>
+      <div class="std-row std-row--target"><span class="std-dot"></span><span class="std-line" style="width: 48%"></span></div>
+    </div>
+    <div class="std-row"><span class="std-dot"></span><span class="std-line" style="width: 64%"></span></div>
+  </div>
+</div>
+
+<style>
+  .swipe-to-delete {
+    display: grid;
+    place-items: center;
+    container-type: inline-size;
+    cursor: grab;
+    /* 가로로 끄는 데모 — 세로 스크롤은 허용 */
+    touch-action: pan-y;
+    -webkit-user-select: none; /* Safari 는 접두어만 안다 */
+    user-select: none;
+  }
+  .swipe-to-delete.is-dragging {
+    cursor: grabbing;
+  }
+  .std-list {
+    display: grid;
+    gap: 8px;
+    width: 64cqw;
+  }
+  .std-slot {
+    position: relative;
+    overflow: hidden;
+    border-radius: 6px;
+  }
+  /* 동작 버튼 두 칸이 줄 폭의 40% 를 차지한다 — 줄은 그만큼만 밀린다 */
+  .std-actions {
+    position: absolute;
+    inset: 0 0 0 auto;
+    display: flex;
+    width: 40%;
+  }
+  .std-action {
+    flex: 1;
+    display: grid;
+    place-items: center;
+  }
+  .std-action--archive {
+    background: var(--demo-muted);
+  }
+  .std-action--delete {
+    background: var(--accent-strong);
+  }
+  /* 보관(archive)·삭제(trash) 아이콘 — Lucide 컴포넌트가 그리므로 :global 로 잡는다 */
+  .std-action--archive :global(.std-icon) {
+    color: var(--ink);
+  }
+  .std-action--delete :global(.std-icon) {
+    color: var(--on-accent);
+  }
+  .std-row {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    height: 44px;
+    padding: 0 12px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+  }
+  .std-dot {
+    flex: none;
+    width: 20px;
+    height: 20px;
+    background: var(--demo-muted);
+    border-radius: 50%;
+  }
+  .std-line {
+    width: 60%;
+    height: 8px;
+    background: var(--demo-muted);
+    border-radius: 2px;
+  }
+  .std-row--target .std-dot {
+    background: var(--accent);
+  }
+  /* 왼쪽으로만, 동작 칸 폭(목록 폭 64cqw 의 40%)까지 */
+  .std-row--target {
+    transform: translateX(clamp(-25.6cqw, var(--dx, 0px), 0px));
+  }
+  .swipe-to-delete:not(.is-dragging) .std-row--target {
+    transform: translateX(0);
+    transition: transform 360ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+</style>

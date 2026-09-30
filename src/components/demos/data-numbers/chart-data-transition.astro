@@ -1,0 +1,48 @@
+---
+// Chart Data Transition 데모 — .is-playing 이 붙으면 막대가 이전 값에 잠깐 머문 뒤 새 값으로 함께 오르내린다, 없으면 새 값
+// 바닥(0)에서 솟는 Bar Chart Grow 와 달리 이전 값에서 새 값으로 보간된다 — 막대는 차트 높이를 채우고 scaleY 로 값을 나타낸다
+const bars = [
+  { from: 0.62, to: 0.38 },
+  { from: 0.44, to: 0.8 },
+  { from: 0.78, to: 0.56 },
+  { from: 0.3, to: 0.66 },
+  { from: 0.7, to: 0.92 },
+  { from: 0.52, to: 0.34 },
+];
+---
+<div class="chart-data-transition" data-demo-root aria-hidden="true">
+  <div class="cdt-chart">
+    {bars.map((bar) => <span class="cdt-bar" style={`--from: ${bar.from}; --to: ${bar.to}`}></span>)}
+  </div>
+</div>
+
+<style>
+  .chart-data-transition {
+    display: grid;
+    place-items: center;
+  }
+  .cdt-chart {
+    display: flex;
+    gap: 5%;
+    width: 64%;
+    height: 62%;
+    padding: 0 4%;
+    border-bottom: 2px solid var(--ink);
+  }
+  .cdt-bar {
+    flex: 1;
+    background: var(--accent);
+    border-radius: 3px 3px 0 0;
+    transform: scaleY(var(--to));
+    transform-origin: bottom;
+  }
+  .chart-data-transition.is-playing .cdt-bar {
+    animation: chart-data-transition-update 1400ms cubic-bezier(0.65, 0, 0.35, 1) both;
+  }
+  @keyframes chart-data-transition-update {
+    0%,
+    35% {
+      transform: scaleY(var(--from));
+    }
+  }
+</style>

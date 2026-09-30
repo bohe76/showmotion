@@ -1,0 +1,59 @@
+---
+// Text Repetition 데모 — 작은 페이지([data-scroller])를 스크롤한 만큼(--scroll, 0~1) 단어 뒤에 겹쳐 둔 윤곽 사본들이 위아래로 펼쳐진다
+// 사본마다 펼쳐질 거리(--d, 단어 높이의 몇 배)를 위아래 번갈아 준다. 맨 위(0)에서는 모두 한자리에 겹쳐 단어 하나로 보인다
+const copies = [2, -2, 1, -1];
+---
+<div class="text-repetition" data-demo-root aria-hidden="true">
+  <div class="trp-page" data-scroller>
+    <div class="trp-sticky">
+      <span class="trp-stack">
+        {copies.map((d) => <span class="trp-copy" style={`--d: ${d}`}>ABC</span>)}
+        <span class="trp-word">ABC</span>
+      </span>
+    </div>
+    <div class="trp-spacer"></div>
+  </div>
+</div>
+
+<style>
+  .text-repetition {
+    position: relative;
+    container-type: inline-size;
+  }
+  .trp-page {
+    position: absolute;
+    inset: 0;
+    overflow-y: auto;
+    /* 끝까지 스크롤해도 바깥 페이지로 넘어가지 않는다 */
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+  }
+  .trp-sticky {
+    position: sticky;
+    top: 0;
+    display: grid;
+    place-items: center;
+    height: 100%;
+    overflow: hidden;
+  }
+  .trp-spacer {
+    height: 200%;
+  }
+  .trp-stack {
+    display: grid;
+    font-size: clamp(2rem, 15cqi, 5rem);
+    font-weight: 900;
+    line-height: 1;
+  }
+  .trp-stack > span {
+    grid-area: 1 / 1;
+  }
+  .trp-copy {
+    color: transparent;
+    -webkit-text-stroke: 0.02em var(--accent);
+    transform: translateY(calc(var(--scroll, 0) * var(--d) * 0.55em));
+  }
+  .trp-word {
+    color: var(--ink);
+  }
+</style>

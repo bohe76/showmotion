@@ -1,0 +1,50 @@
+---
+import SiteLayout from '../components/SiteLayout.astro';
+import { defaultLocale, localeMeta, locales, localePath, ui } from '../i18n/locales';
+
+// 404 — Cloudflare Pages 는 없는 주소에 이 파일(/404.html) 하나를 보여 준다
+// 9개 언어 안내를 모두 싣고, 주소의 첫 조각(/ko/…)이 가리키는 언어만 스크립트가 보여 준다. 스크립트가 없으면 영어
+const t = ui[defaultLocale];
+---
+<SiteLayout locale={defaultLocale} subpath="" title={t.notFoundTitle} description={t.notFoundBody} noindex cjkFonts>
+  <section class="not-found">
+    {locales.map((code) => (
+      <div lang={localeMeta[code].tag} data-not-found={localeMeta[code].slug} hidden={code !== defaultLocale}>
+        <h1>{ui[code].notFoundTitle}</h1>
+        <p>{ui[code].notFoundBody}</p>
+        <p><a href={localePath(code)}>{ui[code].notFoundHome}</a></p>
+      </div>
+    ))}
+  </section>
+</SiteLayout>
+
+<script>
+  const slug = window.location.pathname.split('/')[1] ?? '';
+  const match = slug && document.querySelector<HTMLElement>(`[data-not-found="${CSS.escape(slug)}"]`);
+  if (match) {
+    document.querySelectorAll<HTMLElement>('[data-not-found]').forEach((el) => (el.hidden = el !== match));
+  }
+</script>
+
+<style>
+  .not-found {
+    padding: 48px 0 96px;
+  }
+  h1 {
+    margin: 0;
+    font-size: clamp(1.6rem, 3.5vw, 2.2rem);
+    letter-spacing: -0.02em;
+  }
+  p {
+    max-width: 60ch;
+    margin: 12px 0 0;
+    line-height: 1.6;
+  }
+  a {
+    font-weight: 600;
+    color: var(--accent);
+  }
+  [hidden] {
+    display: none !important;
+  }
+</style>

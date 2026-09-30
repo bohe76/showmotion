@@ -1,0 +1,65 @@
+---
+// Vibrate 데모 — .is-playing 이 붙으면 휴대폰 모양 블록이 여러 방향으로 아주 작게 빠르게 떨린다, 없으면 제자리(최종 상태)
+---
+<div class="vibrate" data-demo-root aria-hidden="true">
+  <div class="vb-phone">
+    <span class="vb-dot"></span>
+    <span class="vb-bar"></span>
+    <span class="vb-bar vb-bar--short"></span>
+  </div>
+</div>
+
+<style>
+  .vibrate {
+    display: grid;
+    place-items: center;
+  }
+  .vb-phone {
+    display: grid;
+    align-content: center;
+    justify-items: center;
+    gap: 8px;
+    width: clamp(56px, 18%, 100px);
+    aspect-ratio: 9 / 16;
+    background: var(--surface);
+    border: 3px solid var(--ink);
+    border-radius: 12px;
+  }
+  .vb-dot {
+    width: 36%;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+  .vb-bar {
+    width: 60%;
+    height: 6px;
+    border-radius: 2px;
+    background: var(--demo-muted);
+  }
+  .vb-bar--short {
+    width: 40%;
+  }
+  /* 짧은 떨림을 여러 번 되풀이해 한 번의 진동으로 보이게 한다 */
+  .vibrate.is-playing .vb-phone {
+    animation: vibrate-jolt 0.12s linear 6 both;
+  }
+  @keyframes vibrate-jolt {
+    0%,
+    100% {
+      transform: translate(0, 0);
+    }
+    20% {
+      transform: translate(-2px, 2px);
+    }
+    40% {
+      transform: translate(-2px, -2px);
+    }
+    60% {
+      transform: translate(2px, 2px);
+    }
+    80% {
+      transform: translate(2px, -2px);
+    }
+  }
+</style>

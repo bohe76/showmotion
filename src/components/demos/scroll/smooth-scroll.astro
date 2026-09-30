@@ -1,0 +1,138 @@
+---
+// Smooth Scroll 데모 — 휠로 굴리면 작은 페이지가 뚝뚝 끊기지 않고 목표 위치까지 미끄러지듯 따라가 멈춘다 (관성 스크롤)
+// CSS scroll-behavior 는 앵커·코드 이동에만 먹고 휠에는 효과가 없어, 아래 스크립트가 휠 입력을 목표로 모아 매 프레임 다가간다
+// 오른쪽 레일: 빈 고리 = 휠로 정한 목표, 채운 점 = 실제 위치(--scroll) — 점이 고리를 늦게 따라가는 것이 부드러움이다
+const paragraphs = [
+  [92, 78, 64],
+  [86, 90, 58],
+  [80, 72, 88],
+  [94, 66, 76],
+  [84, 70, 52],
+];
+---
+<div class="smooth-scroll" data-demo-root aria-hidden="true">
+  <div class="sm-page" data-scroller>
+    <div class="sm-body">
+      {paragraphs.map((lines) => (
+        <div class="sm-para">
+          {lines.map((width) => <div class="sm-line" style={`width: ${width}%`}></div>)}
+        </div>
+      ))}
+    </div>
+  </div>
+  <div class="sm-rail">
+    <span class="sm-target"></span>
+    <span class="sm-thumb"></span>
+  </div>
+</div>
+
+<style>
+  .smooth-scroll {
+    position: relative;
+    display: grid;
+    /* 행을 스테이지 높이로 묶어야 안쪽 페이지가 넘치지 않고 스크롤된다 */
+    grid-template-rows: minmax(0, 1fr);
+    padding: 14px 14% 0;
+  }
+  .sm-page {
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+    container-type: size;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-bottom: 0;
+    border-radius: 6px 6px 0 0;
+  }
+  .sm-body {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 300cqh;
+    padding: 18px 16px 24px;
+  }
+  .sm-para {
+    display: grid;
+    gap: 10px;
+  }
+  .sm-line {
+    height: 8px;
+    border-radius: 2px;
+    background: var(--demo-muted);
+  }
+  .sm-line:first-child {
+    height: 12px;
+    background: var(--ink);
+  }
+  .sm-rail {
+    position: absolute;
+    top: 24px;
+    right: 6%;
+    bottom: 56px;
+    width: 2px;
+    background: var(--line);
+  }
+  .sm-target,
+  .sm-thumb {
+    position: absolute;
+    left: -5px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+  }
+  .sm-target {
+    top: calc(var(--sm-target, var(--scroll, 0)) * (100% - 12px));
+    border: 2px solid var(--ink);
+    background: var(--stage);
+  }
+  .sm-thumb {
+    top: calc(var(--scroll, 0) * (100% - 12px));
+    background: var(--accent);
+  }
+</style>
+
+<script>
+  // 모션 줄이기를 켠 방문자에게는 기본 스크롤을 그대로 둔다
+  if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    document.querySelectorAll<HTMLElement>('.smooth-scroll').forEach((root) => {
+      const scroller = root.querySelector<HTMLElement>('[data-scroller]');
+      if (!scroller) return;
+      let target = 0;
+      let current = 0;
+      let frame = 0;
+      const max = () => scroller.scrollHeight - scroller.clientHeight;
+      const mark = () => root.style.setProperty('--sm-target', max() > 0 ? (target / max()).toFixed(4) : '0');
+      // 멈추면 프레임 요청을 끊는다 — 가만히 있을 때는 아무것도 돌지 않는다
+      const step = () => {
+        current += (target - current) * 0.1;
+        if (Math.abs(target - current) < 0.5) current = target;
+        scroller.scrollTop = current;
+        frame = current === target ? 0 : requestAnimationFrame(step);
+      };
+      scroller.addEventListener(
+        'wheel',
+        (event) => {
+          if (event.ctrlKey) return; // 핀치 확대는 브라우저에 맡긴다
+          event.preventDefault();
+          // 쉬고 있었다면 스크롤바·터치로 옮겨진 실제 위치에서 다시 시작한다
+          if (!frame) target = current = scroller.scrollTop;
+          const delta = event.deltaMode === 1 ? event.deltaY * 16 : event.deltaY;
+          target = Math.min(Math.max(target + delta, 0), max());
+          mark();
+          if (!frame) frame = requestAnimationFrame(step);
+        },
+        { passive: false },
+      );
+      // 스크롤바·터치처럼 휠이 아닌 스크롤은 목표 표시를 실제 위치에 맞춘다
+      scroller.addEventListener(
+        'scroll',
+        () => {
+          if (frame) return;
+          target = scroller.scrollTop;
+          mark();
+        },
+        { passive: true },
+      );
+    });
+  }
+</script>

@@ -1,0 +1,49 @@
+---
+// Light Speed In 데모 — .is-playing 이 붙으면 오른쪽에서 기울어진 채 빠르게 날아와 반대로 한 번 휘청이고 곧게 선다
+---
+<div class="light-speed-in" data-demo-root aria-hidden="true">
+  <div class="lsi-block">A</div>
+</div>
+
+<style>
+  .light-speed-in {
+    display: grid;
+    place-items: center;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    container-type: inline-size;
+  }
+  .lsi-block {
+    display: grid;
+    place-items: center;
+    width: 30%;
+    aspect-ratio: 1;
+    border-radius: 6px;
+    background: var(--accent);
+    color: var(--on-accent);
+    font-size: 12cqw;
+    font-weight: 700;
+    line-height: 1;
+  }
+  .light-speed-in.is-playing .lsi-block {
+    animation: light-speed-in-right 900ms ease-out both;
+  }
+  @keyframes light-speed-in-right {
+    0% {
+      opacity: 0;
+      transform: translateX(200%) skewX(-30deg);
+    }
+    60% {
+      opacity: 1;
+      transform: translateX(0) skewX(20deg);
+    }
+    80% {
+      transform: translateX(0) skewX(-5deg);
+    }
+    100% {
+      opacity: 1;
+      transform: translateX(0) skewX(0);
+    }
+  }
+</style>

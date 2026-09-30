@@ -1,0 +1,51 @@
+---
+// Ping 데모 — 블록 모서리의 알림 점에서 같은 모양의 고리가 커지며 사라지기를 반복한다 (점 자체는 가만히 있다)
+---
+<div class="ping" data-demo-root aria-hidden="true">
+  <div class="pg-box">
+    A
+    <span class="pg-ring"></span>
+    <span class="pg-dot"></span>
+  </div>
+</div>
+
+<style>
+  .ping {
+    display: grid;
+    place-items: center;
+  }
+  .pg-box {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: clamp(64px, 24%, 128px);
+    aspect-ratio: 1;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--ink);
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+  }
+  .pg-dot,
+  .pg-ring {
+    position: absolute;
+    top: -7px;
+    right: -7px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+  /* 복제본(고리)만 커지고 흐려진다 — 레이아웃에 영향이 없도록 절대 위치 */
+  .pg-ring {
+    animation: ping-ring 1.2s cubic-bezier(0, 0, 0.2, 1) infinite;
+  }
+  @keyframes ping-ring {
+    75%,
+    100% {
+      transform: scale(2.6);
+      opacity: 0;
+    }
+  }
+</style>

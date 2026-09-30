@@ -1,0 +1,75 @@
+---
+// FLIP Layout Animation 데모 — 누를 때마다(.is-on 토글) 격자 순서(order)가 바뀌고, 칸마다 옛 자리에서 새 자리로 미끄러진다(.is-playing)
+// FLIP: 새 자리에 먼저 두고(Last) 옛 자리만큼 거꾸로 옮긴 곳(Invert)에서 0으로 재생(Play)한다
+// --fx·--fy = 켜진 배치 칸 − 꺼진 배치 칸(열·행). 한 칸 = 칸 크기(100%) + 간격 8px. --s 는 방향(켜질 때 -1, 꺼질 때 1)
+const tiles = [
+  { letter: 'A', order: 1, fx: 1, fy: 0 },
+  { letter: 'B', order: 2, fx: 1, fy: 0 },
+  { letter: 'C', order: 4, fx: -1, fy: 1 },
+  { letter: 'D', order: 0, fx: 0, fy: -1 },
+  { letter: 'E', order: 5, fx: 1, fy: 0 },
+  { letter: 'F', order: 3, fx: -2, fy: 0 },
+];
+---
+<div class="flip-layout" data-demo-root aria-hidden="true">
+  <ul class="fl-grid">
+    {tiles.map((tile) => (
+      <li class="fl-tile" style={`--o: ${tile.order}; --fx: ${tile.fx}; --fy: ${tile.fy}`}>{tile.letter}</li>
+    ))}
+  </ul>
+</div>
+
+<style>
+  .flip-layout {
+    --s: 1;
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+  }
+  .flip-layout.is-on {
+    --s: -1;
+  }
+  .fl-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    width: 54%;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .fl-tile {
+    display: grid;
+    place-items: center;
+    aspect-ratio: 1;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--ink);
+    background: var(--demo-muted);
+    border-radius: 4px;
+  }
+  .fl-tile:nth-child(1),
+  .fl-tile:nth-child(5) {
+    color: var(--on-accent);
+    background: var(--accent);
+  }
+  .fl-tile:nth-child(3) {
+    color: var(--on-accent);
+    background: var(--accent-strong);
+  }
+  .flip-layout.is-on .fl-tile {
+    order: var(--o);
+  }
+  .flip-layout.is-playing .fl-tile {
+    animation: flip-layout-animation-glide 500ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  /* to 를 비워 두면 원래 자리(transform 없음)로 돌아온다 */
+  @keyframes flip-layout-animation-glide {
+    from {
+      transform: translate(
+        calc(var(--s) * var(--fx) * (100% + 8px)),
+        calc(var(--s) * var(--fy) * (100% + 8px))
+      );
+    }
+  }
+</style>

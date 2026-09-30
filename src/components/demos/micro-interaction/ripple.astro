@@ -1,0 +1,78 @@
+---
+// Ripple 데모 — 누를 때마다(.is-playing) 누른 자리에서 둥근 물결이 번져 나가며 옅어진다
+// 누른 자리(--rx, --ry)는 아래 스크립트가 버튼 기준으로 잰다. 버튼 밖을 누르면 가장 가까운 가장자리, 다시 보기 버튼이면 직전 자리(처음엔 가운데)
+---
+<div class="ripple" data-demo-root aria-hidden="true">
+  <div class="rp-button">
+    <span class="rp-wave"></span>
+    <span class="rp-label"></span>
+  </div>
+</div>
+
+<style>
+  .ripple {
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+  }
+  .rp-button {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 50%;
+    aspect-ratio: 3.2;
+    overflow: hidden;
+    background: var(--accent);
+    border-radius: 10px;
+  }
+  .rp-label {
+    position: relative;
+    width: 42%;
+    height: 10px;
+    background: var(--on-accent);
+    border-radius: 2px;
+  }
+  /* 버튼 폭의 2.2배 원 — 모서리에서 시작해도 반대쪽 모서리까지 덮는다(대각선 ≈ 폭 × 1.05) */
+  .rp-wave {
+    position: absolute;
+    top: var(--ry, 50%);
+    left: var(--rx, 50%);
+    width: 220%;
+    aspect-ratio: 1;
+    background: var(--on-accent);
+    border-radius: 50%;
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0);
+  }
+  .ripple.is-playing .rp-wave {
+    animation: ripple-wave 650ms ease-out both;
+  }
+  @keyframes ripple-wave {
+    0% {
+      opacity: 0.35;
+      transform: translate(-50%, -50%) scale(0);
+    }
+    50% {
+      opacity: 0.3;
+    }
+    100% {
+      opacity: 0;
+      transform: translate(-50%, -50%) scale(1);
+    }
+  }
+</style>
+
+<script>
+  // gallery.ts 는 누르면 .is-playing 만 다시 붙인다 — 누른 자리는 여기서 재서 넘긴다 (pointerdown 이 click 보다 먼저 온다)
+  document.querySelectorAll<HTMLElement>('.ripple').forEach((root) => {
+    const button = root.querySelector<HTMLElement>('.rp-button');
+    if (!button) return;
+    root.addEventListener('pointerdown', (event) => {
+      const rect = button.getBoundingClientRect();
+      const x = Math.min(Math.max(event.clientX - rect.left, 0), rect.width);
+      const y = Math.min(Math.max(event.clientY - rect.top, 0), rect.height);
+      root.style.setProperty('--rx', `${x}px`);
+      root.style.setProperty('--ry', `${y}px`);
+    });
+  });
+</script>

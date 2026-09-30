@@ -1,0 +1,67 @@
+---
+// Card Spotlight 데모 — 포인터가 카드 위에 있으면(.is-active) 포인터 위치(--mx, --my)를 중심으로 은은한 빛이 카드 표면을 따라다닌다
+---
+<div class="card-spotlight" data-demo-root aria-hidden="true">
+  <div class="csp-card">
+    <span class="csp-glow"></span>
+    <span class="csp-mark">A</span>
+    <span class="csp-bar"></span>
+    <span class="csp-bar csp-bar--short"></span>
+  </div>
+</div>
+
+<style>
+  .card-spotlight {
+    position: relative;
+  }
+  .csp-card {
+    position: absolute;
+    inset: 14% 18%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    gap: 8px;
+    padding: 8%;
+    overflow: hidden;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+  }
+  /* 카드는 루트 안쪽(좌우 18%, 위아래 14%)에 있다 — 포인터 비율을 카드 안 좌표로 바꿔 빛의 중심을 잡는다 */
+  .csp-glow {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(
+      circle 120px at calc((var(--mx, 0.5) - 0.18) / 0.64 * 100%) calc((var(--my, 0.5) - 0.14) / 0.72 * 100%),
+      color-mix(in srgb, var(--accent) 40%, transparent),
+      transparent
+    );
+    opacity: 0;
+    transition: opacity 300ms ease-out;
+  }
+  .card-spotlight.is-active .csp-glow {
+    opacity: 1;
+  }
+  .csp-mark {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 2.25rem;
+    aspect-ratio: 1;
+    margin-bottom: auto;
+    font-weight: 700;
+    color: var(--on-accent);
+    background: var(--accent);
+    border-radius: 6px;
+  }
+  .csp-bar {
+    position: relative;
+    width: 70%;
+    height: 8px;
+    background: var(--demo-muted);
+    border-radius: 4px;
+  }
+  .csp-bar--short {
+    width: 45%;
+  }
+</style>

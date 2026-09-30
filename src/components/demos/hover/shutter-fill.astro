@@ -1,0 +1,46 @@
+---
+// Shutter Fill 데모 — 마우스를 올리면(.is-active) 가운데 세로선에서 색이 좌우로 열리듯 채워지고, 떼면 가운데로 닫힌다
+---
+<div class="shutter-fill" data-demo-root aria-hidden="true">
+  <div class="shf-box">
+    <span class="shf-fill"></span>
+    <span class="shf-label">A</span>
+  </div>
+</div>
+
+<style>
+  .shutter-fill {
+    display: grid;
+    place-items: center;
+  }
+  .shf-box {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 40%;
+    aspect-ratio: 16 / 10;
+    overflow: hidden;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--ink);
+    background: var(--surface);
+    border-radius: 6px;
+    transition: color 300ms ease-out;
+  }
+  .shf-fill {
+    position: absolute;
+    inset: 0;
+    background: var(--accent);
+    scale: 0 1;
+    transition: scale 300ms ease-out;
+  }
+  .shf-label {
+    position: relative;
+  }
+  .shutter-fill.is-active .shf-box {
+    color: var(--on-accent);
+  }
+  .shutter-fill.is-active .shf-fill {
+    scale: 1 1;
+  }
+</style>

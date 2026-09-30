@@ -1,0 +1,65 @@
+---
+// Coverflow 데모 — 가운데 항목은 정면을 보고 양옆 항목은 원근으로 비스듬히 돌아선다
+// 끄는 위치(--mx, 0~1)가 가운데 항목(--c)을 정한다: 오른쪽으로 끌면 줄이 오른쪽으로 따라온다
+// 놓으면(.is-dragging 없음) 가장 가까운 항목으로 반올림해 자리 잡는다 — --dx 는 누를 때마다 0 으로 돌아가 쓰지 않는다
+const items = ['A', 'B', 'C', 'D', 'E'];
+---
+<div class="coverflow" data-demo-root aria-hidden="true">
+  <div class="cv-row">
+    {items.map((letter, i) => (
+      <span class="cv-item" style={`--i: ${i}`}>{letter}</span>
+    ))}
+  </div>
+</div>
+
+<style>
+  .coverflow {
+    --c: round(nearest, calc((1 - var(--mx, 0.5)) * 4), 1);
+    overflow: hidden;
+    cursor: grab;
+    /* 가로로 끄는 동안 페이지가 대신 움직이지 않게 한다 (세로 스크롤은 허용) */
+    touch-action: pan-y;
+    -webkit-user-select: none; /* Safari 는 접두어만 안다 */
+    user-select: none;
+  }
+  .coverflow.is-dragging {
+    --c: calc((1 - var(--mx, 0.5)) * 4);
+    cursor: grabbing;
+  }
+  .cv-row {
+    position: relative;
+    height: 100%;
+    perspective: 700px;
+  }
+  .cv-item {
+    /* 가운데로부터 떨어진 칸 수(부호 있음)와 그 크기 */
+    --d: calc(var(--i) - var(--c));
+    --far: max(var(--d), -1 * var(--d));
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    display: grid;
+    place-items: center;
+    width: 28%;
+    aspect-ratio: 1;
+    margin: -14% 0 0 -14%;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--ink);
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    z-index: calc(10 - var(--far));
+    transform: translateX(calc(var(--d) * 46%)) translateZ(calc(var(--far) * -90px))
+      rotateY(calc(clamp(-1, var(--d), 1) * -50deg));
+    transition: transform 400ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .coverflow.is-dragging .cv-item {
+    transition-duration: 80ms;
+  }
+  .cv-item:nth-child(odd) {
+    color: var(--on-accent);
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+</style>

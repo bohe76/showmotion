@@ -1,0 +1,148 @@
+---
+// Copy-to-Clipboard Feedback 데모 — 누를 때마다(.is-playing) 복사 아이콘이 체크로 바뀌고 옆 라벨이 바뀌었다가, 잠시 뒤 원래대로 돌아온다
+import Copy from '@lucide/astro/icons/copy';
+import Check from '@lucide/astro/icons/check';
+---
+<div class="copy-to-clipboard-feedback" data-demo-root aria-hidden="true">
+  <div class="ccf-panel">
+    <div class="ccf-bar">
+      <div class="ccf-button">
+        <Copy class="ccf-copy" aria-hidden="true" />
+        <Check class="ccf-tick" stroke-width={3} aria-hidden="true" />
+        <span class="ccf-label"></span>
+      </div>
+    </div>
+    <div class="ccf-line" style="width: 72%"></div>
+    <div class="ccf-line" style="width: 54%"></div>
+    <div class="ccf-line" style="width: 64%"></div>
+  </div>
+</div>
+
+<style>
+  .copy-to-clipboard-feedback {
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+  }
+  .ccf-panel {
+    width: 66%;
+    padding: 12px 14px 16px;
+    display: grid;
+    gap: 10px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+  }
+  .ccf-bar {
+    display: flex;
+    justify-content: flex-end;
+  }
+  .ccf-button {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 10px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+  }
+  /* 아이콘은 Lucide 컴포넌트가 그리므로 :global 로 잡는다 */
+  .ccf-button :global(.ccf-copy),
+  .ccf-button :global(.ccf-tick) {
+    flex: none;
+    width: 22px;
+    height: 22px;
+  }
+  .ccf-button :global(.ccf-copy) {
+    color: var(--ink);
+  }
+  /* 체크는 복사 아이콘 자리(버튼 안쪽 여백 6px 10px)에 겹쳐 둔다 */
+  .ccf-button :global(.ccf-tick) {
+    position: absolute;
+    top: 6px;
+    left: 10px;
+    color: var(--accent);
+  }
+  /* 체크 경로 길이는 약 22.6 — 24 로 덮는다. Lucide 체크는 긴 획 끝에서 시작하므로
+     -24 → 0 으로 옮겨야 짧은 획부터 그려진다 */
+  .ccf-button :global(.ccf-tick path) {
+    stroke-dasharray: 24;
+    stroke-dashoffset: -24;
+  }
+  .ccf-label {
+    width: 34px;
+    height: 8px;
+    background: var(--demo-muted);
+    border-radius: 2px;
+    transform-origin: left;
+  }
+  .ccf-line {
+    height: 8px;
+    background: var(--demo-muted);
+    border-radius: 2px;
+  }
+  .copy-to-clipboard-feedback.is-playing :global(.ccf-copy) {
+    animation: copy-to-clipboard-feedback-out 1600ms ease-out both;
+  }
+  .copy-to-clipboard-feedback.is-playing :global(.ccf-tick path) {
+    animation: copy-to-clipboard-feedback-tick 1600ms ease-out both;
+  }
+  .copy-to-clipboard-feedback.is-playing .ccf-label {
+    animation: copy-to-clipboard-feedback-label 1600ms ease-out both;
+  }
+  .copy-to-clipboard-feedback.is-playing .ccf-button {
+    animation: copy-to-clipboard-feedback-press 240ms ease-out both;
+  }
+  @keyframes copy-to-clipboard-feedback-out {
+    0%,
+    88%,
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+    10%,
+    80% {
+      opacity: 0;
+      transform: scale(0.5);
+    }
+  }
+  @keyframes copy-to-clipboard-feedback-tick {
+    0%,
+    6% {
+      stroke-dashoffset: -24;
+      opacity: 1;
+    }
+    22%,
+    80% {
+      stroke-dashoffset: 0;
+      opacity: 1;
+    }
+    88%,
+    100% {
+      stroke-dashoffset: 0;
+      opacity: 0;
+    }
+  }
+  /* 라벨 바꿈 — 짧은 강조색 막대로 바뀌었다가 돌아온다 */
+  @keyframes copy-to-clipboard-feedback-label {
+    0%,
+    88%,
+    100% {
+      transform: scaleX(1);
+      background: var(--demo-muted);
+    }
+    12%,
+    80% {
+      transform: scaleX(0.7);
+      background: var(--accent);
+    }
+  }
+  @keyframes copy-to-clipboard-feedback-press {
+    40% {
+      transform: scale(0.94);
+    }
+    to {
+      transform: scale(1);
+    }
+  }
+</style>

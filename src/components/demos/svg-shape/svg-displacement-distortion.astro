@@ -1,0 +1,61 @@
+---
+// SVG Displacement Distortion 데모 — 마우스를 올리면(.is-active) 글자가 물결치는 잡음(feTurbulence)에 밀려 일렁인다
+// 같은 글자를 두 겹 겹치고 위 겹에만 필터를 건다 — 필터는 올린 동안만 걸고, 겹의 투명도로 부드럽게 들고 난다
+// 잡음 무늬를 움직이는 것은 SMIL(animate) — 필터 속성은 CSS 로 움직일 수 없다
+---
+<div class="svg-displacement-distortion" data-demo-root aria-hidden="true">
+  <svg class="sdd-defs" width="0" height="0">
+    <filter id="svg-displacement-distortion-warp" x="-20%" y="-20%" width="140%" height="140%">
+      <feTurbulence type="turbulence" baseFrequency="0.02 0.08" numOctaves="2" seed="3" result="noise">
+        <animate
+          attributeName="baseFrequency"
+          values="0.02 0.08;0.03 0.12;0.02 0.08"
+          dur="4s"
+          repeatCount="indefinite"
+        />
+      </feTurbulence>
+      <feDisplacementMap in="SourceGraphic" in2="noise" scale="14" xChannelSelector="R" yChannelSelector="G" />
+    </filter>
+  </svg>
+  <div class="sdd-word">ABC</div>
+  <div class="sdd-word sdd-word--warp">ABC</div>
+</div>
+
+<style>
+  .svg-displacement-distortion {
+    position: relative;
+    display: grid;
+    place-items: center;
+    container-type: inline-size;
+  }
+  .sdd-defs {
+    position: absolute;
+  }
+  .sdd-word {
+    grid-area: 1 / 1;
+    padding: 0.1em 0.2em;
+    font-size: clamp(2.5rem, 18cqi, 7rem);
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: 0.04em;
+    color: var(--ink);
+    transition: opacity 300ms ease-out;
+  }
+  .svg-displacement-distortion.is-active .sdd-word {
+    opacity: 0;
+  }
+  .sdd-word--warp {
+    color: var(--accent);
+    opacity: 0;
+    /* 떠날 때는 투명해진 뒤에 필터를 뗀다 (지원하지 않는 브라우저는 바로 뗀다) */
+    transition:
+      opacity 300ms ease-out,
+      filter 0s linear 300ms;
+    transition-behavior: allow-discrete;
+  }
+  .svg-displacement-distortion.is-active .sdd-word--warp {
+    opacity: 1;
+    filter: url(#svg-displacement-distortion-warp);
+    transition: opacity 300ms ease-out;
+  }
+</style>

@@ -1,0 +1,29 @@
+---
+// Border Fade 데모 — 마우스를 올리면(.is-active) 흐린 테두리가 강조색으로 천천히 바뀐다
+---
+<div class="border-fade" data-demo-root aria-hidden="true">
+  <div class="bfd-box">A</div>
+</div>
+
+<style>
+  .border-fade {
+    display: grid;
+    place-items: center;
+  }
+  .bfd-box {
+    display: grid;
+    place-items: center;
+    width: 40%;
+    aspect-ratio: 16 / 10;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--ink);
+    background: var(--surface);
+    border-radius: 6px;
+    box-shadow: inset 0 0 0 4px var(--demo-muted);
+    transition: box-shadow 300ms ease-out;
+  }
+  .border-fade.is-active .bfd-box {
+    box-shadow: inset 0 0 0 4px var(--accent);
+  }
+</style>

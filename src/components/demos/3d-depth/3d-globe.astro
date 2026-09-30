@@ -1,0 +1,80 @@
+---
+// 3D Globe 데모 — 경선 6개·위선 3개로 짠 구가 기울어진 채 세로축을 따라 천천히 돌고, 표면의 표시 4개가 함께 돈다
+// 표시는 뒷면이 보이지 않게 해(backface-visibility) 구 뒤쪽으로 넘어가면 사라진다
+// 키프레임 이름은 숫자로 시작할 수 없어 클래스와 같은 globe-3d 로 시작한다 (이스케이프한 이름은 빌드 후 찾지 못했다)
+const meridians = [0, 30, 60, 90, 120, 150];
+const latitudes = [
+  ['-11cqw', 0.866],
+  ['0cqw', 1],
+  ['11cqw', 0.866],
+];
+const markers = [
+  [20, 30],
+  [110, -20],
+  [200, 10],
+  [290, 40],
+];
+---
+<div class="globe-3d" data-demo-root aria-hidden="true">
+  <div class="g3-view">
+    <div class="g3-tilt">
+      <div class="g3-sphere">
+        {meridians.map((angle) => <span class="g3-ring" style={`transform: rotateY(${angle}deg)`}></span>)}
+        {latitudes.map(([y, scale]) => (
+          <span class="g3-ring" style={`transform: translateY(${y}) rotateX(90deg) scale(${scale})`}></span>
+        ))}
+        {markers.map(([lon, lat]) => (
+          <span class="g3-marker" style={`transform: rotateY(${lon}deg) rotateX(${lat}deg) translateZ(22cqw)`}></span>
+        ))}
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .globe-3d {
+    overflow: hidden;
+    container-type: inline-size;
+  }
+  /* cqw 는 조상 컨테이너(루트) 기준이라, 원근은 루트 안쪽 층에 준다 */
+  .g3-view {
+    display: grid;
+    place-items: center;
+    height: 100%;
+    perspective: 140cqw;
+  }
+  .g3-tilt {
+    transform-style: preserve-3d;
+    transform: rotateX(-14deg) rotateZ(12deg);
+  }
+  .g3-sphere {
+    position: relative;
+    width: 44cqw;
+    aspect-ratio: 1;
+    transform-style: preserve-3d;
+    animation: globe-3d-spin 18s linear infinite;
+  }
+  .g3-ring {
+    position: absolute;
+    inset: 0;
+    border: 1px solid var(--demo-muted);
+    border-radius: 50%;
+  }
+  .g3-marker {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 2.4cqw;
+    height: 2.4cqw;
+    margin: -1.2cqw 0 0 -1.2cqw;
+    background: var(--accent);
+    border-radius: 50%;
+    box-shadow: 0 0 0 0.8cqw var(--highlight);
+    backface-visibility: hidden;
+  }
+  @keyframes globe-3d-spin {
+    to {
+      transform: rotateY(1turn);
+    }
+  }
+</style>

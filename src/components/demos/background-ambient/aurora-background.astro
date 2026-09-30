@@ -1,0 +1,75 @@
+---
+// Aurora Background 데모 — 가장자리가 흐린 긴 색 띠 3개가 위쪽에서 천천히 흔들리며 겹친다
+// 흐림은 blur 필터 대신 투명으로 끝나는 radial-gradient 로 만든다 — 매 프레임 다시 흐리게 하지 않는다
+---
+<div class="aurora-background" data-demo-root aria-hidden="true">
+  <span class="au-band au-band--1"></span>
+  <span class="au-band au-band--2"></span>
+  <span class="au-band au-band--3"></span>
+  <div class="au-title">
+    <span class="au-bar"></span>
+    <span class="au-bar au-bar--short"></span>
+  </div>
+</div>
+
+<style>
+  .aurora-background {
+    position: relative;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+  }
+  .au-band {
+    position: absolute;
+    top: -10%;
+    left: -20%;
+    width: 140%;
+    height: 55%;
+    border-radius: 50%;
+  }
+  .au-band--1 {
+    background: radial-gradient(closest-side, var(--accent), transparent);
+    opacity: 0.55;
+    animation: aurora-background-sway 14s ease-in-out infinite alternate;
+  }
+  .au-band--2 {
+    top: 5%;
+    background: radial-gradient(closest-side, var(--highlight), transparent);
+    animation: aurora-background-sway 11s ease-in-out -4s infinite alternate-reverse;
+  }
+  .au-band--3 {
+    top: -20%;
+    left: 0;
+    width: 110%;
+    background: radial-gradient(closest-side, var(--accent), transparent);
+    opacity: 0.35;
+    animation: aurora-background-sway 17s ease-in-out -8s infinite alternate;
+  }
+  .au-title {
+    position: relative;
+    display: grid;
+    justify-items: center;
+    gap: 8px;
+    width: 46%;
+    margin-top: 18%;
+  }
+  .au-bar {
+    width: 100%;
+    height: 12px;
+    background: var(--ink);
+    border-radius: 2px;
+  }
+  .au-bar--short {
+    width: 64%;
+    height: 8px;
+    background: var(--muted);
+  }
+  @keyframes aurora-background-sway {
+    from {
+      transform: translateX(-12%) rotate(-8deg) scaleY(0.8);
+    }
+    to {
+      transform: translateX(12%) rotate(6deg) scaleY(1.15);
+    }
+  }
+</style>

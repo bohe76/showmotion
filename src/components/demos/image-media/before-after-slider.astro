@@ -1,0 +1,58 @@
+---
+// Before-After Slider 데모 — 끄는 위치(--mx, 0~1)에 구분선이 있고, 왼쪽은 B(after)·오른쪽은 A(before)가 보인다
+// 누르기 전에는 가운데(0.5)
+---
+<div class="before-after" data-demo-root aria-hidden="true">
+  <div class="ba-layer ba-before">A</div>
+  <div class="ba-layer ba-after">B</div>
+  <div class="ba-divider"><span class="ba-handle"></span></div>
+</div>
+
+<style>
+  .before-after {
+    position: relative;
+    overflow: hidden;
+    cursor: ew-resize;
+    /* 가로로 끄는 동안 페이지가 대신 움직이지 않게 한다 (세로 스크롤은 허용) */
+    touch-action: pan-y;
+    -webkit-user-select: none; /* Safari 는 접두어만 안다 */
+    user-select: none;
+  }
+  .ba-layer {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    font-size: 2.5rem;
+    font-weight: 700;
+  }
+  .ba-before {
+    color: var(--ink);
+    background: var(--demo-muted);
+  }
+  .ba-after {
+    color: var(--on-accent);
+    background: var(--accent);
+    clip-path: inset(0 calc((1 - var(--mx, 0.5)) * 100%) 0 0);
+  }
+  .ba-divider {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: calc(var(--mx, 0.5) * 100%);
+    width: 2px;
+    background: var(--surface);
+    transform: translateX(-50%);
+  }
+  .ba-handle {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 28px;
+    height: 28px;
+    background: var(--surface);
+    border: 2px solid var(--ink);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+  }
+</style>

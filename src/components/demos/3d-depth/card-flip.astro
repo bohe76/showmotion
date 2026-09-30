@@ -1,0 +1,83 @@
+---
+// Card Flip 데모 — 마우스를 올리면(.is-active) 카드가 세로축으로 반 바퀴 뒤집혀 뒷면(B)이 보이고, 떼면 앞면(A)으로 돌아온다
+// 두 면 모두 뒷면을 숨겨(backface-visibility) 서로 비쳐 보이지 않는다
+---
+<div class="card-flip" data-demo-root aria-hidden="true">
+  <div class="cf-view">
+    <div class="cf-card">
+      <div class="cf-face cf-front">
+        <span class="cf-mark">A</span>
+        <span class="cf-bar"></span>
+        <span class="cf-bar cf-bar--short"></span>
+      </div>
+      <div class="cf-face cf-back">B</div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .card-flip {
+    overflow: hidden;
+  }
+  .cf-view {
+    display: grid;
+    place-items: center;
+    height: 100%;
+    perspective: 900px;
+  }
+  .cf-card {
+    position: relative;
+    width: 40%;
+    aspect-ratio: 3 / 4;
+    transform-style: preserve-3d;
+    transition: transform 600ms cubic-bezier(0.45, 0, 0.2, 1);
+  }
+  .card-flip.is-active .cf-card {
+    transform: rotateY(180deg);
+  }
+  .cf-face {
+    position: absolute;
+    inset: 0;
+    border-radius: 8px;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+  }
+  .cf-front {
+    display: grid;
+    align-content: center;
+    gap: 8px;
+    padding: 0 12%;
+    background: var(--surface);
+    border: 1px solid var(--line);
+  }
+  .cf-mark {
+    display: grid;
+    place-items: center;
+    width: 36%;
+    aspect-ratio: 1;
+    margin-bottom: 6px;
+    font-weight: 700;
+    color: var(--on-accent);
+    background: var(--accent);
+    border-radius: 4px;
+  }
+  .cf-bar {
+    height: 10px;
+    background: var(--ink);
+    border-radius: 2px;
+  }
+  .cf-bar--short {
+    width: 60%;
+    height: 8px;
+    background: var(--demo-muted);
+  }
+  .cf-back {
+    display: grid;
+    place-items: center;
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--on-accent);
+    background: var(--accent);
+    transform: rotateY(180deg);
+  }
+</style>

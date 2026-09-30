@@ -1,0 +1,34 @@
+---
+// Variable Font Weight Animation 데모 — 마우스를 올리면(.is-active) 글자 굵기가 --i 순서로 가늘게 → 굵게 물결처럼 바뀌고, 떼면 돌아온다
+// 사이트 글꼴(Noto Sans Variable)은 굵기 축이 이어져 있어 굵기가 계단 없이 부드럽게 변한다
+const letters = 'ABCDEF'.split('');
+---
+<div class="variable-font-weight-animation" data-demo-root aria-hidden="true">
+  <span class="vfw-word">
+    {letters.map((letter, i) => <span class="vfw-letter" style={`--i: ${i}`}>{letter}</span>)}
+  </span>
+</div>
+
+<style>
+  .variable-font-weight-animation {
+    display: grid;
+    place-items: center;
+    container-type: inline-size;
+  }
+  .vfw-word {
+    font-size: clamp(2rem, 13cqi, 4.5rem);
+    line-height: 1.1;
+    color: var(--ink);
+  }
+  .vfw-letter {
+    font-weight: 200;
+    transition:
+      font-weight 500ms ease-in-out,
+      color 500ms ease-in-out;
+    transition-delay: calc(var(--i) * 60ms);
+  }
+  .variable-font-weight-animation.is-active .vfw-letter {
+    font-weight: 850;
+    color: var(--accent);
+  }
+</style>

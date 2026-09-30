@@ -1,0 +1,47 @@
+---
+// Retro Grid 데모 — 원근으로 눕힌 격자 바닥이 보는 쪽으로 계속 다가오고, 먼 쪽은 지평선에서 흐려진다
+// 격자 층을 한 칸(40px)만큼 옮기고 처음으로 돌아가 이음매가 보이지 않는다
+---
+<div class="retro-grid" data-demo-root aria-hidden="true">
+  <div class="rg-plane">
+    <div class="rg-lines"></div>
+  </div>
+</div>
+
+<style>
+  .retro-grid {
+    position: relative;
+    overflow: hidden;
+    perspective: 220px;
+    perspective-origin: 50% 30%;
+  }
+  .rg-plane {
+    position: absolute;
+    bottom: 0;
+    left: -100%;
+    width: 300%;
+    height: 200%;
+    overflow: hidden;
+    transform-origin: 50% 100%;
+    transform: rotateX(72deg);
+    mask-image: linear-gradient(to top, #000 20%, transparent 85%);
+  }
+  .rg-lines {
+    position: absolute;
+    inset: -40px 0 0;
+    background-image:
+      linear-gradient(to right, var(--accent) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--accent) 1px, transparent 1px);
+    background-size: 40px 40px;
+    opacity: 0.6;
+    animation: retro-grid-roll 1.6s linear infinite;
+  }
+  @keyframes retro-grid-roll {
+    from {
+      transform: translateY(0);
+    }
+    to {
+      transform: translateY(40px);
+    }
+  }
+</style>

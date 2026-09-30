@@ -1,0 +1,51 @@
+---
+// Squiggly Text 데모 — 씨앗(seed)만 다른 잡음 변위 필터 네 개를 빠르게 갈아 끼워 글자 가장자리가 손그림처럼 떨린다
+// CSS 는 필터 속 seed 를 움직일 수 없어서 필터 자체를 바꾼다
+const seeds = [1, 7, 13, 21];
+---
+<div class="squiggly-text" data-demo-root aria-hidden="true">
+  <svg class="sq-defs" width="0" height="0">
+    {seeds.map((seed, i) => (
+      <filter id={`squiggly-text-${i}`}>
+        <feTurbulence type="fractalNoise" baseFrequency="0.03" numOctaves="2" seed={seed} result="noise" />
+        <feDisplacementMap in="SourceGraphic" in2="noise" scale="5" />
+      </filter>
+    ))}
+  </svg>
+  <span class="sq-word">ABCDEF</span>
+</div>
+
+<style>
+  .squiggly-text {
+    display: grid;
+    place-items: center;
+    container-type: inline-size;
+  }
+  .sq-defs {
+    position: absolute;
+  }
+  .sq-word {
+    font-size: clamp(2rem, 13cqi, 4.5rem);
+    font-weight: 800;
+    line-height: 1.1;
+    color: var(--ink);
+    animation: squiggly-text-boil 0.48s steps(1) infinite;
+  }
+  @keyframes squiggly-text-boil {
+    0% {
+      filter: url(#squiggly-text-0);
+    }
+    25% {
+      filter: url(#squiggly-text-1);
+    }
+    50% {
+      filter: url(#squiggly-text-2);
+    }
+    75% {
+      filter: url(#squiggly-text-3);
+    }
+    100% {
+      filter: url(#squiggly-text-0);
+    }
+  }
+</style>

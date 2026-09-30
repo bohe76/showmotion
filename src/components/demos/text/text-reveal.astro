@@ -1,0 +1,54 @@
+---
+// Text Reveal 데모 — 작은 페이지([data-scroller])를 스크롤한 만큼(--scroll, 0~1) 흐린 문단의 단어가 --i 순서로 하나씩 진해진다
+// 불투명도 = clamp(0.2, 스크롤 × 10.5 − i, 1) — 단어 열 개가 스크롤 끝에서 모두 진해진다
+const words = ['ABC', 'DE', 'FGHI', 'JK', 'LMN', 'OP', 'QRST', 'UV', 'WXY', 'Z'];
+---
+<div class="text-reveal" data-demo-root aria-hidden="true">
+  <div class="trv-page" data-scroller>
+    <div class="trv-sticky">
+      <p class="trv-text">
+        {words.map((word, i) => <span class="trv-word" style={`--i: ${i}`}>{word}</span>)}
+      </p>
+    </div>
+    <div class="trv-spacer"></div>
+  </div>
+</div>
+
+<style>
+  .text-reveal {
+    position: relative;
+    container-type: inline-size;
+  }
+  .trv-page {
+    position: absolute;
+    inset: 0;
+    overflow-y: auto;
+    /* 끝까지 스크롤해도 바깥 페이지로 넘어가지 않는다 */
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+  }
+  .trv-sticky {
+    position: sticky;
+    top: 0;
+    display: grid;
+    place-items: center;
+    height: 100%;
+  }
+  .trv-spacer {
+    height: 200%;
+  }
+  .trv-text {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.1em 0.35em;
+    width: 72%;
+    margin: 0;
+    font-size: clamp(1.25rem, 7cqi, 2.5rem);
+    font-weight: 700;
+    line-height: 1.25;
+    color: var(--ink);
+  }
+  .trv-word {
+    opacity: clamp(0.2, var(--scroll, 0) * 10.5 - var(--i), 1);
+  }
+</style>

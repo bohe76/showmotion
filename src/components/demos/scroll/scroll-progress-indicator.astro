@@ -1,0 +1,60 @@
+---
+// Scroll Progress Indicator 데모 — 스테이지 안의 작은 페이지([data-scroller])를 스크롤한 만큼(--scroll, 0~1) 위쪽 막대가 찬다
+// 상세 페이지의 큰 스테이지(약 700px)에서도 스크롤할 거리가 남도록 줄을 넉넉히 둔다
+const widths = [92, 78, 86, 64, 90, 72, 84, 58, 88, 76, 80, 66, 94, 70, 82, 60, 86, 74];
+const lines = [...widths, ...widths, ...widths];
+---
+<div class="scroll-progress" data-demo-root aria-hidden="true">
+  <div class="sp-bar"></div>
+  <div class="sp-page" data-scroller>
+    <div class="sp-title"></div>
+    {lines.map((width) => <div class="sp-line" style={`width: ${width}%`}></div>)}
+  </div>
+</div>
+
+<style>
+  .scroll-progress {
+    position: relative;
+    display: grid;
+    /* 행을 스테이지 높이로 묶어야 안쪽 페이지가 넘치지 않고 스크롤된다 */
+    grid-template-rows: minmax(0, 1fr);
+    padding: 14px 14% 0;
+  }
+  .sp-bar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 5px;
+    background: var(--accent);
+    transform: scaleX(var(--scroll, 0));
+    transform-origin: left;
+  }
+  .sp-page {
+    display: grid;
+    align-content: start;
+    gap: 10px;
+    padding: 18px 16px 24px;
+    overflow-y: auto;
+    /* 끝까지 스크롤해도 바깥 페이지로 넘어가지 않는다 */
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-bottom: 0;
+    border-radius: 6px 6px 0 0;
+  }
+  .sp-title {
+    width: 60%;
+    height: 12px;
+    margin-bottom: 6px;
+    background: var(--ink);
+    border-radius: 2px;
+  }
+  .sp-line {
+    flex: none;
+    height: 8px;
+    background: var(--demo-muted);
+    border-radius: 2px;
+  }
+</style>

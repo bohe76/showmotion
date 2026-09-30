@@ -1,0 +1,38 @@
+---
+// Underline Draw 데모 — 마우스를 올리면(.is-active) 글자 밑줄이 왼쪽에서 오른쪽으로 자라고, 떼면 줄어든다
+---
+<div class="underline-draw" data-demo-root aria-hidden="true">
+  <span class="ud-link">
+    ABC DEF
+    <span class="ud-line"></span>
+  </span>
+</div>
+
+<style>
+  .underline-draw {
+    display: grid;
+    place-items: center;
+    container-type: inline-size;
+  }
+  .ud-link {
+    position: relative;
+    font-size: clamp(1.75rem, 10cqi, 3.5rem);
+    font-weight: 700;
+    line-height: 1.2;
+    color: var(--ink);
+  }
+  .ud-line {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -0.08em;
+    height: 0.08em;
+    background: var(--accent);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 300ms ease-out;
+  }
+  .underline-draw.is-active .ud-line {
+    transform: scaleX(1);
+  }
+</style>

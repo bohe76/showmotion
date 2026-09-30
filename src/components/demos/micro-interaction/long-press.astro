@@ -1,0 +1,177 @@
+---
+// Long Press 데모 — 누를 때마다(.is-playing) "누르고 있기"를 흉내 낸다: 가운데 줄이 살짝 눌린 채 진행 막대가 차오르고,
+// 다 차면 줄이 제자리로 튀며 작은 메뉴가 열린다 (카드 안에서는 길게 누르기를 감지하지 않고 누르면 재생한다)
+---
+<div class="long-press" data-demo-root aria-hidden="true">
+  <div class="lp-list">
+    <div class="lp-row"><span class="lp-dot"></span><span class="lp-line"></span></div>
+    <div class="lp-row lp-row--target">
+      <span class="lp-fill"></span>
+      <span class="lp-dot"></span><span class="lp-line"></span>
+      <span class="lp-touch"></span>
+    </div>
+    <div class="lp-row"><span class="lp-dot"></span><span class="lp-line"></span></div>
+    <div class="lp-menu">
+      <span class="lp-item"></span>
+      <span class="lp-item"></span>
+      <span class="lp-item lp-item--strong"></span>
+    </div>
+  </div>
+</div>
+
+<style>
+  .long-press {
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+  }
+  .lp-list {
+    position: relative;
+    width: 60%;
+    display: grid;
+    gap: 8px;
+  }
+  .lp-row {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    height: 40px;
+    padding: 0 12px;
+    overflow: hidden;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+  }
+  .lp-dot {
+    position: relative;
+    flex: none;
+    width: 18px;
+    height: 18px;
+    background: var(--demo-muted);
+    border-radius: 50%;
+  }
+  .lp-line {
+    position: relative;
+    width: 60%;
+    height: 8px;
+    background: var(--demo-muted);
+    border-radius: 2px;
+  }
+  .lp-row--target .lp-dot {
+    background: var(--accent);
+  }
+  /* 누르고 있는 동안 왼쪽부터 차오르는 진행 막대 */
+  .lp-fill {
+    position: absolute;
+    inset: 0;
+    background: var(--accent);
+    opacity: 0.18;
+    transform: scaleX(0);
+    transform-origin: left;
+  }
+  /* 손끝이 닿은 자리 */
+  .lp-touch {
+    position: absolute;
+    top: 50%;
+    left: 62%;
+    width: 26px;
+    height: 26px;
+    margin: -13px 0 0 -13px;
+    background: var(--ink);
+    border-radius: 50%;
+    opacity: 0;
+  }
+  .lp-menu {
+    position: absolute;
+    top: 46%;
+    right: -6%;
+    z-index: 1;
+    display: grid;
+    gap: 8px;
+    width: 46%;
+    padding: 10px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    opacity: 0;
+    transform: scale(0.6);
+    transform-origin: top left;
+  }
+  .lp-item {
+    height: 8px;
+    background: var(--demo-muted);
+    border-radius: 2px;
+  }
+  .lp-item--strong {
+    width: 70%;
+    background: var(--accent-strong);
+  }
+  .long-press.is-playing .lp-row--target {
+    animation: long-press-hold 1300ms ease-out both;
+  }
+  .long-press.is-playing .lp-fill {
+    animation: long-press-fill 1300ms linear both;
+  }
+  .long-press.is-playing .lp-touch {
+    animation: long-press-touch 1300ms ease-out both;
+  }
+  .long-press.is-playing .lp-menu {
+    animation: long-press-menu 320ms cubic-bezier(0.34, 1.56, 0.64, 1) 1000ms both;
+  }
+  @keyframes long-press-hold {
+    0% {
+      transform: scale(1);
+    }
+    10%,
+    75% {
+      transform: scale(0.96);
+    }
+    85% {
+      transform: scale(1.02);
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
+  @keyframes long-press-fill {
+    0%,
+    8% {
+      transform: scaleX(0);
+      opacity: 0.18;
+    }
+    75% {
+      transform: scaleX(1);
+      opacity: 0.18;
+    }
+    100% {
+      transform: scaleX(1);
+      opacity: 0;
+    }
+  }
+  @keyframes long-press-touch {
+    0% {
+      opacity: 0;
+      transform: scale(0.4);
+    }
+    10%,
+    75% {
+      opacity: 0.25;
+      transform: scale(1);
+    }
+    100% {
+      opacity: 0;
+      transform: scale(1.4);
+    }
+  }
+  @keyframes long-press-menu {
+    from {
+      opacity: 0;
+      transform: scale(0.6);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+</style>

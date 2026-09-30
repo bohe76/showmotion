@@ -1,0 +1,52 @@
+---
+// Puff In / Puff Out 데모 — .is-playing 이 붙으면 크게 부풀며 흐려져 사라졌다가(out) 큰 흐린 상태에서 줄어들며 또렷하게 돌아온다(in), 끝은 보이는 상태
+---
+<div class="puff-in-puff-out" data-demo-root aria-hidden="true">
+  <div class="pf-block">A</div>
+</div>
+
+<style>
+  .puff-in-puff-out {
+    display: grid;
+    place-items: center;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    container-type: inline-size;
+  }
+  .pf-block {
+    display: grid;
+    place-items: center;
+    width: 30%;
+    aspect-ratio: 1;
+    border-radius: 6px;
+    background: var(--accent);
+    color: var(--on-accent);
+    font-size: 12cqw;
+    font-weight: 700;
+    line-height: 1;
+  }
+  .puff-in-puff-out.is-playing .pf-block {
+    animation: puff-in-puff-out-cycle 1800ms both;
+  }
+  @keyframes puff-in-puff-out-cycle {
+    0% {
+      opacity: 1;
+      filter: blur(0);
+      transform: scale(1);
+      animation-timing-function: cubic-bezier(0.165, 0.84, 0.44, 1);
+    }
+    40%,
+    55% {
+      opacity: 0;
+      filter: blur(4px);
+      transform: scale(2);
+      animation-timing-function: cubic-bezier(0.47, 0, 0.745, 0.715);
+    }
+    100% {
+      opacity: 1;
+      filter: blur(0);
+      transform: scale(1);
+    }
+  }
+</style>

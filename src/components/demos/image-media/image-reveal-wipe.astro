@@ -1,0 +1,88 @@
+---
+// Image Reveal Wipe 데모 — 스테이지 안의 작은 페이지([data-scroller])를 스크롤한 만큼(--scroll, 0~1) 덮여 있던 그림이 왼쪽부터 드러난다
+// 맨 위에서는 왼쪽 끝만 조금 보이고, 스크롤 초반에 다 열린다. 상세 페이지의 큰 스테이지에서도 스크롤할 거리가 남도록 줄을 넉넉히 둔다
+const widths = [92, 78, 86, 64, 90, 72, 84, 58, 88, 76, 80, 66, 94, 70, 82, 60, 86, 74];
+const lines = [...widths, ...widths];
+---
+<div class="image-reveal-wipe" data-demo-root aria-hidden="true">
+  <div class="rw-page" data-scroller>
+    <div class="rw-title"></div>
+    {widths.slice(0, 3).map((width) => <div class="rw-line" style={`width: ${width}%`} />)}
+    <div class="rw-frame">
+      <div class="rw-image">
+        <span class="rw-sun"></span>
+        <span class="rw-hill"></span>
+      </div>
+    </div>
+    {lines.map((width) => <div class="rw-line" style={`width: ${width}%`} />)}
+  </div>
+</div>
+
+<style>
+  .image-reveal-wipe {
+    display: grid;
+    /* 행을 스테이지 높이로 묶어야 안쪽 페이지가 넘치지 않고 스크롤된다 */
+    grid-template-rows: minmax(0, 1fr);
+    padding: 14px 14% 0;
+  }
+  .rw-page {
+    display: grid;
+    align-content: start;
+    /* 행을 내용 높이로 고정한다 — auto 행은 overflow: hidden + aspect-ratio 인 액자를 0 높이로 줄여 아래 줄이 그림 위에 겹친다 */
+    grid-auto-rows: max-content;
+    gap: 10px;
+    padding: 18px 16px 24px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-bottom: 0;
+    border-radius: 6px 6px 0 0;
+  }
+  .rw-title {
+    width: 60%;
+    height: 12px;
+    margin-bottom: 6px;
+    background: var(--ink);
+    border-radius: 2px;
+  }
+  .rw-line {
+    height: 8px;
+    background: var(--demo-muted);
+    border-radius: 2px;
+  }
+  .rw-frame {
+    margin: 6px 0;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    background: var(--stage);
+    border-radius: 4px;
+  }
+  .rw-image {
+    position: relative;
+    height: 100%;
+    overflow: hidden;
+    background: var(--highlight);
+    /* 맨 위에서도 조금 보이게 시작하고, 스크롤 초반에 끝까지 열린다 */
+    clip-path: inset(0 calc((1 - clamp(0, 0.12 + var(--scroll, 0) * 2.5, 1)) * 100%) 0 0);
+  }
+  .rw-sun {
+    position: absolute;
+    top: 16%;
+    left: 64%;
+    width: 16%;
+    aspect-ratio: 1;
+    background: var(--accent);
+    border-radius: 50%;
+  }
+  .rw-hill {
+    position: absolute;
+    bottom: -60%;
+    left: -10%;
+    width: 80%;
+    aspect-ratio: 1;
+    background: var(--accent-strong);
+    border-radius: 50%;
+  }
+</style>

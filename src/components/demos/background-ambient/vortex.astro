@@ -1,0 +1,49 @@
+---
+// Vortex 데모 — 입자 16개가 바깥에서 나타나 가운데를 돌며 안쪽으로 빨려 들어가고, 가운데에 닿으면 사라진다
+// 한 transform 안에서 회전각은 늘리고 반지름(translateX)은 줄여 나선을 그린다 — 입자마다 시작 각(--a)과 지연이 다르다
+const particles = Array.from({ length: 16 }, (_, i) => ({ angle: i * 67.5, delay: -i * 0.375 }));
+---
+<div class="vortex" data-demo-root aria-hidden="true">
+  {particles.map(({ angle, delay }) => (
+    <span class="vx-dot" style={`--a: ${angle}deg; animation-delay: ${delay}s`}></span>
+  ))}
+</div>
+
+<style>
+  .vortex {
+    position: relative;
+    overflow: hidden;
+    container-type: inline-size;
+  }
+  .vx-dot {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 5px;
+    height: 5px;
+    margin: -2.5px 0 0 -2.5px;
+    background: var(--accent);
+    border-radius: 50%;
+    opacity: 0;
+    animation: vortex-spiral 6s linear infinite;
+  }
+  .vx-dot:nth-child(3n) {
+    background: var(--ink);
+  }
+  @keyframes vortex-spiral {
+    0% {
+      opacity: 0;
+      transform: rotate(var(--a)) translateX(42cqw) scale(1.6);
+    }
+    20% {
+      opacity: 1;
+    }
+    85% {
+      opacity: 0.8;
+    }
+    100% {
+      opacity: 0;
+      transform: rotate(calc(var(--a) + 540deg)) translateX(0) scale(0.4);
+    }
+  }
+</style>

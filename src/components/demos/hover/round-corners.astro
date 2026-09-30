@@ -1,0 +1,30 @@
+---
+// Round Corners 데모 — 마우스를 올리면(.is-active) 각진 블록의 모서리가 부드럽게 둥글어지고, 떼면 다시 각진다
+---
+<div class="round-corners" data-demo-root aria-hidden="true">
+  <div class="rc-box">A</div>
+</div>
+
+<style>
+  /* 블록 크기가 루트 폭에 비례하므로 둥글기도 cqi 로 — 카드와 상세 스테이지에서 같은 모양이 된다 */
+  .round-corners {
+    display: grid;
+    place-items: center;
+    container-type: inline-size;
+  }
+  .rc-box {
+    display: grid;
+    place-items: center;
+    width: 40cqi;
+    aspect-ratio: 16 / 10;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--on-accent);
+    background: var(--accent);
+    border-radius: 2px;
+    transition: border-radius 300ms ease-out;
+  }
+  .round-corners.is-active .rc-box {
+    border-radius: 8cqi;
+  }
+</style>

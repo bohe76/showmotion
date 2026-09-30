@@ -1,0 +1,67 @@
+---
+// Blur-Up Placeholder 데모 — .is-playing 이 붙으면 흐린 그림이 잠깐 자리를 지키다가 또렷하게 맞춰진다, 없으면 또렷한 그림
+// 그림은 블록(하늘·해·언덕)으로만 흉내 낸다. 흐릴 때 살짝 키워 가장자리의 번짐을 틀 밖으로 밀어낸다
+---
+<div class="blur-up-placeholder" data-demo-root aria-hidden="true">
+  <div class="bup-frame">
+    <div class="bup-image">
+      <span class="bup-sun"></span>
+      <span class="bup-hill bup-hill--back"></span>
+      <span class="bup-hill bup-hill--front"></span>
+    </div>
+  </div>
+</div>
+
+<style>
+  .blur-up-placeholder {
+    display: grid;
+    place-items: center;
+  }
+  .bup-frame {
+    width: 60%;
+    aspect-ratio: 16 / 10;
+    overflow: hidden;
+    border-radius: 6px;
+  }
+  .bup-image {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    background: var(--highlight);
+  }
+  .bup-sun {
+    position: absolute;
+    top: 16%;
+    right: 18%;
+    width: 18%;
+    aspect-ratio: 1;
+    background: var(--accent);
+    border-radius: 50%;
+  }
+  .bup-hill {
+    position: absolute;
+    inset: 0;
+  }
+  .bup-hill--back {
+    background: color-mix(in srgb, var(--accent) 50%, var(--highlight));
+    clip-path: polygon(0 70%, 30% 42%, 58% 72%, 100% 100%, 0 100%);
+  }
+  .bup-hill--front {
+    background: var(--accent-strong);
+    clip-path: polygon(20% 100%, 62% 52%, 100% 78%, 100% 100%);
+  }
+  .blur-up-placeholder.is-playing .bup-image {
+    animation: blur-up-placeholder-sharpen 1600ms ease-out both;
+  }
+  @keyframes blur-up-placeholder-sharpen {
+    0%,
+    45% {
+      filter: blur(12px);
+      transform: scale(1.12);
+    }
+    100% {
+      filter: blur(0);
+      transform: scale(1);
+    }
+  }
+</style>

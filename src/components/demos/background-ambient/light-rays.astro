@@ -1,0 +1,47 @@
+---
+// Light Rays 데모 — 위쪽 한 점 근처에서 내려오는 반투명 빛줄기 5개가 좌우로 천천히 흔들리며 밝아졌다 흐려진다
+// 빛줄기 가장자리는 정적 mask 로 흐리게 한다 — 움직임은 transform·opacity 만
+const rays = [
+  [34, 26, 9, 0],
+  [44, 14, 11, -3],
+  [52, 4, 8, -5],
+  [60, -8, 12, -2],
+  [68, -20, 10, -6],
+];
+---
+<div class="light-rays" data-demo-root aria-hidden="true">
+  {rays.map(([left, angle, duration, delay]) => (
+    <span
+      class="lr-ray"
+      style={`left: ${left}%; --a: ${angle}deg; animation-duration: ${duration}s; animation-delay: ${delay}s`}
+    ></span>
+  ))}
+</div>
+
+<style>
+  .light-rays {
+    position: relative;
+    overflow: hidden;
+  }
+  .lr-ray {
+    position: absolute;
+    top: -12%;
+    width: 16%;
+    height: 130%;
+    background: linear-gradient(to bottom, color-mix(in srgb, var(--accent) 34%, transparent), transparent 85%);
+    mask-image: linear-gradient(to right, transparent, #000 50%, transparent);
+    transform-origin: top center;
+    translate: -50% 0;
+    animation: light-rays-sway 10s ease-in-out infinite alternate;
+  }
+  @keyframes light-rays-sway {
+    from {
+      opacity: 0.45;
+      transform: rotate(calc(var(--a) - 7deg));
+    }
+    to {
+      opacity: 1;
+      transform: rotate(calc(var(--a) + 7deg));
+    }
+  }
+</style>

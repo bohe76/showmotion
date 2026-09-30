@@ -1,0 +1,105 @@
+---
+// Donut Chart Fill 데모 — .is-playing 이 붙으면 도넛의 세 조각이 12시 방향부터 시계 방향으로 차례로 차오른다, 없으면 다 찬 상태
+// pathLength 100 이라 dasharray "길이 100" 이 조각 길이, dashoffset -시작 이 조각 시작 자리다 — 조각 사이 틈은 2
+const segments = [
+  { start: 0, length: 46, delay: 0 },
+  { start: 48, length: 30, delay: 450 },
+  { start: 80, length: 18, delay: 720 },
+];
+---
+<div class="donut-chart-fill" data-demo-root aria-hidden="true">
+  <svg class="dcf-svg" viewBox="0 0 100 100">
+    <circle class="dcf-track" cx="50" cy="50" r="36" />
+    {segments.map((s, i) => (
+      <circle
+        class={`dcf-seg dcf-seg--${i}`}
+        cx="50"
+        cy="50"
+        r="36"
+        pathLength="100"
+        transform="rotate(-90 50 50)"
+        style={`--len: ${s.length}; stroke-dashoffset: ${-s.start}; --delay: ${s.delay}ms`}
+      />
+    ))}
+  </svg>
+  <ul class="dcf-legend">
+    {segments.map((_, i) => (
+      <li class={`dcf-key dcf-key--${i}`}>
+        <span class="dcf-swatch"></span>
+        <span class="dcf-bar"></span>
+      </li>
+    ))}
+  </ul>
+</div>
+
+<style>
+  .donut-chart-fill {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8%;
+  }
+  .dcf-svg {
+    width: 40%;
+    aspect-ratio: 1;
+  }
+  .dcf-track,
+  .dcf-seg {
+    fill: none;
+    stroke-width: 14;
+  }
+  .dcf-track {
+    stroke: var(--line);
+  }
+  .dcf-seg {
+    stroke: var(--c);
+    stroke-dasharray: var(--len) 100;
+  }
+  .dcf-seg--0,
+  .dcf-key--0 {
+    --c: var(--accent);
+  }
+  .dcf-seg--1,
+  .dcf-key--1 {
+    --c: var(--ink);
+  }
+  .dcf-seg--2,
+  .dcf-key--2 {
+    --c: var(--muted);
+  }
+  .donut-chart-fill.is-playing .dcf-seg {
+    animation: donut-chart-fill-sweep 600ms cubic-bezier(0.33, 1, 0.68, 1) both;
+    animation-delay: var(--delay);
+  }
+  @keyframes donut-chart-fill-sweep {
+    from {
+      stroke-dasharray: 0 100;
+    }
+  }
+  .dcf-legend {
+    display: grid;
+    gap: 12px;
+    width: 26%;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .dcf-key {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .dcf-swatch {
+    flex: none;
+    width: 12px;
+    height: 12px;
+    background: var(--c);
+    border-radius: 2px;
+  }
+  .dcf-bar {
+    flex: 1;
+    height: 8px;
+    background: var(--demo-muted);
+    border-radius: 2px;
+  }
+</style>

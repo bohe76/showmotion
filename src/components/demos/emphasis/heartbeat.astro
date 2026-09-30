@@ -1,0 +1,38 @@
+---
+// Heartbeat 데모 — 두 번 연달아 커졌다 줄고 잠시 쉬는 박동을 반복한다
+---
+<div class="heartbeat" data-demo-root aria-hidden="true">
+  <div class="hb-box">A</div>
+</div>
+
+<style>
+  .heartbeat {
+    display: grid;
+    place-items: center;
+  }
+  .hb-box {
+    display: grid;
+    place-items: center;
+    width: clamp(56px, 22%, 120px);
+    aspect-ratio: 1;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--on-accent);
+    background: var(--accent);
+    border-radius: 50%;
+    animation: heartbeat-beat 1.4s ease-in-out infinite;
+  }
+  /* 앞 절반에서 두 번 뛰고 뒤 절반은 쉰다 */
+  @keyframes heartbeat-beat {
+    0%,
+    28%,
+    70%,
+    100% {
+      transform: scale(1);
+    }
+    14%,
+    42% {
+      transform: scale(1.25);
+    }
+  }
+</style>

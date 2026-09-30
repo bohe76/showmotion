@@ -1,0 +1,59 @@
+---
+// Word Rotate 데모 — 줄 가운데 한 단어만 목록의 다음 단어로 위로 밀려 바뀌고, 단어마다 잠시 멈춘다
+// 목록 끝에 첫 단어를 한 번 더 두어, 마지막에서 처음으로 돌아갈 때 튀지 않게 한다
+const words = ['DEF', 'GHI', 'JKL', 'DEF'];
+---
+<div class="word-rotate" data-demo-root aria-hidden="true">
+  <p class="wr-line">
+    <span>AB</span>
+    <span class="wr-window">
+      <span class="wr-list">
+        {words.map((word) => <span class="wr-word">{word}</span>)}
+      </span>
+    </span>
+    <span>MN</span>
+  </p>
+</div>
+
+<style>
+  .word-rotate {
+    display: grid;
+    place-items: center;
+    container-type: inline-size;
+  }
+  .wr-line {
+    display: flex;
+    gap: 0.3em;
+    margin: 0;
+    font-size: clamp(1.75rem, 11cqi, 4rem);
+    font-weight: 800;
+    line-height: 1.2;
+    color: var(--ink);
+  }
+  .wr-window {
+    height: 1.2em;
+    overflow: hidden;
+  }
+  .wr-list {
+    display: grid;
+    color: var(--accent);
+    animation: word-rotate-cycle 6s ease-in-out infinite;
+  }
+  @keyframes word-rotate-cycle {
+    0%,
+    26% {
+      transform: translateY(0);
+    }
+    33%,
+    59% {
+      transform: translateY(-25%);
+    }
+    66%,
+    92% {
+      transform: translateY(-50%);
+    }
+    100% {
+      transform: translateY(-75%);
+    }
+  }
+</style>

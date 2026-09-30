@@ -1,0 +1,107 @@
+---
+// Zoom Page Transition 데모 — 누를 때마다(.is-on 토글) 들어갈 때는 A가 커지며 흐려지고 B가 살짝 작은 크기에서 제자리로 커지며, 나올 때는 B가 작아지며 흐려지고 A가 큰 크기에서 제자리로 줄어든다
+---
+<div class="zoom-page" data-demo-root aria-hidden="true">
+  <div class="zp-frame">
+    <div class="zp-page zp-page--a">
+      <span class="zp-bar"></span>
+      <span class="zp-hero">A</span>
+      <span class="zp-line"></span>
+      <span class="zp-line zp-line--short"></span>
+    </div>
+    <div class="zp-page zp-page--b">
+      <span class="zp-bar"></span>
+      <div class="zp-tiles">
+        <span class="zp-tile">B</span>
+        <span class="zp-tile"></span>
+      </div>
+      <span class="zp-line zp-line--short"></span>
+      <span class="zp-line"></span>
+    </div>
+  </div>
+</div>
+
+<style>
+  .zoom-page {
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+  }
+  .zp-frame {
+    position: relative;
+    width: 60%;
+    height: 80%;
+    overflow: hidden;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+  }
+  .zp-page {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    align-content: start;
+    gap: 10px;
+    padding: 12px;
+    background: var(--surface);
+    transition:
+      opacity 400ms ease-out,
+      transform 400ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .zp-page--b {
+    background: var(--stage);
+    opacity: 0;
+    transform: scale(0.85);
+  }
+  .zoom-page.is-on .zp-page--a {
+    opacity: 0;
+    transform: scale(1.15);
+  }
+  .zoom-page.is-on .zp-page--b {
+    opacity: 1;
+    transform: scale(1);
+  }
+  .zp-bar {
+    width: 40%;
+    height: 8px;
+    border-radius: 2px;
+    background: var(--ink);
+  }
+  .zp-hero {
+    display: grid;
+    place-items: center;
+    aspect-ratio: 16 / 7;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--on-accent);
+    background: var(--accent);
+    border-radius: 4px;
+  }
+  .zp-tiles {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .zp-tile {
+    display: grid;
+    place-items: center;
+    aspect-ratio: 4 / 3;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--ink);
+    background: var(--demo-muted);
+    border-radius: 4px;
+  }
+  .zp-tile:first-child {
+    color: var(--on-accent);
+    background: var(--accent-strong);
+  }
+  .zp-line {
+    height: 8px;
+    border-radius: 2px;
+    background: var(--demo-muted);
+  }
+  .zp-line--short {
+    width: 60%;
+  }
+</style>

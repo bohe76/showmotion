@@ -1,0 +1,40 @@
+---
+// Bar Chart Grow 데모 — .is-playing 이 붙으면 막대가 바닥선에서 차례로 제 높이까지 솟는다, 없으면 다 솟은 상태
+const bars = [46, 72, 58, 88, 64, 94];
+---
+<div class="bar-chart-grow" data-demo-root aria-hidden="true">
+  <div class="bcg-chart">
+    {bars.map((height, i) => <span class="bcg-bar" style={`height: ${height}%; --i: ${i}`}></span>)}
+  </div>
+</div>
+
+<style>
+  .bar-chart-grow {
+    display: grid;
+    place-items: center;
+  }
+  .bcg-chart {
+    display: flex;
+    align-items: flex-end;
+    gap: 5%;
+    width: 64%;
+    height: 62%;
+    padding: 0 4%;
+    border-bottom: 2px solid var(--ink);
+  }
+  .bcg-bar {
+    flex: 1;
+    background: var(--accent);
+    border-radius: 3px 3px 0 0;
+    transform-origin: bottom;
+  }
+  .bar-chart-grow.is-playing .bcg-bar {
+    animation: bar-chart-grow-rise 700ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation-delay: calc(var(--i) * 80ms);
+  }
+  @keyframes bar-chart-grow-rise {
+    from {
+      transform: scaleY(0);
+    }
+  }
+</style>

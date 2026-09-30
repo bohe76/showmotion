@@ -1,0 +1,76 @@
+---
+// Typing Indicator 데모 — 대화 말풍선 아래 작은 말풍선 속 점 세 개가 차례로 떠오르며 밝아지기를 반복한다
+const dots = [0, 1, 2];
+---
+<div class="typing-indicator" data-demo-root aria-hidden="true">
+  <div class="ti-thread">
+    <div class="ti-bubble ti-bubble--sent">
+      <span class="ti-line"></span>
+      <span class="ti-line ti-line--short"></span>
+    </div>
+    <div class="ti-bubble ti-bubble--typing">
+      {dots.map((i) => <span class="ti-dot" style={`--i: ${i}`}></span>)}
+    </div>
+  </div>
+</div>
+
+<style>
+  .typing-indicator {
+    display: grid;
+    place-items: center;
+  }
+  .ti-thread {
+    display: grid;
+    gap: 12px;
+    width: 58%;
+  }
+  .ti-bubble {
+    padding: 12px 14px;
+    border-radius: 16px;
+  }
+  .ti-bubble--sent {
+    display: grid;
+    justify-self: end;
+    gap: 6px;
+    width: 62%;
+    background: var(--accent);
+    border-bottom-right-radius: 4px;
+  }
+  .ti-line {
+    height: 8px;
+    background: var(--on-accent);
+    border-radius: 2px;
+    opacity: 0.85;
+  }
+  .ti-line--short {
+    width: 60%;
+  }
+  .ti-bubble--typing {
+    display: flex;
+    justify-self: start;
+    gap: 6px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-bottom-left-radius: 4px;
+  }
+  .ti-dot {
+    width: 8px;
+    height: 8px;
+    background: var(--muted);
+    border-radius: 50%;
+    animation: typing-indicator-rise 1.3s ease-in-out infinite;
+    animation-delay: calc(var(--i) * 0.18s);
+  }
+  @keyframes typing-indicator-rise {
+    0%,
+    60%,
+    100% {
+      opacity: 0.4;
+      transform: translateY(0);
+    }
+    30% {
+      opacity: 1;
+      transform: translateY(-4px);
+    }
+  }
+</style>

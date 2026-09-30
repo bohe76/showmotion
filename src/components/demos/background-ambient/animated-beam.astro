@@ -1,0 +1,55 @@
+---
+// Animated Beam 데모 — 두 블록(A, B)을 잇는 선 위로 빛 조각이 A→B로 계속 흐른다
+// 빛 조각은 선 안에서 transform 으로만 움직인다 (선 밖은 overflow 로 잘린다)
+---
+<div class="animated-beam" data-demo-root aria-hidden="true">
+  <div class="ab-node">A</div>
+  <div class="ab-line">
+    <span class="ab-pulse"></span>
+  </div>
+  <div class="ab-node">B</div>
+</div>
+
+<style>
+  .animated-beam {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 14%;
+  }
+  .ab-node {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: clamp(44px, 16%, 88px);
+    aspect-ratio: 1;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--ink);
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+  }
+  .ab-line {
+    position: relative;
+    flex: 1;
+    height: 2px;
+    overflow: hidden;
+    background: var(--demo-muted);
+  }
+  .ab-pulse {
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 40%;
+    background: linear-gradient(to right, transparent, var(--accent) 70%, transparent);
+    animation: animated-beam-flow 2.4s ease-in-out infinite;
+  }
+  @keyframes animated-beam-flow {
+    from {
+      transform: translateX(-100%);
+    }
+    to {
+      transform: translateX(250%);
+    }
+  }
+</style>

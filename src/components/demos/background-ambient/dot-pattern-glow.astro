@@ -1,0 +1,56 @@
+---
+// Dot Pattern Glow 데모 — 흐린 점 격자 위로 빛 띠가 가로질러 지나가며 그 자리의 점만 밝게 보인다
+// 띠(창)는 오른쪽으로, 안쪽 밝은 점 층은 같은 거리만큼 왼쪽으로 옮겨 점 위치를 바탕 격자에 고정한다 — transform 만 쓴다
+---
+<div class="dot-pattern-glow" data-demo-root aria-hidden="true">
+  <span class="dpg-dots"></span>
+  <div class="dpg-window">
+    <div class="dpg-lit"></div>
+  </div>
+</div>
+
+<style>
+  .dot-pattern-glow {
+    position: relative;
+    overflow: hidden;
+    container-type: inline-size;
+  }
+  /* cqw 는 자기 자신이 아니라 조상 컨테이너(루트) 기준이라, 바탕 점은 루트 안쪽 층에 그린다 */
+  .dpg-dots {
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(circle, var(--demo-muted) 1.5px, transparent 2px);
+    background-size: 5cqw 5cqw;
+  }
+  .dpg-window {
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 40cqw;
+    overflow: hidden;
+    mask-image: linear-gradient(to right, transparent, #000 50%, transparent);
+    animation: dot-pattern-glow-sweep 5s linear infinite;
+  }
+  .dpg-lit {
+    width: 100cqw;
+    height: 100%;
+    background-image: radial-gradient(circle, var(--accent) 2px, transparent 2.5px);
+    background-size: 5cqw 5cqw;
+    animation: dot-pattern-glow-hold 5s linear infinite;
+  }
+  @keyframes dot-pattern-glow-sweep {
+    from {
+      transform: translateX(-40cqw);
+    }
+    to {
+      transform: translateX(100cqw);
+    }
+  }
+  @keyframes dot-pattern-glow-hold {
+    from {
+      transform: translateX(40cqw);
+    }
+    to {
+      transform: translateX(-100cqw);
+    }
+  }
+</style>

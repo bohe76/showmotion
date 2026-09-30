@@ -1,0 +1,51 @@
+---
+// Bob 데모 — 마우스를 올리면(.is-active) 블록이 떠오른 뒤 올려 둔 동안 위아래로 둥실거린다
+// 점선 칸은 원래 자리 — 얼마나 떠 있는지 보이게 한다
+---
+<div class="bob" data-demo-root aria-hidden="true">
+  <div class="bo-ghost"></div>
+  <div class="bo-box">A</div>
+</div>
+
+<style>
+  .bob {
+    display: grid;
+    place-items: center;
+  }
+  .bo-ghost,
+  .bo-box {
+    grid-area: 1 / 1;
+    width: 40%;
+    aspect-ratio: 16 / 10;
+    border-radius: 6px;
+  }
+  .bo-ghost {
+    border: 2px dashed var(--demo-muted);
+  }
+  .bo-box {
+    display: grid;
+    place-items: center;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--on-accent);
+    background: var(--accent);
+  }
+  .bob.is-active .bo-box {
+    animation:
+      bob-rise 300ms ease-out forwards,
+      bob-hover 1.5s ease-in-out 300ms infinite alternate;
+  }
+  @keyframes bob-rise {
+    to {
+      transform: translateY(-16%);
+    }
+  }
+  @keyframes bob-hover {
+    from {
+      transform: translateY(-16%);
+    }
+    to {
+      transform: translateY(-8%);
+    }
+  }
+</style>

@@ -1,0 +1,85 @@
+---
+// Skeleton Shimmer 데모 — 회색 자리 블록 위로 밝은 띠가 왼쪽에서 오른쪽으로 쓸고 지나가기를 반복한다
+// 띠는 블록마다 배경 그림(폭 300%)으로 두고 background-position 을 옮긴다 — 가상 요소(::after)는 공통 정지 규칙이 닿지 않아 쓰지 않는다
+// 띠 색은 블록보다 밝아야 한다: 라이트는 surface 쪽, 다크는 muted 쪽으로 섞는다
+---
+<div class="skeleton-shimmer" data-demo-root aria-hidden="true">
+  <div class="ss-card">
+    <span class="ss-shape ss-media"></span>
+    <div class="ss-head">
+      <span class="ss-shape ss-avatar"></span>
+      <div class="ss-lines">
+        <span class="ss-shape ss-line ss-line--title"></span>
+        <span class="ss-shape ss-line ss-line--short"></span>
+      </div>
+    </div>
+    <span class="ss-shape ss-line"></span>
+  </div>
+</div>
+
+<style>
+  .skeleton-shimmer {
+    --glint: color-mix(in srgb, var(--demo-muted), var(--surface) 65%);
+    display: grid;
+    place-items: center;
+  }
+  @media (prefers-color-scheme: dark) {
+    .skeleton-shimmer {
+      --glint: color-mix(in srgb, var(--demo-muted), var(--muted) 35%);
+    }
+  }
+  .ss-card {
+    display: grid;
+    gap: 10px;
+    width: 58%;
+    padding: 14px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+  }
+  .ss-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .ss-lines {
+    display: grid;
+    flex: 1;
+    gap: 6px;
+  }
+  .ss-shape {
+    background: var(--demo-muted) linear-gradient(90deg, transparent 40%, var(--glint) 50%, transparent 60%) no-repeat;
+    background-size: 300% 100%;
+    border-radius: 3px;
+    animation: skeleton-shimmer-sweep 1.8s ease-in-out infinite;
+  }
+  .ss-media {
+    aspect-ratio: 16 / 7;
+  }
+  .ss-avatar {
+    flex: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+  }
+  .ss-line {
+    height: 8px;
+  }
+  .ss-line--title {
+    width: 70%;
+    height: 10px;
+  }
+  .ss-line--short {
+    width: 45%;
+  }
+  /* 100% → 0%: 띠가 블록 왼쪽 밖에서 오른쪽 밖으로 지나간다. 끝의 30% 는 쉼 */
+  @keyframes skeleton-shimmer-sweep {
+    0% {
+      background-position: 100% 0;
+    }
+    70%,
+    100% {
+      background-position: 0% 0;
+    }
+  }
+</style>

@@ -1,0 +1,60 @@
+---
+// Icon Morph 데모 — 누를 때마다(.is-on 토글) 세 줄 아이콘이 X로 바뀌고 다시 돌아온다
+// Lucide menu 의 세 경로(위 y=5 · 가운데 y=12 · 아래 y=19)에 CSS를 건다 — 위아래 줄이 가운데로 모이고(translate) 기운다(rotate)
+// 켤 때는 모인 뒤 기울고, 끌 때는 편 뒤 벌어진다 (translate·rotate 를 따로 두어 지연을 다르게 준다)
+import Menu from '@lucide/astro/icons/menu';
+---
+<div class="icon-morph" data-demo-root aria-hidden="true">
+  <div class="im-tile">
+    <Menu class="im-icon" size={66} aria-hidden="true" />
+  </div>
+</div>
+
+<style>
+  .icon-morph {
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+  }
+  .im-tile {
+    display: grid;
+    place-items: center;
+    width: 88px;
+    height: 88px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+  }
+  /* 아이콘은 Lucide 컴포넌트가 그리므로 :global 로 잡는다. SVG 안의 px 는 viewBox(24) 단위다 */
+  .im-tile :global(.im-icon) {
+    color: var(--ink);
+  }
+  .im-tile :global(.im-icon path) {
+    transform-box: fill-box;
+    transform-origin: center;
+    transition:
+      translate 160ms ease-out 160ms,
+      rotate 160ms ease-out,
+      scale 160ms ease-out,
+      opacity 160ms ease-out;
+  }
+  .icon-morph.is-on .im-tile :global(.im-icon path) {
+    transition:
+      translate 160ms ease-out,
+      rotate 160ms ease-out 160ms,
+      scale 160ms ease-out 160ms,
+      opacity 160ms ease-out 160ms;
+  }
+  .icon-morph.is-on .im-tile :global(.im-icon path:nth-child(1)) {
+    translate: 0 7px;
+    rotate: 45deg;
+  }
+  .icon-morph.is-on .im-tile :global(.im-icon path:nth-child(2)) {
+    opacity: 0;
+    scale: 0 1;
+  }
+  .icon-morph.is-on .im-tile :global(.im-icon path:nth-child(3)) {
+    translate: 0 -7px;
+    rotate: -45deg;
+  }
+</style>

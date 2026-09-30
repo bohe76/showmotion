@@ -1,0 +1,42 @@
+---
+// Shimmer Text 데모 — 흐린 글자 위로 강조색 띠가 왼쪽에서 오른쪽으로 훑고 지나간 뒤 잠시 쉬었다 반복한다
+// 배경을 글자 폭의 250%로 두고 위치를 100% → 0%로 옮기면 가운데 띠가 글자를 가로지른다
+---
+<div class="shimmer-text" data-demo-root aria-hidden="true">
+  <span class="sh-pill">
+    <span class="sh-word">ABC DEFGH</span>
+  </span>
+</div>
+
+<style>
+  .shimmer-text {
+    display: grid;
+    place-items: center;
+    container-type: inline-size;
+  }
+  .sh-pill {
+    padding: 0.3em 0.9em;
+    font-size: clamp(1.25rem, 8cqi, 2.75rem);
+    font-weight: 700;
+    line-height: 1.2;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+  }
+  .sh-word {
+    color: transparent;
+    background: linear-gradient(100deg, var(--muted) 40%, var(--accent) 50%, var(--muted) 60%) 100% 0 / 250% 100% no-repeat;
+    -webkit-background-clip: text;
+    background-clip: text;
+    animation: shimmer-text-sweep 3s ease-in-out infinite;
+  }
+  @keyframes shimmer-text-sweep {
+    from {
+      background-position: 100% 0;
+    }
+    60%,
+    to {
+      background-position: 0% 0;
+    }
+  }
+</style>

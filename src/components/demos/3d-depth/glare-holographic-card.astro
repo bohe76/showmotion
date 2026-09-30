@@ -1,0 +1,101 @@
+---
+// Glare / Holographic Card 데모 — 포인터 위치(--mx, --my)를 따라 카드 표면에 둥근 빛 반사가 움직이고, 카드가 그쪽으로 살짝 기운다
+// 비스듬한 무지개 띠 층은 포인터와 반대로 조금 밀려 보는 각도에 따라 빛이 흐르는 느낌을 준다
+// 포인터가 떠나면(.is-active 없음) 반사가 사라지고 카드가 평평해진다
+---
+<div class="glare-holographic-card" data-demo-root aria-hidden="true">
+  <div class="gh-view">
+    <div class="gh-card">
+      <span class="gh-mark">A</span>
+      <span class="gh-bar"></span>
+      <span class="gh-bar gh-bar--short"></span>
+      <span class="gh-holo"></span>
+      <span class="gh-glare"></span>
+    </div>
+  </div>
+</div>
+
+<style>
+  .glare-holographic-card {
+    overflow: hidden;
+  }
+  .gh-view {
+    display: grid;
+    place-items: center;
+    height: 100%;
+    perspective: 900px;
+  }
+  .gh-card {
+    position: relative;
+    display: grid;
+    align-content: center;
+    gap: 10px;
+    width: 40%;
+    aspect-ratio: 3 / 4;
+    padding: 0 10%;
+    overflow: hidden;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    transition: transform 500ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .gh-mark {
+    display: grid;
+    place-items: center;
+    width: 40%;
+    aspect-ratio: 1;
+    margin-bottom: 6px;
+    font-weight: 700;
+    color: var(--on-accent);
+    background: var(--accent);
+    border-radius: 6px;
+  }
+  .gh-bar {
+    height: 10px;
+    background: var(--ink);
+    border-radius: 2px;
+  }
+  .gh-bar--short {
+    width: 60%;
+    height: 8px;
+    background: var(--demo-muted);
+  }
+  .gh-holo,
+  .gh-glare {
+    position: absolute;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 300ms ease-out;
+  }
+  /* 무지개 띠 — 카드보다 넓은 층을 포인터 반대쪽으로 옮긴다(transform) */
+  .gh-holo {
+    inset: 0 -50%;
+    background: repeating-linear-gradient(
+      115deg,
+      transparent 0 8%,
+      color-mix(in srgb, var(--highlight) 70%, transparent) 14%,
+      transparent 20% 28%,
+      color-mix(in srgb, var(--accent) 30%, transparent) 34%,
+      transparent 40%
+    );
+    transform: translateX(calc((var(--mx, 0.5) - 0.5) * -30%));
+  }
+  .gh-glare {
+    inset: 0;
+    background: radial-gradient(
+      circle at calc(var(--mx, 0.5) * 100%) calc(var(--my, 0.5) * 100%),
+      color-mix(in srgb, var(--accent) 45%, transparent),
+      transparent 55%
+    );
+  }
+  .glare-holographic-card.is-active .gh-card {
+    transform: rotateX(calc((var(--my, 0.5) - 0.5) * 14deg)) rotateY(calc((0.5 - var(--mx, 0.5)) * 16deg));
+    transition-duration: 120ms;
+  }
+  .glare-holographic-card.is-active .gh-holo {
+    opacity: 0.55;
+  }
+  .glare-holographic-card.is-active .gh-glare {
+    opacity: 1;
+  }
+</style>

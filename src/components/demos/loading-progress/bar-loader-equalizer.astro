@@ -1,0 +1,40 @@
+---
+// Bar Loader (Equalizer) 데모 — 막대 다섯 개가 어긋난 박자로 늘었다 줄며 이퀄라이저처럼 출렁인다
+// 지연을 고르지 않게 두어 파도처럼 한 방향으로 흐르지 않게 한다 — 음수 지연이라 처음부터 어긋난 채로 시작한다
+const delays = [0, -0.45, -0.15, -0.6, -0.3];
+---
+<div class="bar-loader-equalizer" data-demo-root aria-hidden="true">
+  <div class="ble-bars">
+    {delays.map((delay) => <span class="ble-bar" style={`animation-delay: ${delay}s`}></span>)}
+  </div>
+</div>
+
+<style>
+  .bar-loader-equalizer {
+    display: grid;
+    place-items: center;
+  }
+  .ble-bars {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    height: 72px;
+  }
+  .ble-bar {
+    width: 10px;
+    height: 100%;
+    background: var(--accent);
+    border-radius: 5px;
+    transform: scaleY(0.3);
+    animation: bar-loader-equalizer-stretch 0.9s ease-in-out infinite;
+  }
+  @keyframes bar-loader-equalizer-stretch {
+    0%,
+    100% {
+      transform: scaleY(0.3);
+    }
+    50% {
+      transform: scaleY(1);
+    }
+  }
+</style>

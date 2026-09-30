@@ -1,0 +1,77 @@
+---
+// 폰트는 unicode-range 로 쪼개져 있어 페이지에 실제로 쓰인 글자 범위의 파일만 내려받는다
+// 웹폰트는 라틴(Noto Sans, 모든 페이지)과 한국어(Noto Sans KR, 한국어 페이지만)뿐이다. 일본어·중국어는 시스템 글꼴(global.css)
+// — 번역 뒤 한자 종류가 많아 조각을 50개 넘게 받고 올 때마다 페이지를 다시 배치했다(모바일 Lighthouse 57~58, 2026-09-30)
+// 한국어 글꼴 선언은 수백 줄이라 한국어 페이지에만 링크한다. 404 는 9개 언어 안내를 모두 실어 함께 링크한다(cjkFonts)
+import '@fontsource-variable/noto-sans';
+import krFonts from '../styles/fonts/kr.css?url';
+import '../styles/global.css';
+import { locales, localeMeta, pageHref, defaultLocale, siteName, type Locale } from '../i18n/locales';
+
+interface Props {
+  locale: Locale;
+  // 언어와 무관한 하위 경로 — canonical 과 hreflang 이 같은 페이지의 언어별 주소를 가리키게 한다
+  subpath: string;
+  title: string;
+  description: string;
+  // 구조화 데이터(schema.org JSON-LD) — 페이지 종류마다 SiteLayout 을 부르는 쪽에서 만든다
+  jsonLd?: object[];
+  // 404 처럼 검색에 올리지 않을 페이지: noindex, canonical·hreflang 없음
+  noindex?: boolean;
+  // 한국어 글꼴도 싣는다 — 여러 언어 글자를 한 페이지에 보여 주는 404 용
+  cjkFonts?: boolean;
+}
+
+const { locale, subpath, title, description, jsonLd = [], noindex = false, cjkFonts = false } = Astro.props;
+const fontLinks = cjkFonts || locale === 'ko' ? [krFonts] : [];
+const site = Astro.site!;
+const canonical = new URL(pageHref(locale, subpath), site).href;
+// 공유 미리보기 이미지 — 사이트 공통 한 장 (원본: scripts/og/og.html)
+const ogImage = new URL('/og-image.png', site).href;
+---
+<!doctype html>
+<html lang={localeMeta[locale].tag}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- 스크립트가 켜져 있음을 그리기 전에 알린다 — 스크립트가 나중에 보여 주는 검색창 자리를 미리 잡아 화면이 밀리지 않게 한다(CLS) -->
+    <script is:inline>document.documentElement.classList.add('js');</script>
+    <title>{title}</title>
+    {fontLinks.map((href) => <link rel="stylesheet" href={href} />)}
+    <meta name="description" content={description} />
+    {noindex ? (
+      <meta name="robots" content="noindex" />
+    ) : (
+      <>
+        <link rel="canonical" href={canonical} />
+        {locales.map((code) => (
+          <link rel="alternate" hreflang={localeMeta[code].tag} href={new URL(pageHref(code, subpath), site).href} />
+        ))}
+        <link rel="alternate" hreflang="x-default" href={new URL(pageHref(defaultLocale, subpath), site).href} />
+      </>
+    )}
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={siteName} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:locale" content={localeMeta[locale].og} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={siteName} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon-48.png" type="image/png" sizes="48x48" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="sitemap" href="/sitemap.xml" />
+    {/* < 를 이스케이프해 설명 문구 안의 "</script>" 같은 글자가 태그를 닫지 못하게 한다 */}
+    {jsonLd.map((data) => <script type="application/ld+json" set:html={JSON.stringify(data).replace(/</g, '\\u003c')} />)}
+  </head>
+  <body>
+    <slot />
+  </body>
+</html>

@@ -1,0 +1,77 @@
+---
+// Melting Text 데모 — .is-playing 이 붙으면 글자가 아래로 늘어지고 밑에서 물방울 줄기가 흘러내린다
+// 없으면 최종 상태(녹아 늘어진 모습). SVG 필터 대신 늘이기(scaleY)와 줄기 막대로 녹는 모습을 흉내 낸다
+const letters = [
+  { letter: 'A', drip: { x: 14, h: 0.5 } },
+  { letter: 'B', drip: { x: 22, h: 0.28 } },
+  { letter: 'C' },
+  { letter: 'D', drip: { x: 20, h: 0.62 } },
+  { letter: 'E', drip: { x: 64, h: 0.36 } },
+  { letter: 'F' },
+];
+---
+<div class="melting-text" data-demo-root aria-hidden="true">
+  <span class="mlt-word">
+    {letters.map(({ letter, drip }, i) => (
+      <span class="mlt-letter" style={`--i: ${i}`}>
+        {letter}
+        {drip && <span class="mlt-drip" style={`--x: ${drip.x}%; --h: ${drip.h}em`}></span>}
+      </span>
+    ))}
+  </span>
+</div>
+
+<style>
+  .melting-text {
+    display: grid;
+    place-items: center;
+    container-type: inline-size;
+  }
+  .mlt-word {
+    /* 녹아 늘어진 줄기가 들어갈 자리를 아래에 남긴다 */
+    padding-bottom: 0.5em;
+    font-size: clamp(2rem, 13cqi, 4.5rem);
+    font-weight: 900;
+    line-height: 1;
+    color: var(--ink);
+  }
+  .mlt-letter {
+    position: relative;
+    display: inline-block;
+    transform: scaleY(1.12) skewX(-3deg);
+    transform-origin: top;
+  }
+  .mlt-drip {
+    position: absolute;
+    top: 0.8em;
+    left: var(--x);
+    width: 0.12em;
+    height: var(--h);
+    background: var(--ink);
+    border-radius: 0 0 999px 999px;
+  }
+  .melting-text.is-playing .mlt-letter {
+    animation: melting-text-sag 1.6s ease-in both;
+    animation-delay: calc(var(--i) * 90ms);
+  }
+  .melting-text.is-playing .mlt-drip {
+    animation: melting-text-drip 1.8s ease-in both;
+    animation-delay: calc(400ms + var(--i) * 90ms);
+  }
+  @keyframes melting-text-sag {
+    from {
+      transform: none;
+    }
+    to {
+      transform: scaleY(1.12) skewX(-3deg);
+    }
+  }
+  @keyframes melting-text-drip {
+    from {
+      height: 0;
+    }
+    to {
+      height: var(--h);
+    }
+  }
+</style>

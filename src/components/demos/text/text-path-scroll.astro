@@ -1,0 +1,73 @@
+---
+// Text Path Scroll 데모 — 작은 페이지([data-scroller])를 스크롤한 만큼 곡선 위의 글자가 곡선을 따라 앞으로 미끄러진다
+// 곡선은 볼록한 언덕 하나다 — 오목한 골짜기가 있으면 곡선 위에 선 글자의 윗부분이 모여 서로 겹친다
+// 곡선 위 시작 위치(textPath startOffset)는 CSS 속성이 없어 --scroll 로 움직일 수 없다 — 아래 스크립트가 스크롤 진행도를 직접 계산해 넣는다
+---
+<div class="text-path-scroll" data-demo-root aria-hidden="true">
+  <div class="tps-page" data-scroller>
+    <div class="tps-sticky">
+      <svg class="tps-svg" viewBox="0 0 400 220">
+        <path id="text-path-scroll-curve" class="tps-curve" d="M -10 190 C 120 10, 280 10, 410 190" />
+        <text class="tps-text" font-size="34" font-weight="800">
+          <textPath href="#text-path-scroll-curve" startOffset="4%">ABC DEF GHI</textPath>
+        </text>
+      </svg>
+    </div>
+    <div class="tps-spacer"></div>
+  </div>
+</div>
+
+<script>
+  // 루트마다 스크롤 영역의 진행도(0~1)를 곡선 위 시작 위치(4% → 56%)로 옮긴다
+  // gallery.ts 의 --scroll 갱신과 같은 scroll 이벤트라 순서를 믿지 않고 여기서 직접 계산한다
+  document.querySelectorAll<HTMLElement>('.text-path-scroll').forEach((root) => {
+    const scroller = root.querySelector<HTMLElement>('[data-scroller]');
+    const textPath = root.querySelector('textPath');
+    if (!scroller || !textPath) return;
+    const update = () => {
+      const max = scroller.scrollHeight - scroller.clientHeight;
+      const progress = max > 0 ? scroller.scrollTop / max : 0;
+      textPath.setAttribute('startOffset', `${(4 + progress * 52).toFixed(2)}%`);
+    };
+    update();
+    scroller.addEventListener('scroll', update, { passive: true });
+  });
+</script>
+
+<style>
+  .text-path-scroll {
+    position: relative;
+  }
+  .tps-page {
+    position: absolute;
+    inset: 0;
+    overflow-y: auto;
+    /* 끝까지 스크롤해도 바깥 페이지로 넘어가지 않는다 */
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+  }
+  .tps-sticky {
+    position: sticky;
+    top: 0;
+    display: grid;
+    place-items: center;
+    height: 100%;
+  }
+  .tps-spacer {
+    height: 200%;
+  }
+  .tps-svg {
+    width: 84%;
+    height: auto;
+    overflow: visible;
+  }
+  .tps-curve {
+    fill: none;
+    stroke: var(--demo-muted);
+    stroke-width: 2;
+    stroke-dasharray: 4 6;
+  }
+  .tps-text {
+    fill: var(--ink);
+  }
+</style>

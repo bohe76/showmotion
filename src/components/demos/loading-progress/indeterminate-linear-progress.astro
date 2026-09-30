@@ -1,0 +1,38 @@
+---
+// Indeterminate Linear Progress 데모 — 끝을 모르는 작업이라 막대 한 조각이 트랙을 왼쪽에서 오른쪽으로 되풀이해 훑는다
+// 조각은 트랙 밖(왼쪽)에서 들어와 트랙 밖(오른쪽)으로 완전히 나간 뒤 다시 시작해 이음매가 보이지 않는다
+---
+<div class="indeterminate-linear-progress" data-demo-root aria-hidden="true">
+  <div class="ilp-track">
+    <div class="ilp-bar"></div>
+  </div>
+</div>
+
+<style>
+  .indeterminate-linear-progress {
+    display: grid;
+    place-items: center;
+  }
+  .ilp-track {
+    width: 64%;
+    height: 6px;
+    overflow: hidden;
+    background: var(--line);
+    border-radius: 999px;
+  }
+  .ilp-bar {
+    width: 36%;
+    height: 100%;
+    background: var(--accent);
+    border-radius: 999px;
+    animation: indeterminate-linear-progress-sweep 1.6s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+  }
+  @keyframes indeterminate-linear-progress-sweep {
+    from {
+      transform: translateX(-100%);
+    }
+    to {
+      transform: translateX(280%);
+    }
+  }
+</style>

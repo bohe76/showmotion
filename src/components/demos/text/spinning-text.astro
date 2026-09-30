@@ -1,0 +1,50 @@
+---
+// Spinning Text 데모 — 원 둘레에 글자를 고르게 세워 두고 원 전체를 천천히 한 바퀴씩 돌린다
+// 글자마다 --i 로 각도를 나눠 가운데에서 돌린 뒤 반지름만큼 위로 민다
+const letters = 'ABCDEFGHIJKLMNOP'.split('');
+---
+<div class="spinning-text" data-demo-root aria-hidden="true">
+  <div class="spt-ring" style={`--n: ${letters.length}`}>
+    {letters.map((letter, i) => <span class="spt-letter" style={`--i: ${i}`}>{letter}</span>)}
+    <span class="spt-dot"></span>
+  </div>
+</div>
+
+<style>
+  .spinning-text {
+    display: grid;
+    place-items: center;
+    container-type: inline-size;
+  }
+  .spt-ring {
+    position: relative;
+    width: 44cqi;
+    aspect-ratio: 1;
+    animation: spinning-text-turn 16s linear infinite;
+  }
+  .spt-letter {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    font-size: clamp(0.8rem, 5cqi, 1.6rem);
+    font-weight: 700;
+    line-height: 1;
+    color: var(--ink);
+    transform: translate(-50%, -50%) rotate(calc(var(--i) * 360deg / var(--n))) translateY(-18cqi);
+  }
+  .spt-dot {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 12cqi;
+    aspect-ratio: 1;
+    background: var(--accent);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+  }
+  @keyframes spinning-text-turn {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+</style>

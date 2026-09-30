@@ -1,0 +1,123 @@
+---
+// Bottom Sheet Slide-Up 데모 — .is-playing 이 붙으면 작은 화면 아래 가장자리에서 시트가 미끄러져 올라오고 뒤는 어둡게 가려진다
+// 클래스가 없으면 최종 상태(시트가 올라온 화면)
+---
+<div class="bottom-sheet" data-demo-root aria-hidden="true">
+  <div class="bsu-screen">
+    <div class="bsu-bar"></div>
+    <div class="bsu-hero">A</div>
+    <div class="bsu-line"></div>
+    <div class="bsu-line bsu-line--short"></div>
+    <div class="bsu-scrim"></div>
+    <div class="bsu-sheet">
+      <span class="bsu-handle"></span>
+      <span class="bsu-row"></span>
+      <span class="bsu-row"></span>
+      <span class="bsu-row bsu-row--short"></span>
+    </div>
+  </div>
+</div>
+
+<style>
+  .bottom-sheet {
+    display: grid;
+    place-items: center;
+  }
+  .bsu-screen {
+    position: relative;
+    display: grid;
+    align-content: start;
+    gap: 10px;
+    width: 42%;
+    height: 84%;
+    padding: 12px;
+    overflow: hidden;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+  }
+  .bsu-bar {
+    width: 50%;
+    height: 8px;
+    border-radius: 2px;
+    background: var(--ink);
+  }
+  .bsu-hero {
+    display: grid;
+    place-items: center;
+    aspect-ratio: 4 / 3;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--on-accent);
+    background: var(--accent);
+    border-radius: 4px;
+  }
+  .bsu-line {
+    height: 8px;
+    border-radius: 2px;
+    background: var(--demo-muted);
+  }
+  .bsu-line--short {
+    width: 60%;
+  }
+  /* 덮개 색은 토큰에 없어 어두운 반투명 값을 직접 쓴다 — 다크 모드에서도 어둡게 가린다 */
+  .bsu-scrim {
+    position: absolute;
+    inset: 0;
+    background: rgb(12 12 14 / 0.45);
+  }
+  .bsu-sheet {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    display: grid;
+    justify-items: start;
+    gap: 10px;
+    padding: 8px 12px 16px;
+    background: var(--surface);
+    border-radius: 10px 10px 0 0;
+  }
+  .bsu-handle {
+    justify-self: center;
+    width: 28px;
+    height: 4px;
+    margin-bottom: 4px;
+    border-radius: 2px;
+    background: var(--demo-muted);
+  }
+  .bsu-row {
+    width: 100%;
+    height: 10px;
+    border-radius: 2px;
+    background: var(--demo-muted);
+  }
+  .bsu-row:nth-child(2) {
+    background: var(--accent);
+  }
+  .bsu-row--short {
+    width: 60%;
+  }
+  .bottom-sheet.is-playing .bsu-scrim {
+    animation: bottom-sheet-slide-up-fade 400ms ease-out both;
+  }
+  .bottom-sheet.is-playing .bsu-sheet {
+    animation: bottom-sheet-slide-up-rise 450ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  @keyframes bottom-sheet-slide-up-fade {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  @keyframes bottom-sheet-slide-up-rise {
+    from {
+      transform: translateY(100%);
+    }
+    to {
+      transform: translateY(0);
+    }
+  }
+</style>

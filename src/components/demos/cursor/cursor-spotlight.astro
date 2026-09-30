@@ -1,0 +1,48 @@
+---
+// Cursor Spotlight 데모 — 포인터 위치(--px, --py)를 중심으로 둥근 빛이 내용을 비추고 나머지는 어둡게 가린다
+// 포인터가 없으면 가운데를 비춘다
+const letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L'];
+---
+<div class="cursor-spotlight" data-demo-root aria-hidden="true">
+  <ul class="cs-grid">
+    {letters.map((letter) => <li>{letter}</li>)}
+  </ul>
+  <div class="cs-shade"></div>
+</div>
+
+<style>
+  .cursor-spotlight {
+    position: relative;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+  }
+  .cs-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    width: 72%;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .cs-grid li {
+    display: grid;
+    place-items: center;
+    aspect-ratio: 1;
+    font-weight: 700;
+    color: var(--on-accent);
+    background: var(--accent);
+    border-radius: 4px;
+  }
+  .cs-shade {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(
+      circle at var(--px, 50%) var(--py, 50%),
+      transparent 0 56px,
+      rgb(12 12 14 / 0.86) 84px
+    );
+    pointer-events: none;
+  }
+</style>

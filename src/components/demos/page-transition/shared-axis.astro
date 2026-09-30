@@ -1,0 +1,116 @@
+---
+// Shared Axis 데모 (X축) — 누를 때마다(.is-on 토글) 두 페이지가 가로축을 따라 함께 움직인다: 앞으로 가면 A가 왼쪽으로 조금 밀려 사라지고 B가 오른쪽에서 들어오며, 되돌아가면 반대 방향
+// 이동 거리는 짧게, 사라지는 쪽은 빠르게 흐려지고 나타나는 쪽은 조금 늦게 짙어진다
+---
+<div class="shared-axis" data-demo-root aria-hidden="true">
+  <div class="sa-frame">
+    <div class="sa-page sa-page--a">
+      <span class="sa-bar"></span>
+      <span class="sa-hero">A</span>
+      <span class="sa-line"></span>
+      <span class="sa-line sa-line--short"></span>
+    </div>
+    <div class="sa-page sa-page--b">
+      <span class="sa-bar"></span>
+      <div class="sa-tiles">
+        <span class="sa-tile">B</span>
+        <span class="sa-tile"></span>
+      </div>
+      <span class="sa-line sa-line--short"></span>
+      <span class="sa-line"></span>
+    </div>
+  </div>
+</div>
+
+<style>
+  .shared-axis {
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+  }
+  .sa-frame {
+    position: relative;
+    width: 60%;
+    height: 80%;
+    overflow: hidden;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+  }
+  .sa-page {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    align-content: start;
+    gap: 10px;
+    padding: 12px;
+    background: var(--surface);
+  }
+  /* 보이는 쪽이 될 때 — 짧게 미끄러지며 조금 늦게 짙어진다 */
+  .sa-page--a,
+  .shared-axis.is-on .sa-page--b {
+    opacity: 1;
+    transform: translateX(0);
+    transition:
+      opacity 250ms ease-out 100ms,
+      transform 400ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  /* 숨는 쪽이 될 때 — 같은 축으로 밀려나며 빠르게 흐려진다 */
+  .sa-page--b,
+  .shared-axis.is-on .sa-page--a {
+    opacity: 0;
+    transition:
+      opacity 150ms ease-in,
+      transform 400ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .sa-page--b {
+    background: var(--stage);
+    transform: translateX(18%);
+  }
+  .shared-axis.is-on .sa-page--a {
+    transform: translateX(-18%);
+  }
+  .sa-bar {
+    width: 40%;
+    height: 8px;
+    border-radius: 2px;
+    background: var(--ink);
+  }
+  .sa-hero {
+    display: grid;
+    place-items: center;
+    aspect-ratio: 16 / 7;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--on-accent);
+    background: var(--accent);
+    border-radius: 4px;
+  }
+  .sa-tiles {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .sa-tile {
+    display: grid;
+    place-items: center;
+    aspect-ratio: 4 / 3;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--ink);
+    background: var(--demo-muted);
+    border-radius: 4px;
+  }
+  .sa-tile:first-child {
+    color: var(--on-accent);
+    background: var(--accent-strong);
+  }
+  .sa-line {
+    height: 8px;
+    border-radius: 2px;
+    background: var(--demo-muted);
+  }
+  .sa-line--short {
+    width: 60%;
+  }
+</style>

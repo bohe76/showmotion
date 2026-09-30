@@ -1,0 +1,56 @@
+---
+// Background Beams 데모 — 흐린 곡선 5개 위로 짧은 빛줄기가 차례로 지나간다
+// 빛줄기는 같은 곡선에 짧은 점선(dasharray)을 두고 dashoffset 을 옮긴다 — 작은 SVG 라 다시 칠하는 비용이 작다
+// pathLength=100 으로 곡선 길이를 맞춰 모든 빛줄기가 같은 규칙으로 움직인다
+const paths = [
+  ['M -20 140 C 120 150, 260 90, 420 -10', 0, 5.2],
+  ['M -20 200 C 100 190, 220 140, 420 110', 1.4, 6.4],
+  ['M -20 260 C 120 240, 180 120, 420 60', 2.6, 5.6],
+  ['M 40 320 C 120 220, 260 120, 420 20', 0.8, 7],
+  ['M -20 310 C 140 280, 240 190, 420 170', 3.4, 6],
+] as const;
+---
+<div class="background-beams" data-demo-root aria-hidden="true">
+  <svg viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice">
+    {paths.map(([d]) => <path class="bbm-track" d={d} />)}
+    {paths.map(([d, delay, duration]) => (
+      <path class="bbm-beam" d={d} pathLength="100" style={`animation-delay: ${delay}s; animation-duration: ${duration}s`} />
+    ))}
+  </svg>
+</div>
+
+<style>
+  .background-beams {
+    overflow: hidden;
+  }
+  .background-beams svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+  .bbm-track,
+  .bbm-beam {
+    fill: none;
+    stroke-linecap: round;
+  }
+  .bbm-track {
+    stroke: var(--demo-muted);
+    stroke-width: 1;
+  }
+  .bbm-beam {
+    stroke: var(--accent);
+    stroke-width: 2;
+    /* 빛줄기 하나(14) + 곡선보다 긴 틈 — 한 곡선에 빛줄기가 둘 보이지 않는다 */
+    stroke-dasharray: 14 200;
+    stroke-dashoffset: 14;
+    animation: background-beams-travel 6s ease-in infinite;
+  }
+  @keyframes background-beams-travel {
+    from {
+      stroke-dashoffset: 14;
+    }
+    to {
+      stroke-dashoffset: -100;
+    }
+  }
+</style>

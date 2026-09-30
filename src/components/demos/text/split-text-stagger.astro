@@ -1,0 +1,40 @@
+---
+// Split Text Stagger 데모 — .is-playing 이 붙으면 글자마다 --i 로 조금씩 늦게 올라오며 나타나고, 없으면 최종 상태(보임)
+const letters = 'ABCDEF'.split('');
+---
+<div class="split-text-stagger" data-demo-root aria-hidden="true">
+  <span class="sts-word">
+    {letters.map((letter, i) => <span class="sts-letter" style={`--i: ${i}`}>{letter}</span>)}
+  </span>
+</div>
+
+<style>
+  .split-text-stagger {
+    display: grid;
+    place-items: center;
+    container-type: inline-size;
+  }
+  .sts-word {
+    font-size: clamp(2rem, 13cqi, 4.5rem);
+    font-weight: 800;
+    line-height: 1.1;
+    color: var(--ink);
+  }
+  .sts-letter {
+    display: inline-block;
+  }
+  .split-text-stagger.is-playing .sts-letter {
+    animation: split-text-stagger-in 500ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation-delay: calc(var(--i) * 60ms);
+  }
+  @keyframes split-text-stagger-in {
+    from {
+      opacity: 0;
+      transform: translateY(0.5em);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+</style>

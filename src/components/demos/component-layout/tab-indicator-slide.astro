@@ -1,0 +1,76 @@
+---
+// Tab Indicator Slide 데모 — 누를 때마다(.is-on 토글) 밑줄이 탭 A에서 탭 C로 미끄러져 가고, 다시 누르면 A로 돌아온다
+// 밑줄 폭 = 탭 한 칸이라 translateX(200%) 가 정확히 두 칸이다
+const tabs = ['A', 'B', 'C'];
+---
+<div class="tab-indicator" data-demo-root aria-hidden="true">
+  <div class="ti-card">
+    <div class="ti-tabs">
+      {tabs.map((tab) => <span class="ti-tab">{tab}</span>)}
+      <span class="ti-indicator"></span>
+    </div>
+    <div class="ti-panel">
+      <span class="ti-line"></span>
+      <span class="ti-line ti-line--short"></span>
+    </div>
+  </div>
+</div>
+
+<style>
+  .tab-indicator {
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+  }
+  .ti-card {
+    width: 64%;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  .ti-tabs {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    border-bottom: 1px solid var(--line);
+  }
+  .ti-tab {
+    display: grid;
+    place-items: center;
+    padding: 10px 0;
+    font-weight: 700;
+    color: var(--muted);
+    transition: color 250ms ease-out;
+  }
+  .ti-indicator {
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    width: calc(100% / 3);
+    height: 3px;
+    background: var(--accent);
+    border-radius: 2px 2px 0 0;
+    transition: transform 350ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .ti-panel {
+    display: grid;
+    gap: 8px;
+    padding: 14px 12px;
+  }
+  .ti-line {
+    height: 8px;
+    border-radius: 2px;
+    background: var(--demo-muted);
+  }
+  .ti-line--short {
+    width: 60%;
+  }
+  .tab-indicator:not(.is-on) .ti-tab:nth-child(1),
+  .tab-indicator.is-on .ti-tab:nth-child(3) {
+    color: var(--ink);
+  }
+  .tab-indicator.is-on .ti-indicator {
+    transform: translateX(200%);
+  }
+</style>

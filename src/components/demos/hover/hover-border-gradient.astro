@@ -1,0 +1,61 @@
+---
+// Hover Border Gradient 데모 — 평소에는 테두리 한쪽에 빛 조각이 멈춰 있고, 마우스를 올리면(.is-active) 테두리를 따라 돌며 테두리 전체가 밝아진다
+---
+<div class="hover-border-gradient" data-demo-root aria-hidden="true">
+  <div class="hbg-pill">
+    <span class="hbg-arc"></span>
+    <span class="hbg-face">A</span>
+  </div>
+</div>
+
+<style>
+  .hover-border-gradient {
+    display: grid;
+    place-items: center;
+  }
+  .hbg-pill {
+    position: relative;
+    display: grid;
+    width: 44%;
+    aspect-ratio: 3 / 1;
+    padding: 3px;
+    overflow: hidden;
+    background: var(--line);
+    border-radius: 999px;
+    transition:
+      background-color 300ms ease-out,
+      box-shadow 300ms ease-out;
+  }
+  /* 알약보다 큰 정사각형을 돌린다 — 안쪽 면(.hbg-face)이 가려 테두리 두께만큼만 보인다 */
+  .hbg-arc {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 150%;
+    aspect-ratio: 1;
+    background: conic-gradient(var(--accent), transparent 20% 80%, var(--accent));
+    translate: -50% -50%;
+  }
+  .hbg-face {
+    position: relative;
+    display: grid;
+    place-items: center;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--ink);
+    background: var(--surface);
+    border-radius: 999px;
+  }
+  .hover-border-gradient.is-active .hbg-pill {
+    background: color-mix(in srgb, var(--accent) 40%, var(--line));
+    box-shadow: 0 0 18px color-mix(in srgb, var(--accent) 40%, transparent);
+  }
+  .hover-border-gradient.is-active .hbg-arc {
+    animation: hover-border-gradient-spin 2s linear infinite;
+  }
+  @keyframes hover-border-gradient-spin {
+    to {
+      rotate: 360deg;
+    }
+  }
+</style>

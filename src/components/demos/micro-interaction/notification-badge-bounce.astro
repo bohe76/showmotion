@@ -1,0 +1,117 @@
+---
+// Notification Badge Bounce 데모 — .is-playing 이 붙으면 종 위 숫자 배지가 톡 튀어나와 통통 튀고, 고리가 한 번 퍼진다(ping)
+// 없으면 최종 상태(배지가 붙어 있는 종)
+import Bell from '@lucide/astro/icons/bell';
+---
+<div class="notification-badge-bounce" data-demo-root aria-hidden="true">
+  <div class="nbb-bell">
+    <span class="nbb-body">
+      <Bell class="nbb-icon" aria-hidden="true" />
+    </span>
+    <span class="nbb-ping"></span>
+    <span class="nbb-badge">3</span>
+  </div>
+</div>
+
+<style>
+  .notification-badge-bounce {
+    display: grid;
+    place-items: center;
+    container-type: size;
+  }
+  .nbb-bell {
+    position: relative;
+    width: 22cqmin;
+    aspect-ratio: 1;
+  }
+  .nbb-body {
+    position: absolute;
+    inset: 0;
+    transform-origin: 50% 8%;
+  }
+  /* 아이콘은 Lucide 컴포넌트가 그리므로 :global 로 잡는다 */
+  .nbb-body :global(.nbb-icon) {
+    display: block;
+    width: 100%;
+    height: 100%;
+    color: var(--ink);
+  }
+  .nbb-badge,
+  .nbb-ping {
+    position: absolute;
+    top: -6%;
+    right: -6%;
+    width: 42%;
+    aspect-ratio: 1;
+    border-radius: 50%;
+  }
+  .nbb-badge {
+    display: grid;
+    place-items: center;
+    font-size: clamp(0.75rem, 4cqmin, 1.25rem);
+    font-weight: 700;
+    color: var(--on-accent);
+    background: var(--accent);
+    border: 3px solid var(--stage);
+  }
+  .nbb-ping {
+    background: var(--accent);
+    opacity: 0;
+  }
+  .notification-badge-bounce.is-playing .nbb-badge {
+    animation: notification-badge-bounce-pop 700ms linear 200ms both;
+  }
+  .notification-badge-bounce.is-playing .nbb-ping {
+    animation: notification-badge-bounce-ping 800ms ease-out 450ms forwards;
+  }
+  .notification-badge-bounce.is-playing .nbb-body {
+    animation: notification-badge-bounce-ring 500ms ease-in-out 200ms both;
+  }
+  /* 0 에서 커지며 튀어나와 두 번 통통 튄 뒤 멈춘다 */
+  @keyframes notification-badge-bounce-pop {
+    0% {
+      transform: scale(0);
+      animation-timing-function: cubic-bezier(0.2, 0.8, 0.4, 1);
+    }
+    35% {
+      transform: scale(1.25);
+      animation-timing-function: ease-in-out;
+    }
+    55% {
+      transform: scale(0.88);
+      animation-timing-function: ease-in-out;
+    }
+    75% {
+      transform: scale(1.06);
+      animation-timing-function: ease-in-out;
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
+  @keyframes notification-badge-bounce-ping {
+    0% {
+      opacity: 0.5;
+      transform: scale(1);
+    }
+    100% {
+      opacity: 0;
+      transform: scale(2.2);
+    }
+  }
+  @keyframes notification-badge-bounce-ring {
+    0%,
+    100% {
+      transform: rotate(0);
+    }
+    25% {
+      transform: rotate(-10deg);
+    }
+    50% {
+      transform: rotate(8deg);
+    }
+    75% {
+      transform: rotate(-4deg);
+    }
+  }
+</style>

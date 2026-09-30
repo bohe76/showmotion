@@ -1,0 +1,73 @@
+---
+// Text Replacement 데모 — .is-playing 이 붙으면 칸마다 옛 글자가 위로 빠지고 새 글자가 아래에서 올라온다(--i 로 차례)
+// 없으면 최종 상태(새 글자). 두 글자를 한 칸에 겹쳐 두어 칸 폭이 넓은 쪽에 맞춰지므로 바뀌는 동안 폭이 튀지 않는다
+const pairs = [
+  ['A', 'W'],
+  ['B', 'X'],
+  ['C', 'Y'],
+  ['D', 'Z'],
+];
+---
+<div class="text-replacement" data-demo-root aria-hidden="true">
+  <span class="tr-word">
+    {pairs.map(([from, to], i) => (
+      <span class="tr-cell" style={`--i: ${i}`}>
+        <span class="tr-old">{from}</span>
+        <span class="tr-new">{to}</span>
+      </span>
+    ))}
+  </span>
+</div>
+
+<style>
+  .text-replacement {
+    display: grid;
+    place-items: center;
+    container-type: inline-size;
+  }
+  .tr-word {
+    display: flex;
+    font-size: clamp(2.25rem, 15cqi, 5rem);
+    font-weight: 800;
+    line-height: 1.15;
+    color: var(--ink);
+  }
+  .tr-cell {
+    display: grid;
+    justify-items: center;
+    overflow: hidden;
+  }
+  .tr-cell > span {
+    grid-area: 1 / 1;
+  }
+  .tr-old {
+    transform: translateY(-110%);
+  }
+  .tr-new {
+    color: var(--accent);
+  }
+  .text-replacement.is-playing .tr-old {
+    animation: text-replacement-out 450ms cubic-bezier(0.65, 0, 0.35, 1) both;
+    animation-delay: calc(500ms + var(--i) * 80ms);
+  }
+  .text-replacement.is-playing .tr-new {
+    animation: text-replacement-in 450ms cubic-bezier(0.65, 0, 0.35, 1) both;
+    animation-delay: calc(500ms + var(--i) * 80ms);
+  }
+  @keyframes text-replacement-out {
+    from {
+      transform: translateY(0);
+    }
+    to {
+      transform: translateY(-110%);
+    }
+  }
+  @keyframes text-replacement-in {
+    from {
+      transform: translateY(110%);
+    }
+    to {
+      transform: translateY(0);
+    }
+  }
+</style>

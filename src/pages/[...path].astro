@@ -1,0 +1,17 @@
+---
+import ListPage from '../components/ListPage.astro';
+import MotionPage from '../components/MotionPage.astro';
+import { sitePages } from '../data/pages';
+import type { Locale } from '../i18n/locales';
+import type { CategoryId } from '../data/categories';
+import type { Motion } from '../data/types';
+
+// 모든 페이지를 한 파일에서 만든다 — /{lang}/ 과 /{category}/ 가 같은 깊이의 동적 경로라 따로 두면 충돌한다
+// 전체 1 + 카테고리 15 + 모션 상세 × 9개 언어 (목록: src/data/pages.ts)
+export function getStaticPaths() {
+  return sitePages().map((page) => ({ params: { path: page.path }, props: page }));
+}
+
+const page = Astro.props as { locale: Locale; category?: CategoryId; motion?: Motion };
+---
+{page.motion ? <MotionPage locale={page.locale} motion={page.motion} /> : <ListPage locale={page.locale} category={page.category} />}

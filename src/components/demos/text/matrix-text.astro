@@ -1,0 +1,46 @@
+---
+// Matrix Text 데모 — 글자 기둥이 서로 다른 속도로 위에서 아래로 떨어진다. 아래쪽(앞머리) 글자가 가장 진하고 꼬리는 흐려진다
+// 기둥 하나는 줄바꿈으로 이은 글자 한 덩어리 — 노드 수를 줄인다. 시작 지연을 음수로 줘 처음부터 흩어져 있게 한다
+const pool = 'QWERTYUIOPASDFGHJKLZXCVBNM';
+const columns = Array.from({ length: 8 }, (_, i) => ({
+  text: Array.from({ length: 7 }, (_, j) => pool[(i * 5 + j * 3) % pool.length]).join('\n'),
+  duration: 3 + ((i * 7) % 5) * 0.6,
+  offset: -((i * 11) % 8) * 0.45,
+}));
+---
+<div class="matrix-text" data-demo-root aria-hidden="true">
+  {columns.map((col, i) => (
+    <span class="mx-col" style={`--i: ${i}; --d: ${col.duration}s; --o: ${col.offset}s`}>{col.text}</span>
+  ))}
+</div>
+
+<style>
+  .matrix-text {
+    position: relative;
+    overflow: hidden;
+    /* 기둥이 스테이지 높이(cqh)만큼 떨어지도록 루트를 크기 기준으로 삼는다 */
+    container-type: size;
+    /* 아래 구석(안내·버튼)에 닿기 전에 흐려져 사라지게 한다 */
+    mask-image: linear-gradient(to bottom, #000 72%, transparent 88%);
+  }
+  .mx-col {
+    position: absolute;
+    top: 0;
+    left: calc(8% + var(--i) * 11.5%);
+    font-size: clamp(0.85rem, 4.5cqi, 1.6rem);
+    font-weight: 700;
+    line-height: 1.15;
+    white-space: pre;
+    color: var(--accent);
+    mask-image: linear-gradient(to bottom, transparent, #000 85%);
+    animation: matrix-text-fall var(--d) linear var(--o) infinite;
+  }
+  @keyframes matrix-text-fall {
+    from {
+      transform: translateY(-100%);
+    }
+    to {
+      transform: translateY(100cqh);
+    }
+  }
+</style>

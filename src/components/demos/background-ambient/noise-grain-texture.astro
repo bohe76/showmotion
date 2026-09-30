@@ -1,0 +1,73 @@
+---
+// Noise / Grain Texture 데모 — 도형 위에 고운 알갱이 층을 덮고, 그 층을 작은 폭으로 뚝뚝 옮겨 필름 그레인처럼 깜빡이게 한다
+// 알갱이는 SVG 난류 필터로 한 번만 그리고(색은 --ink), 움직임은 층의 transform(steps)뿐이다 — 매 프레임 다시 만들지 않는다
+---
+<div class="noise-grain-texture" data-demo-root aria-hidden="true">
+  <span class="ng-disc"></span>
+  <span class="ng-block"></span>
+  <svg class="ng-grain">
+    <filter id="noise-grain-texture-filter" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" stitchTiles="stitch" result="noise" />
+      <!-- 난류의 빨강 값으로 투명도를 만들어 점만 남긴다 -->
+      <feColorMatrix in="noise" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  1.6 0 0 0 -0.62" result="grain" />
+      <feFlood class="ng-flood" result="tint" />
+      <feComposite in="tint" in2="grain" operator="in" />
+    </filter>
+    <rect width="100%" height="100%" filter="url(#noise-grain-texture-filter)" />
+  </svg>
+</div>
+
+<style>
+  .noise-grain-texture {
+    position: relative;
+    overflow: hidden;
+  }
+  .ng-disc {
+    position: absolute;
+    top: 18%;
+    left: 22%;
+    width: 38%;
+    aspect-ratio: 1;
+    background: var(--accent);
+    border-radius: 50%;
+  }
+  .ng-block {
+    position: absolute;
+    top: 38%;
+    left: 46%;
+    width: 34%;
+    aspect-ratio: 4 / 3;
+    background: var(--highlight);
+    border-radius: 8px;
+  }
+  .ng-grain {
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    opacity: 0.4;
+    pointer-events: none;
+    animation: noise-grain-texture-jitter 0.8s steps(1) infinite;
+  }
+  .ng-flood {
+    flood-color: var(--ink);
+  }
+  @keyframes noise-grain-texture-jitter {
+    0% {
+      transform: translate(0, 0);
+    }
+    20% {
+      transform: translate(-6%, 4%);
+    }
+    40% {
+      transform: translate(5%, -7%);
+    }
+    60% {
+      transform: translate(-3%, -5%);
+    }
+    80% {
+      transform: translate(7%, 3%);
+    }
+  }
+</style>

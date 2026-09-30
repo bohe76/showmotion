@@ -1,0 +1,60 @@
+---
+// Curl 데모 — 마우스를 올리면(.is-active) 카드의 오른쪽 아래 모서리가 종이처럼 접혀 올라간다
+---
+<div class="curl" data-demo-root aria-hidden="true">
+  <div class="cu-card">
+    <span class="cu-letter">A</span>
+    <span class="cu-bar"></span>
+    <span class="cu-bar cu-bar--short"></span>
+    <span class="cu-flap"></span>
+  </div>
+</div>
+
+<style>
+  .curl {
+    display: grid;
+    place-items: center;
+  }
+  .cu-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 44%;
+    aspect-ratio: 4 / 3;
+    padding: 7%;
+    background: var(--accent);
+    border-radius: 6px;
+  }
+  .cu-letter {
+    margin-bottom: auto;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--on-accent);
+  }
+  .cu-bar {
+    width: 70%;
+    height: 8px;
+    background: var(--on-accent);
+    border-radius: 4px;
+    opacity: 0.5;
+  }
+  .cu-bar--short {
+    width: 45%;
+  }
+  /* 대각선으로 반씩 칠한 사각형 — 바깥 반은 배경색(떨어져 나간 모서리), 안쪽 반은 접힌 뒷면 */
+  .cu-flap {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    width: 0;
+    aspect-ratio: 1;
+    background: linear-gradient(315deg, var(--stage) 50%, var(--highlight) 50%);
+    border-top-left-radius: 2px;
+    box-shadow: -2px -2px 4px rgb(0 0 0 / 0.18);
+    transition: width 300ms ease-out;
+  }
+  .curl.is-active .cu-flap {
+    width: 32%;
+  }
+</style>

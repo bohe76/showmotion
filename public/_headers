@@ -1,0 +1,4 @@
+# Cloudflare Pages 응답 헤더 — /_astro/ 파일은 이름에 내용 해시가 붙어 바뀌면 이름도 바뀌므로 1년 캐시한다
+# HTML·검색 색인(search-index/*.json)은 해시가 없어 Pages 기본값(매번 재확인)을 그대로 쓴다
+/_astro/*
+  Cache-Control: public, max-age=31536000, immutable

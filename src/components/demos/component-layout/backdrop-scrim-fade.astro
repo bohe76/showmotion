@@ -1,0 +1,102 @@
+---
+// Backdrop Scrim Fade 데모 — .is-playing 이 붙으면 작은 페이지 위로 반투명한 어두운 막이 천천히 덮이고, 그 위에 패널이 뜬다
+// 클래스가 없으면 최종 상태(막이 덮인 페이지)
+---
+<div class="backdrop-scrim" data-demo-root aria-hidden="true">
+  <div class="bs-page">
+    <div class="bs-bar"></div>
+    <div class="bs-hero">A</div>
+    <div class="bs-line"></div>
+    <div class="bs-line bs-line--short"></div>
+    <div class="bs-scrim"></div>
+    <div class="bs-panel">
+      <span class="bs-panel-line"></span>
+      <span class="bs-panel-line bs-panel-line--short"></span>
+    </div>
+  </div>
+</div>
+
+<style>
+  .backdrop-scrim {
+    display: grid;
+    place-items: center;
+  }
+  .bs-page {
+    position: relative;
+    display: grid;
+    align-content: start;
+    gap: 10px;
+    width: 62%;
+    height: 80%;
+    padding: 12px;
+    overflow: hidden;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+  }
+  .bs-bar {
+    width: 40%;
+    height: 8px;
+    border-radius: 2px;
+    background: var(--ink);
+  }
+  .bs-hero {
+    display: grid;
+    place-items: center;
+    aspect-ratio: 16 / 7;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--on-accent);
+    background: var(--accent);
+    border-radius: 4px;
+  }
+  .bs-line {
+    height: 8px;
+    border-radius: 2px;
+    background: var(--demo-muted);
+  }
+  .bs-line--short {
+    width: 60%;
+  }
+  /* 덮개 색은 토큰에 없어 cursor-spotlight 처럼 어두운 반투명 값을 직접 쓴다 — 다크 모드에서도 어둡게 가린다 */
+  .bs-scrim {
+    position: absolute;
+    inset: 0;
+    background: rgb(12 12 14 / 0.5);
+  }
+  .bs-panel {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    display: grid;
+    gap: 8px;
+    width: 56%;
+    padding: 12px;
+    background: var(--surface);
+    border-radius: 6px;
+    transform: translate(-50%, -50%);
+  }
+  .bs-panel-line {
+    height: 8px;
+    border-radius: 2px;
+    background: var(--ink);
+  }
+  .bs-panel-line--short {
+    width: 55%;
+    background: var(--demo-muted);
+  }
+  .backdrop-scrim.is-playing .bs-scrim {
+    animation: backdrop-scrim-fade-in 600ms ease-out both;
+  }
+  .backdrop-scrim.is-playing .bs-panel {
+    animation: backdrop-scrim-fade-in 200ms ease-out 300ms both;
+  }
+  @keyframes backdrop-scrim-fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+</style>

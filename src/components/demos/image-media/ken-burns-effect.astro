@@ -1,0 +1,156 @@
+---
+// Ken Burns Effect 데모 — 사진 3장 슬라이드쇼. 사진마다 보이는 동안 한 방향으로만 천천히 확대·이동하고, 다음 사진으로 교차 전환한다 (반복)
+// 한 주기 18s = 사진당 6s. 사진은 7s 동안 보이고(앞뒤 1s 는 교차 전환), 나머지는 투명하게 쉰다
+// 이동량은 확대로 생긴 여유보다 작게 둔다 — 여유 = (배율 - 1) / 2, 이동 = 배율 × translate. 넘으면 액자 가장자리가 빈다
+---
+<div class="ken-burns-effect" data-demo-root aria-hidden="true">
+  <div class="kb-frame">
+    <!-- 사진 1: 해와 언덕 — 확대하며 왼쪽 위로 -->
+    <div class="kb-photo kb-photo--1">
+      <span class="kb-sun"></span>
+      <span class="kb-hill kb-hill-far"></span>
+      <span class="kb-hill"></span>
+    </div>
+    <!-- 사진 2: 건물 줄 — 축소하며 오른쪽으로 -->
+    <div class="kb-photo kb-photo--2">
+      <span class="kb-moon"></span>
+      <span class="kb-block" style="left: 8%; height: 46%"></span>
+      <span class="kb-block" style="left: 26%; height: 64%"></span>
+      <span class="kb-block" style="left: 44%; height: 38%"></span>
+      <span class="kb-block" style="left: 62%; height: 72%"></span>
+      <span class="kb-block" style="left: 80%; height: 52%"></span>
+    </div>
+    <!-- 사진 3: 바다 — 오른쪽으로 옆 이동 -->
+    <div class="kb-photo kb-photo--3">
+      <span class="kb-sea"></span>
+      <span class="kb-wave" style="left: 6%; bottom: 30%"></span>
+      <span class="kb-wave" style="left: 46%; bottom: 20%"></span>
+      <span class="kb-wave" style="left: 24%; bottom: 8%"></span>
+    </div>
+  </div>
+</div>
+
+<style>
+  .ken-burns-effect {
+    display: grid;
+    place-items: center;
+  }
+  .kb-frame {
+    position: relative;
+    width: 60%;
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    background: var(--stage);
+    border-radius: 6px;
+  }
+  .kb-photo {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    opacity: 0;
+    animation: ken-burns-effect-show 18s linear infinite both;
+  }
+  /* 사진마다 시작·끝 배율(--s0 → --s1)과 이동(--x0,--y0 → --x1,--y1) */
+  .kb-photo--1 {
+    --s0: 1.05;
+    --x0: 2%;
+    --y0: 1%;
+    --s1: 1.25;
+    --x1: -5%;
+    --y1: -3%;
+    background: var(--highlight);
+    /* 음수 지연: 페이지를 열자마자 첫 사진이 이미 보이는 상태로 시작한다 */
+    animation-delay: -1s;
+  }
+  .kb-photo--2 {
+    --s0: 1.25;
+    --x0: -4%;
+    --y0: 2%;
+    --s1: 1.05;
+    --x1: 2%;
+    --y1: -1%;
+    background: var(--demo-muted);
+    animation-delay: 5s;
+  }
+  .kb-photo--3 {
+    --s0: 1.15;
+    --x0: -5%;
+    --y0: 0%;
+    --s1: 1.2;
+    --x1: 5%;
+    --y1: 0%;
+    background: var(--highlight);
+    animation-delay: 11s;
+  }
+  .kb-sun {
+    position: absolute;
+    top: 18%;
+    left: 62%;
+    width: 18%;
+    aspect-ratio: 1;
+    background: var(--accent);
+    border-radius: 50%;
+  }
+  .kb-hill {
+    position: absolute;
+    bottom: -30%;
+    left: -10%;
+    width: 80%;
+    aspect-ratio: 1;
+    background: var(--accent-strong);
+    border-radius: 50%;
+  }
+  .kb-hill-far {
+    left: 40%;
+    bottom: -45%;
+    /* 먼 언덕은 연하게 — 해(--accent)와 같은 색이면 두 도형이 붙어 보인다 */
+    background: color-mix(in srgb, var(--accent) 50%, var(--highlight));
+  }
+  .kb-moon {
+    position: absolute;
+    top: 14%;
+    left: 14%;
+    width: 14%;
+    aspect-ratio: 1;
+    background: var(--surface);
+    border-radius: 50%;
+  }
+  .kb-block {
+    position: absolute;
+    bottom: 0;
+    width: 14%;
+    background: var(--ink);
+    border-radius: 2px 2px 0 0;
+  }
+  .kb-sea {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    height: 48%;
+    background: var(--accent);
+  }
+  .kb-wave {
+    position: absolute;
+    width: 30%;
+    height: 5%;
+    background: var(--highlight);
+    border-radius: 999px;
+  }
+  /* 0~5.6%(1s) 나타남 → 33.3%(6s)까지 보임 → 38.9%(7s)까지 사라짐. 확대·이동은 보이는 7s 동안 한 방향으로만 */
+  @keyframes ken-burns-effect-show {
+    0% {
+      opacity: 0;
+      transform: scale(var(--s0)) translate(var(--x0), var(--y0));
+    }
+    5.6%,
+    33.3% {
+      opacity: 1;
+    }
+    38.9%,
+    100% {
+      opacity: 0;
+      transform: scale(var(--s1)) translate(var(--x1), var(--y1));
+    }
+  }
+</style>

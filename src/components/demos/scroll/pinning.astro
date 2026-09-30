@@ -1,0 +1,116 @@
+---
+// Pinning 데모 — 왼쪽 패널은 제자리에 고정되고 오른쪽 단계들이 스크롤되어 지나간다, 단계가 바뀌면 패널 글자도 바뀐다
+// 단계 높이 80cqh × 3 + 끝 40cqh → 둘째·셋째 단계가 화면 가운데에 닿는 때가 --scroll 약 0.17·0.61
+const slides = [
+  { letter: 'A', at: -1 },
+  { letter: 'B', at: 0.17 },
+  { letter: 'C', at: 0.61 },
+];
+const steps = ['A', 'B', 'C'];
+---
+<div class="pinning" data-demo-root aria-hidden="true">
+  <div class="pn-page" data-scroller>
+    <div class="pn-aside">
+      <div class="pn-panel">
+        {slides.map((slide) => <span class="pn-slide" style={`--at: ${slide.at}`}>{slide.letter}</span>)}
+      </div>
+    </div>
+    <div class="pn-steps">
+      {steps.map((letter) => (
+        <div class="pn-step">
+          <span class="pn-tag">{letter}</span>
+          <div class="pn-line"></div>
+          <div class="pn-line pn-line--short"></div>
+        </div>
+      ))}
+    </div>
+    <div class="pn-outro">
+      <div class="pn-line"></div>
+      <div class="pn-line pn-line--short"></div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .pinning {
+    display: grid;
+    /* 행을 스테이지 높이로 묶어야 안쪽 페이지가 넘치지 않고 스크롤된다 */
+    grid-template-rows: minmax(0, 1fr);
+    padding: 14px 14% 0;
+  }
+  .pn-page {
+    display: grid;
+    grid-template-columns: 44% 1fr;
+    column-gap: 14px;
+    padding: 0 14px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+    /* 단계 높이를 페이지 높이(cqh) 기준으로 잡는다 */
+    container-type: size;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-bottom: 0;
+    border-radius: 6px 6px 0 0;
+  }
+  .pn-panel {
+    position: sticky;
+    top: 12px;
+    height: calc(100cqh - 24px);
+    margin-top: 12px;
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  .pn-slide {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--on-accent);
+    background: var(--accent);
+    /* 자기 단계에 닿으면 불투명도가 0→1 로 넘어가고, 전환으로 부드럽게 바뀐다 */
+    opacity: clamp(0, (var(--scroll, 0) - var(--at)) * 60, 1);
+    transition: opacity 200ms ease;
+  }
+  .pn-slide:nth-child(2) {
+    color: var(--surface);
+    background: var(--ink);
+  }
+  .pn-slide:nth-child(3) {
+    background: var(--accent-strong);
+  }
+  .pn-step {
+    display: grid;
+    align-content: center;
+    gap: 10px;
+    height: 80cqh;
+  }
+  .pn-tag {
+    display: grid;
+    place-items: center;
+    width: 26px;
+    height: 26px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--ink);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+  }
+  .pn-line {
+    height: 8px;
+    border-radius: 2px;
+    background: var(--demo-muted);
+  }
+  .pn-line--short {
+    width: 62%;
+  }
+  .pn-outro {
+    grid-column: 1 / -1;
+    display: grid;
+    align-content: center;
+    gap: 10px;
+    height: 40cqh;
+  }
+</style>

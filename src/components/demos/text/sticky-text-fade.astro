@@ -1,0 +1,61 @@
+---
+// Sticky Text Fade 데모 — 작은 페이지([data-scroller])를 스크롤하는 동안 글 묶음은 제자리에 고정되고, 진행도(--scroll)에 따라 줄이 하나씩 나타났다 사라진다
+// 줄마다 보이는 구간 [--a, --b] 를 두고, 구간 앞뒤로 짧게 흐려진다 (불투명도 = clamp(0, min((s − a)×12 + 1, (b − s)×12 + 1), 1))
+const lines = [
+  { text: 'ABC DEF', a: -1, b: 0.28 },
+  { text: 'GHI JKL', a: 0.36, b: 0.62 },
+  { text: 'MNO PQR', a: 0.72, b: 2 },
+];
+---
+<div class="sticky-text-fade" data-demo-root aria-hidden="true">
+  <div class="stf-page" data-scroller>
+    <div class="stf-sticky">
+      <div class="stf-stack">
+        {lines.map(({ text, a, b }) => (
+          <span class="stf-line" style={`--a: ${a}; --b: ${b}`}>{text}</span>
+        ))}
+      </div>
+    </div>
+    <div class="stf-spacer"></div>
+  </div>
+</div>
+
+<style>
+  .sticky-text-fade {
+    position: relative;
+    container-type: inline-size;
+  }
+  .stf-page {
+    position: absolute;
+    inset: 0;
+    overflow-y: auto;
+    /* 끝까지 스크롤해도 바깥 페이지로 넘어가지 않는다 */
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+  }
+  .stf-sticky {
+    position: sticky;
+    top: 0;
+    display: grid;
+    place-items: center;
+    height: 100%;
+  }
+  .stf-spacer {
+    height: 200%;
+  }
+  .stf-stack {
+    display: grid;
+    font-size: clamp(1.75rem, 11cqi, 4rem);
+    font-weight: 800;
+    line-height: 1.1;
+    color: var(--ink);
+  }
+  .stf-line {
+    grid-area: 1 / 1;
+    text-align: center;
+    opacity: clamp(0, min((var(--scroll, 0) - var(--a)) * 12 + 1, (var(--b) - var(--scroll, 0)) * 12 + 1), 1);
+  }
+  .stf-line:nth-child(2) {
+    color: var(--accent);
+  }
+</style>

@@ -1,0 +1,79 @@
+---
+// Pulse Placeholder 데모 — 카드 안의 회색 자리 블록들이 함께 천천히 옅어졌다 돌아오기를 반복한다 (카드 바탕은 그대로)
+---
+<div class="pulse-placeholder" data-demo-root aria-hidden="true">
+  <div class="pp-card">
+    <div class="pp-head">
+      <span class="pp-shape pp-avatar"></span>
+      <div class="pp-lines">
+        <span class="pp-shape pp-line pp-line--title"></span>
+        <span class="pp-shape pp-line pp-line--short"></span>
+      </div>
+    </div>
+    <span class="pp-shape pp-media"></span>
+    <span class="pp-shape pp-line"></span>
+    <span class="pp-shape pp-line pp-line--mid"></span>
+  </div>
+</div>
+
+<style>
+  .pulse-placeholder {
+    display: grid;
+    place-items: center;
+  }
+  .pp-card {
+    display: grid;
+    gap: 10px;
+    width: 58%;
+    padding: 14px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+  }
+  .pp-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .pp-lines {
+    display: grid;
+    flex: 1;
+    gap: 6px;
+  }
+  .pp-shape {
+    background: var(--demo-muted);
+    border-radius: 3px;
+    animation: pulse-placeholder-fade 1.8s ease-in-out infinite;
+  }
+  .pp-avatar {
+    flex: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+  }
+  .pp-line {
+    height: 8px;
+  }
+  .pp-line--title {
+    width: 70%;
+    height: 10px;
+  }
+  .pp-line--short {
+    width: 45%;
+  }
+  .pp-line--mid {
+    width: 75%;
+  }
+  .pp-media {
+    aspect-ratio: 16 / 7;
+  }
+  @keyframes pulse-placeholder-fade {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.4;
+    }
+  }
+</style>

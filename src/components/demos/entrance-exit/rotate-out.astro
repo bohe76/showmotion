@@ -1,0 +1,42 @@
+---
+// Rotate Out 데모 — 평소에는 보이는 처음 상태, .is-playing 이 붙으면 가운데를 축으로 반 바퀴 넘게 돌며 사라진다(forwards)
+---
+<div class="rotate-out" data-demo-root aria-hidden="true">
+  <div class="rto-block">A</div>
+</div>
+
+<style>
+  .rotate-out {
+    display: grid;
+    place-items: center;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    container-type: inline-size;
+  }
+  .rto-block {
+    display: grid;
+    place-items: center;
+    width: 30%;
+    aspect-ratio: 1;
+    border-radius: 6px;
+    background: var(--accent);
+    color: var(--on-accent);
+    font-size: 12cqw;
+    font-weight: 700;
+    line-height: 1;
+  }
+  .rotate-out.is-playing .rto-block {
+    animation: rotate-out-center 900ms ease-in forwards;
+  }
+  @keyframes rotate-out-center {
+    from {
+      opacity: 1;
+      transform: rotate(0);
+    }
+    to {
+      opacity: 0;
+      transform: rotate(200deg);
+    }
+  }
+</style>

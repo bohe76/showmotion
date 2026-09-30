@@ -1,0 +1,38 @@
+---
+// Magnetic Filings 데모 — 짧은 선 격자가 저마다 포인터(--mx, --my) 쪽을 향해 돈다. 자석 둘레의 쇳가루처럼 보인다
+// 포인터가 없으면 모두 가운데를 향한다
+const cols = 7;
+const rows = 5;
+const filings = Array.from({ length: cols * rows }, (_, i) => ({
+  x: 0.1 + ((i % cols) * 0.8) / (cols - 1),
+  y: 0.12 + (Math.floor(i / cols) * 0.76) / (rows - 1),
+}));
+---
+<div class="magnetic-filings" data-demo-root aria-hidden="true">
+  {filings.map(({ x, y }) => <span style={`--x: ${x.toFixed(4)}; --y: ${y.toFixed(4)}`} />)}
+</div>
+
+<style>
+  .magnetic-filings {
+    position: relative;
+    overflow: hidden;
+    /* 선마다 포인터까지의 각도를 스테이지 실제 크기(cqw)로 구해야 가로세로 거리가 맞게 향한다 */
+    container-type: size;
+  }
+  .magnetic-filings span {
+    position: absolute;
+    top: calc(var(--y) * 100%);
+    left: calc(var(--x) * 100%);
+    width: clamp(14px, 6%, 28px);
+    height: 3px;
+    background: var(--ink);
+    border-radius: 2px;
+    translate: -50% -50%;
+    /* 각도가 ±180° 경계를 넘을 때 한 바퀴 도는 것을 막으려고 전환 없이 바로 따라간다 */
+    /* 두 인수는 같은 단위로 준다 — Firefox 는 단위가 다르면(cqh·cqw) 선언을 버린다. 스테이지는 늘 4:3(DemoStage)이라 높이 = 75cqw */
+    rotate: atan2(
+      calc((var(--my, 0.5) - var(--y)) * 75cqw),
+      calc((var(--mx, 0.5) - var(--x)) * 100cqw)
+    );
+  }
+</style>

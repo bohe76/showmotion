@@ -1,0 +1,102 @@
+---
+// Crossfade Page Transition 데모 — 누를 때마다(.is-on 토글) 같은 자리에서 페이지 A가 옅어지는 동안 페이지 B가 동시에 짙어지며 바뀐다
+---
+<div class="crossfade-page" data-demo-root aria-hidden="true">
+  <div class="cf-frame">
+    <div class="cf-page cf-page--a">
+      <span class="cf-bar"></span>
+      <span class="cf-hero">A</span>
+      <span class="cf-line"></span>
+      <span class="cf-line cf-line--short"></span>
+    </div>
+    <div class="cf-page cf-page--b">
+      <span class="cf-bar"></span>
+      <div class="cf-tiles">
+        <span class="cf-tile">B</span>
+        <span class="cf-tile"></span>
+      </div>
+      <span class="cf-line cf-line--short"></span>
+      <span class="cf-line"></span>
+    </div>
+  </div>
+</div>
+
+<style>
+  .crossfade-page {
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+  }
+  .cf-frame {
+    position: relative;
+    width: 60%;
+    height: 80%;
+    overflow: hidden;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+  }
+  .cf-page {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    align-content: start;
+    gap: 10px;
+    padding: 12px;
+    background: var(--surface);
+    transition: opacity 500ms ease-in-out;
+  }
+  .cf-page--b {
+    background: var(--stage);
+    opacity: 0;
+  }
+  .cf-bar {
+    width: 40%;
+    height: 8px;
+    border-radius: 2px;
+    background: var(--ink);
+  }
+  .cf-hero {
+    display: grid;
+    place-items: center;
+    aspect-ratio: 16 / 7;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--on-accent);
+    background: var(--accent);
+    border-radius: 4px;
+  }
+  .cf-tiles {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .cf-tile {
+    display: grid;
+    place-items: center;
+    aspect-ratio: 4 / 3;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--ink);
+    background: var(--demo-muted);
+    border-radius: 4px;
+  }
+  .cf-tile:first-child {
+    color: var(--on-accent);
+    background: var(--accent-strong);
+  }
+  .cf-line {
+    height: 8px;
+    border-radius: 2px;
+    background: var(--demo-muted);
+  }
+  .cf-line--short {
+    width: 60%;
+  }
+  .crossfade-page.is-on .cf-page--a {
+    opacity: 0;
+  }
+  .crossfade-page.is-on .cf-page--b {
+    opacity: 1;
+  }
+</style>

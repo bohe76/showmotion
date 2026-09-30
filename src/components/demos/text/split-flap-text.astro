@@ -1,0 +1,88 @@
+---
+// Split-Flap Text 데모 — .is-playing 이 붙으면 칸마다 알파벳 순서로 여섯 번 넘어가 목표 글자에 멈추고, 왼쪽 칸부터 차례로 멈춘다
+// 칸 안의 글자 띠(목표 글자가 맨 위, 아래로 갈수록 앞 글자)를 한 줄씩 끊어서(steps) 올린다. 없으면 최종 상태(목표 글자)
+const targets = 'HKNQT'.split('');
+const flips = 6;
+const tiles = targets.map((target) => {
+  const code = target.charCodeAt(0);
+  return Array.from({ length: flips + 1 }, (_, j) => String.fromCharCode(code - j)).join('\n');
+});
+---
+<div class="split-flap-text" data-demo-root aria-hidden="true">
+  <div class="sft-row" style={`--n: ${flips}`}>
+    {tiles.map((reel, i) => (
+      <span class="sft-tile" style={`--i: ${i}`}>
+        <span class="sft-face">
+          <span class="sft-reel">{reel}</span>
+        </span>
+      </span>
+    ))}
+  </div>
+</div>
+
+<style>
+  .split-flap-text {
+    display: grid;
+    place-items: center;
+    container-type: inline-size;
+  }
+  .sft-row {
+    display: flex;
+    gap: 0.12em;
+    font-size: clamp(1.75rem, 10cqi, 3.75rem);
+    font-weight: 700;
+    line-height: 1.2;
+  }
+  .sft-tile {
+    position: relative;
+    width: 0.9em;
+    height: 1.2em;
+    overflow: hidden;
+    text-align: center;
+    color: var(--surface);
+    background: var(--ink);
+    border-radius: 0.08em;
+  }
+  /* 가운데 이음선 — 위아래 날개가 나뉜 판처럼 보이게 한다 */
+  .sft-tile::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: var(--line);
+  }
+  .sft-face,
+  .sft-reel {
+    display: block;
+  }
+  .sft-reel {
+    white-space: pre;
+  }
+  .split-flap-text.is-playing .sft-face {
+    --d: calc(600ms + var(--i) * 160ms);
+    animation: split-flap-text-flick calc(var(--d) / var(--n)) ease-out var(--n) both;
+  }
+  .split-flap-text.is-playing .sft-reel {
+    --d: calc(600ms + var(--i) * 160ms);
+    animation: split-flap-text-roll var(--d) steps(var(--n)) both;
+  }
+  @keyframes split-flap-text-roll {
+    from {
+      transform: translateY(calc(var(--n) * -1.2em));
+    }
+    to {
+      transform: translateY(0);
+    }
+  }
+  /* 한 글자 넘어갈 때마다 판이 위에서 떨어지듯 살짝 눌렸다 펴진다 */
+  @keyframes split-flap-text-flick {
+    from {
+      transform: scaleY(0.4);
+    }
+    to {
+      transform: scaleY(1);
+    }
+  }
+</style>

@@ -1,0 +1,47 @@
+---
+// Head Shake 데모 — .is-playing 이 붙으면 블록이 고개를 젓듯 좌우로 돌며 흔들린다, 없으면 제자리(최종 상태)
+---
+<div class="head-shake" data-demo-root aria-hidden="true">
+  <div class="hs-box">A</div>
+</div>
+
+<style>
+  .head-shake {
+    display: grid;
+    place-items: center;
+  }
+  .hs-box {
+    display: grid;
+    place-items: center;
+    width: clamp(64px, 26%, 140px);
+    aspect-ratio: 1;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--on-accent);
+    background: var(--accent);
+    border-radius: 50%;
+  }
+  .head-shake.is-playing .hs-box {
+    animation: head-shake-no 1s ease-in-out both;
+  }
+  /* 좌우 이동에 세로축 회전을 더해 "도리도리"로 보이게 한다 — 원근이 있어야 회전이 보인다 */
+  @keyframes head-shake-no {
+    0%,
+    50%,
+    100% {
+      transform: perspective(400px) translateX(0) rotateY(0);
+    }
+    6.5% {
+      transform: perspective(400px) translateX(-6px) rotateY(-12deg);
+    }
+    18.5% {
+      transform: perspective(400px) translateX(5px) rotateY(10deg);
+    }
+    31.5% {
+      transform: perspective(400px) translateX(-3px) rotateY(-6deg);
+    }
+    43.5% {
+      transform: perspective(400px) translateX(2px) rotateY(3deg);
+    }
+  }
+</style>

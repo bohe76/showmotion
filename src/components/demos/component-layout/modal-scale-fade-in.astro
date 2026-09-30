@@ -1,0 +1,121 @@
+---
+// Modal Scale-Fade In 데모 — .is-playing 이 붙으면 페이지가 어두워지는 동안 가운데 대화 상자가 살짝 작은 크기에서 커지며 떠오른다
+// 클래스가 없으면 최종 상태(대화 상자가 열린 페이지)
+---
+<div class="modal-scale-fade" data-demo-root aria-hidden="true">
+  <div class="ms-page">
+    <div class="ms-bar"></div>
+    <div class="ms-hero"></div>
+    <div class="ms-line"></div>
+    <div class="ms-line ms-line--short"></div>
+    <div class="ms-scrim"></div>
+    <div class="ms-dialog">
+      <span class="ms-title">A</span>
+      <span class="ms-text"></span>
+      <span class="ms-text ms-text--short"></span>
+      <span class="ms-action"></span>
+    </div>
+  </div>
+</div>
+
+<style>
+  .modal-scale-fade {
+    display: grid;
+    place-items: center;
+  }
+  .ms-page {
+    position: relative;
+    display: grid;
+    align-content: start;
+    gap: 10px;
+    width: 62%;
+    height: 80%;
+    padding: 12px;
+    overflow: hidden;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+  }
+  .ms-bar {
+    width: 40%;
+    height: 8px;
+    border-radius: 2px;
+    background: var(--ink);
+  }
+  .ms-hero {
+    aspect-ratio: 16 / 7;
+    background: var(--demo-muted);
+    border-radius: 4px;
+  }
+  .ms-line {
+    height: 8px;
+    border-radius: 2px;
+    background: var(--demo-muted);
+  }
+  .ms-line--short {
+    width: 60%;
+  }
+  /* 덮개 색은 토큰에 없어 어두운 반투명 값을 직접 쓴다 — 다크 모드에서도 어둡게 가린다 */
+  .ms-scrim {
+    position: absolute;
+    inset: 0;
+    background: rgb(12 12 14 / 0.45);
+  }
+  .ms-dialog {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    display: grid;
+    gap: 8px;
+    width: 64%;
+    padding: 12px;
+    background: var(--surface);
+    border-radius: 6px;
+    transform: translate(-50%, -50%);
+  }
+  .ms-title {
+    font-weight: 700;
+    color: var(--ink);
+  }
+  .ms-text {
+    height: 8px;
+    border-radius: 2px;
+    background: var(--demo-muted);
+  }
+  .ms-text--short {
+    width: 70%;
+  }
+  .ms-action {
+    justify-self: end;
+    width: 32%;
+    height: 14px;
+    margin-top: 4px;
+    border-radius: 3px;
+    background: var(--accent);
+  }
+  .modal-scale-fade.is-playing .ms-scrim {
+    animation: modal-scale-fade-in-scrim 250ms ease-out both;
+  }
+  .modal-scale-fade.is-playing .ms-dialog {
+    animation: modal-scale-fade-in-dialog 250ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  @keyframes modal-scale-fade-in-scrim {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  /* 가운데 맞춤 translate 를 유지한 채 크기만 바꾼다 */
+  @keyframes modal-scale-fade-in-dialog {
+    from {
+      opacity: 0;
+      transform: translate(-50%, -50%) scale(0.9);
+    }
+    to {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1);
+    }
+  }
+</style>

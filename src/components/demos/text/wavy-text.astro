@@ -1,0 +1,42 @@
+---
+// Wavy Text 데모 — 글자마다 --i 로 조금씩 늦게 오르내려 단어 안으로 물결이 흐른다
+// 지연을 음수로 줘 처음부터 물결이 이어진 상태로 시작한다
+const letters = 'ABCDEF'.split('');
+---
+<div class="wavy-text" data-demo-root aria-hidden="true">
+  <span class="wv-word">
+    {letters.map((letter, i) => <span class="wv-letter" style={`--i: ${i}`}>{letter}</span>)}
+  </span>
+</div>
+
+<style>
+  .wavy-text {
+    display: grid;
+    place-items: center;
+    container-type: inline-size;
+  }
+  .wv-word {
+    font-size: clamp(2rem, 13cqi, 4.5rem);
+    font-weight: 800;
+    line-height: 1.1;
+    color: var(--ink);
+  }
+  .wv-letter {
+    display: inline-block;
+    animation: wavy-text-bob 1.6s ease-in-out infinite;
+    animation-delay: calc(var(--i) * 0.12s - 1.6s);
+  }
+  .wv-letter:nth-child(odd) {
+    color: var(--accent);
+  }
+  @keyframes wavy-text-bob {
+    0%,
+    50%,
+    100% {
+      transform: translateY(0);
+    }
+    25% {
+      transform: translateY(-0.28em);
+    }
+  }
+</style>

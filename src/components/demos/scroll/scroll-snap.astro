@@ -1,0 +1,99 @@
+---
+// Scroll Snap 데모 — 작은 페이지가 브라우저 기본 스크롤 스냅(scroll-snap-type)으로 구간마다 딱 맞춰 멈춘다
+// 오른쪽 점은 --scroll 로 현재 구간을 따라간다
+const slides = ['A', 'B', 'C', 'D'];
+---
+<div class="scroll-snap" data-demo-root aria-hidden="true">
+  <div class="sc-page" data-scroller>
+    {slides.map((letter) => (
+      <div class="sc-slide">
+        <span class="sc-tile">{letter}</span>
+        <span class="sc-line"></span>
+        <span class="sc-line sc-line--short"></span>
+      </div>
+    ))}
+  </div>
+  <div class="sc-dots">
+    {slides.map(() => <span class="sc-dot"></span>)}
+    <span class="sc-current"></span>
+  </div>
+</div>
+
+<style>
+  .scroll-snap {
+    position: relative;
+    display: grid;
+    /* 행을 스테이지 높이로 묶어야 안쪽 페이지가 넘치지 않고 스크롤된다 */
+    grid-template-rows: minmax(0, 1fr);
+    padding: 14px 14% 0;
+  }
+  .sc-page {
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scroll-snap-type: y mandatory;
+    scrollbar-width: thin;
+    container-type: size;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-bottom: 0;
+    border-radius: 6px 6px 0 0;
+  }
+  .sc-slide {
+    display: grid;
+    align-content: center;
+    justify-items: center;
+    gap: 10px;
+    height: 100cqh;
+    scroll-snap-align: start;
+    border-bottom: 1px solid var(--line);
+  }
+  .sc-tile {
+    display: grid;
+    place-items: center;
+    width: 30%;
+    aspect-ratio: 16 / 10;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--on-accent);
+    background: var(--accent);
+    border-radius: 6px;
+  }
+  .sc-slide:nth-child(even) .sc-tile {
+    color: var(--ink);
+    background: var(--demo-muted);
+  }
+  .sc-line {
+    width: 50%;
+    height: 8px;
+    border-radius: 2px;
+    background: var(--demo-muted);
+  }
+  .sc-line--short {
+    width: 34%;
+  }
+  .sc-dots {
+    position: absolute;
+    top: 50%;
+    right: 5%;
+    display: grid;
+    gap: 10px;
+    transform: translateY(-50%);
+  }
+  .sc-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--demo-muted);
+  }
+  /* 점 한 칸 = 8px + 간격 10px, 네 구간이면 세 칸을 움직인다 */
+  .sc-current {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+    transform: translateY(calc(var(--scroll, 0) * 54px));
+  }
+</style>

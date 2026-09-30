@@ -1,0 +1,111 @@
+---
+// 3D Pin 데모 — 마우스를 올리면(.is-active) 카드가 원근으로 뒤로 눕고, 가운데에서 핀과 바닥 빛이 솟아오른다
+// 핀은 카드 밖(같은 자리)에 두어 카드와 함께 눕지 않고 똑바로 선다
+// 클래스 이름은 숫자로 시작할 수 없어 pin-3d 로 쓴다
+---
+<div class="pin-3d" data-demo-root aria-hidden="true">
+  <div class="p3-view">
+    <div class="p3-card">
+      <span class="p3-mark">A</span>
+      <span class="p3-bar"></span>
+      <span class="p3-bar p3-bar--short"></span>
+    </div>
+  </div>
+  <span class="p3-glow"></span>
+  <span class="p3-pin"></span>
+</div>
+
+<style>
+  .pin-3d {
+    position: relative;
+    overflow: hidden;
+  }
+  .p3-view {
+    display: grid;
+    place-items: center;
+    height: 100%;
+    perspective: 900px;
+  }
+  .p3-card {
+    display: grid;
+    align-content: center;
+    gap: 8px;
+    width: 46%;
+    aspect-ratio: 4 / 3;
+    padding: 0 8%;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    transition: transform 500ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .p3-mark {
+    display: grid;
+    place-items: center;
+    width: 24%;
+    aspect-ratio: 1;
+    margin-bottom: 4px;
+    font-weight: 700;
+    color: var(--on-accent);
+    background: var(--accent);
+    border-radius: 4px;
+  }
+  .p3-bar {
+    height: 10px;
+    background: var(--ink);
+    border-radius: 2px;
+  }
+  .p3-bar--short {
+    width: 60%;
+    height: 8px;
+    background: var(--demo-muted);
+  }
+  /* 바닥 빛 — 카드 가운데에 납작한 타원으로 깔린다 */
+  .p3-glow {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 30%;
+    aspect-ratio: 3 / 1;
+    background: radial-gradient(closest-side, color-mix(in srgb, var(--accent) 55%, transparent), transparent);
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.4);
+    transition:
+      opacity 300ms ease-out,
+      transform 500ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  /* 핀 — 아래쪽이 카드 가운데에 닿는 세로 선과 끝의 점 */
+  .p3-pin {
+    position: absolute;
+    bottom: 50%;
+    left: 50%;
+    width: 2px;
+    height: 34%;
+    margin-left: -1px;
+    background: linear-gradient(to top, transparent, var(--accent));
+    transform: scaleY(0);
+    transform-origin: bottom;
+    transition: transform 450ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .p3-pin::before {
+    content: '';
+    position: absolute;
+    top: -5px;
+    left: 50%;
+    width: 10px;
+    height: 10px;
+    margin-left: -5px;
+    background: var(--accent);
+    border-radius: 50%;
+  }
+  .pin-3d.is-active .p3-card {
+    transform: rotateX(50deg) scale(0.85);
+  }
+  .pin-3d.is-active .p3-glow {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  .pin-3d.is-active .p3-pin {
+    transform: scaleY(1);
+    transition-delay: 120ms;
+  }
+</style>

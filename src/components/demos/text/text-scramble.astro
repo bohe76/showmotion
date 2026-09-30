@@ -1,0 +1,54 @@
+---
+// Text Scramble 데모 — 마우스를 올리면(.is-active) 글자 칸마다 아무 글자나 빠르게 번갈아 보이다가 제 글자에 멈추고, 왼쪽 칸부터 차례로 풀린다
+// 칸 안의 글자 띠(제 글자가 맨 위, 아래는 아무 글자)를 한 줄씩 끊어서(steps) 올린다. 뒤 칸일수록 반복 횟수(--n)가 많아 늦게 멈춘다
+// 고정폭 글꼴로 두어 글자가 바뀌는 동안 폭이 튀지 않게 한다
+const pool = 'QXZKVJRWMYPGTLHN';
+const reels = 'ABCDEF'.split('').map((letter, i) => {
+  const noise = Array.from({ length: 7 }, (_, j) => pool[(i * 3 + j * 5) % pool.length]);
+  return [letter, ...noise].join('\n');
+});
+---
+<div class="text-scramble" data-demo-root aria-hidden="true">
+  <span class="tsc-word">
+    {reels.map((reel, i) => (
+      <span class="tsc-cell">
+        <span class="tsc-reel" style={`--n: ${i + 1}`}>{reel}</span>
+      </span>
+    ))}
+  </span>
+</div>
+
+<style>
+  .text-scramble {
+    display: grid;
+    place-items: center;
+    container-type: inline-size;
+  }
+  .tsc-word {
+    display: flex;
+    font-family: ui-monospace, 'Cascadia Mono', Consolas, monospace;
+    font-size: clamp(2rem, 12cqi, 4.25rem);
+    font-weight: 700;
+    line-height: 1;
+    color: var(--ink);
+  }
+  .tsc-cell {
+    height: 1em;
+    overflow: hidden;
+  }
+  .tsc-reel {
+    display: block;
+    white-space: pre;
+  }
+  .text-scramble.is-active .tsc-reel {
+    animation: text-scramble-roll 280ms steps(7) var(--n) both;
+  }
+  @keyframes text-scramble-roll {
+    from {
+      transform: translateY(-7em);
+    }
+    to {
+      transform: translateY(0);
+    }
+  }
+</style>

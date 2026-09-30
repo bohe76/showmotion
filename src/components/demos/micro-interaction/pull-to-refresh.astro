@@ -1,0 +1,111 @@
+---
+// Pull to Refresh 데모 — 아래로 끄는 동안(.is-dragging) 목록이 세로 이동량(--dy)의 절반만큼 따라 내려오고 위에서 스피너가 드러난다
+// 놓으면 스피너가 잠시 돌며 새로고침한 뒤 목록이 제자리로 올라간다
+---
+<div class="pull-to-refresh" data-demo-root aria-hidden="true">
+  <div class="ptr-screen">
+    <div class="ptr-spinner"></div>
+    <div class="ptr-list">
+      <div class="ptr-row"><span class="ptr-dot"></span><span class="ptr-line"></span></div>
+      <div class="ptr-row"><span class="ptr-dot"></span><span class="ptr-line" style="width: 48%"></span></div>
+      <div class="ptr-row"><span class="ptr-dot"></span><span class="ptr-line" style="width: 64%"></span></div>
+      <div class="ptr-row"><span class="ptr-dot"></span><span class="ptr-line" style="width: 52%"></span></div>
+      <div class="ptr-row"><span class="ptr-dot"></span><span class="ptr-line" style="width: 70%"></span></div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .pull-to-refresh {
+    display: grid;
+    place-items: center;
+    padding-top: 12px;
+    cursor: grab;
+    /* 세로로 끄는 데모 — 페이지 세로 스크롤을 막고 가로는 허용 */
+    touch-action: pan-x;
+    -webkit-user-select: none; /* Safari 는 접두어만 안다 */
+    user-select: none;
+  }
+  .pull-to-refresh.is-dragging {
+    cursor: grabbing;
+  }
+  .ptr-screen {
+    position: relative;
+    align-self: stretch;
+    width: 52%;
+    overflow: hidden;
+    background: var(--stage);
+    border: 1px solid var(--line);
+    border-bottom: 0;
+    border-radius: 12px 12px 0 0;
+    /* 끈 거리 — 손가락 이동의 절반, 최대 64px 에서 멈춘다 */
+    --ptr-pull: clamp(0px, calc(var(--dy, 0px) * 0.5), 64px);
+  }
+  /* 스피너는 목록 바로 위에 붙어 다니다가, 끌지 않을 때는 화면 위로 숨는다 */
+  .ptr-spinner {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 28px;
+    height: 28px;
+    margin-left: -14px;
+    border: 3px solid var(--demo-muted);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    /* 이동은 개별 translate 로 — transform 에 두면 rotate 가 이동까지 돌려 스피너가 원을 그리며 돈다 */
+    translate: 0 calc(var(--ptr-pull) - 36px);
+  }
+  .ptr-list {
+    display: grid;
+    gap: 8px;
+    padding: 10px;
+    background: var(--stage);
+    transform: translateY(var(--ptr-pull));
+  }
+  .ptr-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    height: 34px;
+    padding: 0 10px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+  }
+  .ptr-dot {
+    flex: none;
+    width: 16px;
+    height: 16px;
+    background: var(--demo-muted);
+    border-radius: 50%;
+  }
+  .ptr-line {
+    width: 58%;
+    height: 8px;
+    background: var(--demo-muted);
+    border-radius: 2px;
+  }
+  .ptr-row:first-child .ptr-dot {
+    background: var(--accent);
+  }
+  /* 끄는 동안: 포인터 높이(--my)에 따라 스피너가 돌아간다 */
+  .pull-to-refresh.is-dragging .ptr-spinner {
+    rotate: calc(var(--my, 0) * 360deg);
+  }
+  /* 놓은 뒤: 새로고침하는 동안(지연) 끈 자리에 머물며 스피너가 돌다가 제자리로 올라간다.
+     --dy 는 놓아도 남으므로 제자리 값을 따로 준다 */
+  .pull-to-refresh:not(.is-dragging) .ptr-list {
+    transform: translateY(0);
+    transition: transform 320ms ease-out 900ms;
+  }
+  .pull-to-refresh:not(.is-dragging) .ptr-spinner {
+    translate: 0 -36px;
+    transition: translate 320ms ease-out 900ms;
+    animation: pull-to-refresh-spin 300ms linear 4;
+  }
+  @keyframes pull-to-refresh-spin {
+    to {
+      rotate: 360deg;
+    }
+  }
+</style>

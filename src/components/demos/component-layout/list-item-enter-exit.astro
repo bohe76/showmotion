@@ -1,0 +1,94 @@
+---
+// List Item Enter/Exit 데모 — 누를 때마다(.is-on 토글) 맨 위에 새 항목이 들어오고, 다시 누르면 빠져나간다
+// 들어올 때: 자리가 먼저 벌어지고 내용이 옆에서 미끄러져 나타난다. 나갈 때: 내용이 먼저 사라지고 이웃이 빈자리를 메운다
+const rows = [
+  { letter: 'B', width: 64 },
+  { letter: 'C', width: 48 },
+  { letter: 'D', width: 72 },
+];
+---
+<div class="list-enter-exit" data-demo-root aria-hidden="true">
+  <ul class="le-list">
+    <li class="le-new">
+      <div class="le-clip">
+        <div class="le-row le-row--new">
+          <span class="le-dot">A</span>
+          <span class="le-bar" style="width: 56%"></span>
+        </div>
+      </div>
+    </li>
+    {rows.map((row) => (
+      <li class="le-row">
+        <span class="le-dot">{row.letter}</span>
+        <span class="le-bar" style={`width: ${row.width}%`}></span>
+      </li>
+    ))}
+  </ul>
+</div>
+
+<style>
+  /* 아래 44px 는 왼쪽 아래 조작 안내 자리 — 비워 두고 남은 높이의 가운데에 둬야 낮은 카드에서 D 줄이 안내에 가려지지 않는다 */
+  .list-enter-exit {
+    display: grid;
+    place-items: center;
+    padding-bottom: 44px;
+    cursor: pointer;
+  }
+  .le-list {
+    width: 60%;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  /* 목록 간격(gap)을 쓰면 접힌 항목에도 틈이 남아, 간격은 각 행의 아래 여백으로 둔다
+     네 줄이 가장 낮은 카드 스테이지(높이 약 220px − 안내 자리 44px)에 들어가도록 줄을 낮게 둔다 */
+  .le-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 6px;
+    padding: 5px 10px;
+    font-size: 0.875rem;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+  }
+  .le-dot {
+    font-weight: 700;
+    color: var(--ink);
+  }
+  .le-bar {
+    height: 8px;
+    border-radius: 2px;
+    background: var(--demo-muted);
+  }
+  .le-row--new {
+    border-color: var(--accent);
+    opacity: 0;
+    transform: translateX(-24px);
+    transition:
+      opacity 200ms ease-out,
+      transform 200ms ease-out;
+  }
+  .le-row--new .le-bar {
+    background: var(--accent);
+  }
+  /* 0fr → 1fr 로 자리를 벌리고 접는다 — 나갈 때는 내용이 사라진 뒤(지연) 접힌다 */
+  .le-new {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 300ms ease-out 150ms;
+  }
+  .le-clip {
+    overflow: hidden;
+  }
+  .list-enter-exit.is-on .le-new {
+    grid-template-rows: 1fr;
+    transition-delay: 0ms;
+  }
+  .list-enter-exit.is-on .le-row--new {
+    opacity: 1;
+    transform: translateX(0);
+    transition-delay: 200ms;
+  }
+</style>

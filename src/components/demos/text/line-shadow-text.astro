@@ -1,0 +1,50 @@
+---
+// Line Shadow Text 데모 — 글자 뒤에 비껴 놓은 사본을 사선 줄무늬로 채우고, 줄무늬를 한 칸씩 흘려 보낸다
+// 줄무늬 한 칸(0.2em 타일)만큼 이동하면 처음과 같아져 끊김 없이 반복된다
+---
+<div class="line-shadow-text" data-demo-root aria-hidden="true">
+  <div class="lst-wrap">
+    <span class="lst-shadow">ABCDEF</span>
+    <span class="lst-word">ABCDEF</span>
+  </div>
+</div>
+
+<style>
+  .line-shadow-text {
+    display: grid;
+    place-items: center;
+    container-type: inline-size;
+  }
+  .lst-wrap {
+    display: grid;
+    font-size: clamp(2rem, 13cqi, 4.5rem);
+    font-weight: 900;
+    line-height: 1.1;
+  }
+  .lst-wrap > span {
+    grid-area: 1 / 1;
+  }
+  .lst-word {
+    color: var(--ink);
+  }
+  .lst-shadow {
+    color: transparent;
+    background: linear-gradient(
+        -45deg,
+        var(--accent) 25%,
+        transparent 25% 50%,
+        var(--accent) 50% 75%,
+        transparent 75%
+      )
+      0 0 / 0.2em 0.2em;
+    -webkit-background-clip: text;
+    background-clip: text;
+    transform: translate(0.08em, 0.08em);
+    animation: line-shadow-text-stripes 1.2s linear infinite;
+  }
+  @keyframes line-shadow-text-stripes {
+    to {
+      background-position: 0.2em 0;
+    }
+  }
+</style>

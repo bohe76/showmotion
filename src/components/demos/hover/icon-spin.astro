@@ -1,0 +1,48 @@
+---
+// Icon Spin 데모 — 마우스를 올리면(.is-active) 버튼 안의 아이콘이 한 바퀴 돌고, 떼면 반대로 한 바퀴 돌아온다
+---
+<div class="icon-spin" data-demo-root aria-hidden="true">
+  <div class="isp-btn">
+    <span class="isp-icon">A</span>
+    <span class="isp-bar"></span>
+  </div>
+</div>
+
+<style>
+  .icon-spin {
+    display: grid;
+    place-items: center;
+  }
+  .isp-btn {
+    display: flex;
+    align-items: center;
+    gap: 10%;
+    width: 48%;
+    aspect-ratio: 3 / 1;
+    padding: 0 9%;
+    background: var(--accent);
+    border-radius: 6px;
+  }
+  .isp-icon {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 22%;
+    aspect-ratio: 1;
+    font-weight: 700;
+    color: var(--accent);
+    background: var(--on-accent);
+    border-radius: 6px;
+    transition: rotate 700ms ease-in-out;
+  }
+  .icon-spin.is-active .isp-icon {
+    rotate: 360deg;
+  }
+  .isp-bar {
+    flex: 1;
+    height: 8px;
+    background: var(--on-accent);
+    border-radius: 4px;
+    opacity: 0.6;
+  }
+</style>

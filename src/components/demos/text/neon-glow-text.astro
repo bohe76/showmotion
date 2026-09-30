@@ -1,0 +1,39 @@
+---
+// Neon Glow Text 데모 — 강조색 빛 번짐(text-shadow)으로 네온관처럼 빛나고, 몇 초에 한 번 짧게 깜박인다
+// 깜박임은 드물게 둔다 — 빠른 번쩍임은 광과민 사용자에게 해롭다
+---
+<div class="neon-glow-text" data-demo-root aria-hidden="true">
+  <span class="ngt-word">ABCDEF</span>
+</div>
+
+<style>
+  .neon-glow-text {
+    display: grid;
+    place-items: center;
+    container-type: inline-size;
+  }
+  .ngt-word {
+    font-size: clamp(2rem, 13cqi, 4.5rem);
+    font-weight: 600;
+    line-height: 1.1;
+    color: var(--accent);
+    text-shadow:
+      0 0 0.06em var(--accent),
+      0 0 0.2em var(--accent),
+      0 0 0.45em var(--accent);
+    animation: neon-glow-text-flicker 5s linear infinite;
+  }
+  @keyframes neon-glow-text-flicker {
+    0%,
+    61%,
+    63%,
+    66%,
+    100% {
+      opacity: 1;
+    }
+    62%,
+    65% {
+      opacity: 0.35;
+    }
+  }
+</style>

@@ -1,0 +1,604 @@
+---
+import Base from '../layouts/Base.astro';
+import { motions, motionsIn } from '../data/motions';
+import { categories, type CategoryId } from '../data/categories';
+import { locales, localeMeta, pageHref, categorySubpath, siteName, ui, type Locale } from '../i18n/locales';
+import { splitPlaceholders } from '../i18n/placeholder';
+import Globe from '@lucide/astro/icons/globe';
+import CircleX from '@lucide/astro/icons/circle-x';
+import CircleChevronUp from '@lucide/astro/icons/circle-chevron-up';
+import CircleChevronDown from '@lucide/astro/icons/circle-chevron-down';
+
+// 모든 페이지의 틀: 헤더(언어 선택) → 검색 → 카테고리 칩 → 본문 → 공통 프롬프트 모달 → 푸터
+interface Props {
+  locale: Locale;
+  subpath: string;
+  title: string;
+  description: string;
+  // 칩 강조: 'all' | 카테고리 id | 없음(상세 페이지)
+  current?: 'all' | CategoryId;
+  // 전체 페이지에서만 입력 즉시 카드를 거른다. 다른 페이지는 전체 페이지로 ?q= 를 보낸다
+  liveSearch?: boolean;
+  // Base 로 그대로 넘긴다 — 구조화 데이터, 검색 제외(404)
+  jsonLd?: object[];
+  noindex?: boolean;
+  cjkFonts?: boolean;
+}
+
+const { locale, subpath, title, description, current, liveSearch = false, jsonLd, noindex, cjkFonts } = Astro.props;
+const t = ui[locale];
+const note = splitPlaceholders(t.promptNote);
+const chips = [
+  { id: 'all', name: 'All', count: motions.length, href: pageHref(locale, '') },
+  ...categories.map((c) => ({
+    id: c.id,
+    name: c.name,
+    count: motionsIn(c.id).length,
+    href: pageHref(locale, categorySubpath(c.id)),
+  })),
+];
+---
+<Base locale={locale} subpath={subpath} title={title} description={description} jsonLd={jsonLd} noindex={noindex} cjkFonts={cjkFonts}>
+  <header class="site-header">
+    <div class="wrap header-row">
+      <a class="brand" href={pageHref(locale, '')}>{siteName}</a>
+      <!-- 9개 언어라 한 줄로 늘어놓지 않고 드롭다운으로 연다 (JS 없이 동작하는 details). 같은 페이지의 다른 언어로 간다 -->
+      <nav class="lang" aria-label={t.languageLabel}>
+        <details class="lang-menu" data-lang-menu>
+          <summary>
+            <Globe size={16} aria-hidden="true" />
+            <span lang={localeMeta[locale].tag}>{localeMeta[locale].label}</span>
+          </summary>
+          <ul>
+          {locales.map((code) => (
+            <li>
+              <a
+                href={pageHref(code, subpath)}
+                hreflang={localeMeta[code].tag}
+                lang={localeMeta[code].tag}
+                aria-current={code === locale ? 'page' : undefined}
+              >
+                {localeMeta[code].label}
+              </a>
+            </li>
+          ))}
+          </ul>
+        </details>
+      </nav>
+    </div>
+  </header>
+
+  <div class="wrap nav-area">
+    <!-- 검색은 스크립트가 있어야 동작하므로 hidden 으로 렌더하고 스크립트가 노출한다. 스크립트가 없으면 칩으로 둘러본다 -->
+    <form class="search" role="search" action={pageHref(locale, '')} method="get" hidden data-search-form data-live={liveSearch ? '' : undefined}>
+      <label class="visually-hidden" for="search-input">{t.searchLabel}</label>
+      <input
+        id="search-input"
+        class="search-input"
+        type="search"
+        name="q"
+        placeholder={t.searchPlaceholder}
+        autocomplete="off"
+        spellcheck="false"
+        enterkeyhint="search"
+        data-search-input
+        role={liveSearch ? undefined : 'combobox'}
+        aria-autocomplete={liveSearch ? undefined : 'list'}
+        aria-expanded={liveSearch ? undefined : 'false'}
+        aria-controls={liveSearch ? undefined : 'search-listbox'}
+      />
+      <kbd class="search-key" aria-hidden="true">/</kbd>
+      {!liveSearch && (
+        <>
+          <!-- 카테고리·상세 페이지: 입력하는 동안 이름 목록을 띄운다 (WAI-ARIA combobox). 고르면 상세 페이지, Enter 는 전체 페이지 결과 -->
+          <ul class="search-list" id="search-listbox" role="listbox" aria-label={t.searchLabel} hidden data-search-list></ul>
+          <span class="visually-hidden" role="status" aria-live="polite" data-search-count></span>
+        </>
+      )}
+    </form>
+
+    <!-- 칩은 필터 버튼이 아니라 카테고리 페이지 링크다. 이름은 모든 언어에서 영어 -->
+    <!-- 데스크톱은 여러 줄로 감싸고, 모바일은 한 줄 가로 스크롤(스크롤바 없음, 오른쪽 끝 흐림은 .chips-bar 가 그린다) -->
+    <div class="chips-bar">
+      <nav class="chips" aria-label={t.categoriesLabel} data-chips>
+        <ul lang="en">
+          {chips.map((chip) => (
+            <li>
+              <a class="chip" href={chip.href} aria-current={chip.id === current ? 'page' : undefined}>
+                {chip.name} <span class="chip-count">{chip.count}</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+    </div>
+  </div>
+
+  <main class="wrap">
+    <slot />
+  </main>
+
+  <!-- 페이지 맨 위·맨 아래로 바로 가기. 넓은 화면은 본문 오른쪽 여백, 좁은 화면·모바일은 오른쪽 아래에 떠 있다 -->
+  <!-- 스크립트로 동작하므로 hidden 으로 렌더하고 site.ts 가 보인다. 툴팁은 버튼끼리 겹치지 않게 왼쪽에 띄운다 -->
+  <div class="page-jump" hidden data-page-jump>
+    <button type="button" class="jump" aria-label={t.toTop} data-tooltip={t.toTop} data-tooltip-side="left" data-jump="top">
+      <CircleChevronUp size={32} stroke-width={1.75} aria-hidden="true" />
+    </button>
+    <button type="button" class="jump" aria-label={t.toBottom} data-tooltip={t.toBottom} data-tooltip-side="left" data-jump="bottom">
+      <CircleChevronDown size={32} stroke-width={1.75} aria-hidden="true" />
+    </button>
+  </div>
+
+  <!-- 모든 카드가 공유하는 프롬프트 모달 — 열 때 해당 카드의 프롬프트를 채운다 -->
+  <dialog class="prompt-dialog" aria-labelledby="prompt-dialog-title" data-prompt-dialog>
+    <div class="dialog-head">
+      <h2 id="prompt-dialog-title" data-dialog-title></h2>
+      <button
+        type="button"
+        class="dialog-close"
+        aria-label={t.close}
+        data-tooltip={t.close}
+        data-dialog-close
+      >
+        <CircleX size={24} stroke-width={1.75} aria-hidden="true" />
+      </button>
+    </div>
+    <p class="dialog-note">{note.map((s) => (s.placeholder ? <mark class="ph">{s.text}</mark> : s.text))}</p>
+    <pre class="dialog-prompt" tabindex="0" data-dialog-prompt></pre>
+    <div class="dialog-actions">
+      <button type="button" class="dialog-copy" data-dialog-copy>{t.copyPrompt}</button>
+      <span class="copy-status" role="status" aria-live="polite" data-dialog-status></span>    </div>
+  </dialog>
+
+  <!-- 스크립트가 읽는 공통 문구 -->
+  <div
+    hidden
+    data-labels
+    data-lang={localeMeta[locale].tag}
+    data-copied={t.copied}
+    data-failed={t.copyFailed}
+    data-results-one={t.searchResults.one}
+    data-results-other={t.searchResults.other}
+    data-no-results={t.searchNoResults}
+    data-similar={t.similarNames}
+    data-see-all={t.searchSeeAll}
+    data-locale={locale}
+  ></div>
+
+  <footer class="site-footer">
+    <div class="wrap">{t.footer}</div>
+  </footer>
+</Base>
+
+<script>
+  import { initSite } from '../scripts/site';
+  import { initGallery } from '../scripts/gallery';
+  initSite();
+  initGallery();
+</script>
+
+<style>
+  .site-header {
+    border-bottom: 1px solid var(--line);
+  }
+  .header-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding-top: 14px;
+    padding-bottom: 14px;
+  }
+  .brand {
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: var(--ink);
+    text-decoration: none;
+  }
+  .lang-menu {
+    position: relative;
+  }
+  .lang-menu summary {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 36px;
+    padding: 6px 10px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--ink);
+    list-style: none;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: border-color 150ms ease-out;
+  }
+  .lang-menu summary::-webkit-details-marker {
+    display: none;
+  }
+  .lang-menu summary:hover,
+  .lang-menu[open] summary {
+    border-color: var(--ink);
+  }
+  .lang-menu ul {
+    position: absolute;
+    top: calc(100% + 6px);
+    right: 0;
+    z-index: 10;
+    min-width: 200px;
+    margin: 0;
+    padding: 6px;
+    list-style: none;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+  }
+  /* 언어 이름은 시스템 글꼴로 — [lang] 별 Noto 한중일 글꼴을 걸면 Firefox 는 닫힌 메뉴 안의 글자 때문에도 그 글꼴 파일을 모두 받는다 */
+  .lang-menu a {
+    display: block;
+    padding: 8px 10px;
+    font-family: var(--font-fallback);
+    font-size: 0.9rem;
+    color: var(--ink);
+    text-decoration: none;
+    border-radius: 4px;
+  }
+  .lang-menu a:hover {
+    background: var(--stage);
+  }
+  .lang-menu a[aria-current='page'] {
+    font-weight: 600;
+    color: var(--accent);
+  }
+  .nav-area {
+    padding-top: 20px;
+  }
+  .search {
+    position: relative;
+  }
+  /* 스크립트가 있으면 검색창이 곧 나타나므로 자리를 먼저 잡아 둔다(보이지만 않게). 스크립트가 없으면 자리도 없다 */
+  :global(.js) .search[hidden] {
+    display: block !important; /* 아래 [hidden] 규칙(!important)보다 구체적이라 이긴다 */
+    visibility: hidden;
+  }
+  .search-input {
+    width: 100%;
+    min-height: 44px;
+    padding: 10px 44px 10px 14px;
+    font: inherit;
+    color: var(--ink);
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    transition: border-color 150ms ease-out;
+  }
+  .search-input::placeholder {
+    color: var(--muted);
+  }
+  .search-input:hover {
+    border-color: var(--ink);
+  }
+  .search-input:focus-visible {
+    outline-offset: 0;
+    border-color: var(--accent);
+  }
+  .search-key {
+    position: absolute;
+    top: 50%;
+    right: 12px;
+    display: grid;
+    place-items: center;
+    width: 22px;
+    height: 22px;
+    font: inherit;
+    font-size: 0.8rem;
+    color: var(--muted);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    transform: translateY(-50%);
+    pointer-events: none;
+  }
+  .search-input:focus + .search-key {
+    display: none;
+  }
+  .search-list {
+    position: absolute;
+    top: calc(100% + 6px);
+    right: 0;
+    left: 0;
+    z-index: 20;
+    max-height: min(60vh, 420px);
+    margin: 0;
+    padding: 6px;
+    overflow-y: auto;
+    list-style: none;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+  }
+  /* 항목은 스크립트가 만든다 */
+  .search-list :global([role='option']) {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    padding: 8px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  .search-list :global([role='option'][aria-selected='true']) {
+    background: var(--stage);
+  }
+  .search-list :global(.sl-name) {
+    font-weight: 600;
+  }
+  .search-list :global(.sl-category) {
+    margin-left: auto;
+    font-size: 0.8rem;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+  .search-list :global(.sl-all) {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--accent);
+    border-top: 1px solid var(--line);
+    border-radius: 0 0 4px 4px;
+  }
+  .search-list :global(.sl-empty) {
+    padding: 8px 10px;
+    font-size: 0.9rem;
+    color: var(--muted);
+  }
+  /* 키보드 단축키 표시는 마우스 환경에서만 — 터치 기기에서는 자리 표시 글자에 폭을 돌려준다 */
+  @media (hover: none) {
+    .search-key {
+      display: none;
+    }
+    .search-input {
+      padding-right: 14px;
+    }
+  }
+  /* 칩 줄: 데스크톱은 여러 줄로 감싸 모두 보인다. 모바일은 한 줄 가로 스크롤(아래 media) */
+  .chips-bar {
+    position: relative;
+    margin-top: 12px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--line);
+  }
+  .chips {
+    /* 현재 칩 보이기(site.ts)가 offsetLeft 를 칩 줄 기준으로 읽는다 */
+    position: relative;
+  }
+  .chips ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 0;
+    padding: 2px;
+    list-style: none;
+  }
+  @media (max-width: 640px) {
+    .chips {
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .chips::-webkit-scrollbar {
+      display: none;
+    }
+    /* 오른쪽 끝 흐림 자리만큼 여백을 둬 마지막 칩도 흐림 밖으로 끝까지 밀 수 있다 */
+    .chips ul {
+      flex-wrap: nowrap;
+      width: max-content;
+      padding-right: 40px;
+    }
+    /* 오른쪽 끝을 바탕색으로 흐려 옆에 칩이 더 있음을 알린다 (스크롤하지 않는 바깥 요소에 그려 구분선은 흐리지 않는다) */
+    .chips-bar::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 12px;
+      width: 40px;
+      background: linear-gradient(to right, transparent, var(--bg));
+      pointer-events: none;
+    }
+  }
+  /* 글자를 칩 안에서 세로 가운데에 둔다 — Noto Sans 는 줄 상자 위쪽 여백이 커서 상자 가운데 정렬로는 글자가 아래로 처진다.
+     text-box 로 줄 상자를 대문자 윗선~기준선까지 잘라 위아래 여백을 같게 한다(블록 상자에만 적용돼 display: block).
+     높이 36px = 테두리 2 + 여백 12×2 + 대문자 높이 약 10 */
+  .chip {
+    display: block;
+    padding: 12px 12px;
+    line-height: 1;
+    text-box: trim-both cap alphabetic;
+    font-size: 0.875rem;
+    font-weight: 600;
+    white-space: nowrap;
+    color: var(--ink);
+    text-decoration: none;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    transition: border-color 150ms ease-out;
+  }
+  /* text-box 를 모르는 브라우저: 줄 상자(14px)를 그대로 쓰니 여백을 줄이고 글자를 1px 올린다 */
+  @supports not (text-box: trim-both cap alphabetic) {
+    .chip {
+      padding: 9px 12px 11px;
+    }
+  }
+  .chip:hover {
+    border-color: var(--ink);
+  }
+  .chip-count {
+    margin-left: 2px;
+    font-weight: 400;
+    color: var(--muted);
+  }
+  .chip[aria-current='page'] {
+    color: var(--on-accent);
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+  .chip[aria-current='page'] .chip-count {
+    color: inherit;
+  }
+  /* overflow: visible — 닫기 버튼 툴팁이 모달 위로 나가도 잘리지 않게. 긴 프롬프트는 .dialog-prompt 안에서 스크롤된다 */
+  .prompt-dialog {
+    overflow: visible;
+    width: min(680px, calc(100% - 32px));
+    max-height: min(80vh, 720px);
+    padding: 0;
+    color: var(--ink);
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+  }
+  .prompt-dialog[open] {
+    display: flex;
+    flex-direction: column;
+  }
+  .prompt-dialog::backdrop {
+    background: rgb(0 0 0 / 0.5);
+  }
+  .dialog-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 16px 18px 0;
+  }
+  .dialog-head h2 {
+    margin: 0;
+    font-size: 1.2rem;
+  }
+  /* 원 테두리는 아이콘(CircleX)이 그리므로 버튼 자체는 테두리 없이 */
+  .dialog-close {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    color: var(--muted);
+    background: transparent;
+    border: 0;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: color 150ms ease-out;
+  }
+  .dialog-close:hover {
+    color: var(--ink);
+  }
+  .dialog-note {
+    margin: 6px 18px 0;
+    font-size: 0.8rem;
+    color: var(--muted);
+  }
+  .dialog-prompt {
+    /* flex: 1 (기준 0%)이면 높이가 정해지지 않은 dialog 안에서 Safari 가 본문을 0 높이로 접는다 — 기준을 내용 크기(auto)로 둔다 */
+    flex: 1 1 auto;
+    min-height: 0;
+    margin: 12px 18px 0;
+    padding: 12px;
+    overflow: auto;
+    font-size: 0.9rem;
+    line-height: 1.65;
+    white-space: pre-wrap;
+    background: var(--stage);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+  }
+  /* 복사 버튼은 가로 가운데. 복사 결과 문구는 버튼을 밀지 않도록 아래 줄에 둔다 */
+  .dialog-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 14px 18px 18px;
+    text-align: center;
+  }
+  .dialog-copy {
+    min-height: 40px;
+    padding: 8px 16px;
+    font: inherit;
+    font-weight: 600;
+    color: var(--on-accent);
+    background: var(--accent);
+    border: 0;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 150ms ease-out;
+  }
+  .dialog-copy:hover {
+    background: var(--accent-strong);
+  }
+  /* 성공("복사됨")은 버튼 글자로 보여 주므로 평소엔 스크린리더 전용. 실패 안내(is-visible)만 버튼 아래에 보인다 */
+  .copy-status {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  .copy-status.is-visible {
+    position: static;
+    width: auto;
+    height: auto;
+    overflow: visible;
+    clip-path: none;
+    white-space: normal;
+    font-size: 0.85rem;
+    color: var(--muted);
+  }
+  /* 기본(좁은 화면·모바일): 오른쪽 아래에 떠 있다. 본문 위에 겹치므로 바탕을 채운다 */
+  .page-jump {
+    position: fixed;
+    right: 16px;
+    bottom: 16px;
+    z-index: 30;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  /* 본문(최대 1200px) 오른쪽 여백이 버튼이 들어갈 만큼 넓으면 여백에 둔다.
+     버튼 중심 = 카드 오른쪽 끝(화면 끝에서 여백 g + 32px)과 여백 가운데(g / 2)의 중간 = 0.75g + 16px, g = (100vw - 1200px) / 2 */
+  @media (min-width: 1320px) {
+    .page-jump {
+      right: calc((100vw - 1200px) * 0.375 - 4px);
+      bottom: 32px;
+    }
+  }
+  /* 원 테두리는 아이콘(CircleChevronUp/Down)이 그린다 — 모달 닫기·돌아가기와 같은 방식 */
+  .jump {
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    color: var(--muted);
+    background: none;
+    border: 0;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: color 150ms ease-out;
+  }
+  /* 본문 위에 떠 있어도 읽히도록 아이콘의 원 안쪽만 바탕색으로 채운다 — 버튼 상자를 칠하면 원 밖으로 넘친다 */
+  .jump :global(circle) {
+    fill: var(--surface);
+  }
+  .jump:hover {
+    color: var(--ink);
+  }
+  .site-footer {
+    padding: 24px 0 32px;
+    font-size: 0.85rem;
+    color: var(--muted);
+    border-top: 1px solid var(--line);
+  }
+  [hidden] {
+    display: none !important;
+  }
+</style>

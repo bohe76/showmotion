@@ -1,0 +1,124 @@
+---
+// Circular Reveal 데모 — 누를 때마다(.is-on 토글) 새 페이지가 머리줄 오른쪽 동그라미에서 퍼지는 원 안에 드러난다(.is-playing)
+// 새로 보일 페이지를 위에 올리고 그 페이지만 원을 키운다 — A→B, B→A 모두 같은 방식
+---
+<div class="circular-reveal" data-demo-root aria-hidden="true">
+  <div class="cr-frame">
+    <div class="cr-page cr-page--a">
+      <div class="cr-head"><span class="cr-bar"></span><span class="cr-dot"></span></div>
+      <span class="cr-hero">A</span>
+      <span class="cr-line"></span>
+      <span class="cr-line cr-line--short"></span>
+    </div>
+    <div class="cr-page cr-page--b">
+      <div class="cr-head"><span class="cr-bar"></span><span class="cr-dot"></span></div>
+      <div class="cr-tiles">
+        <span class="cr-tile">B</span>
+        <span class="cr-tile"></span>
+      </div>
+      <span class="cr-line cr-line--short"></span>
+      <span class="cr-line"></span>
+    </div>
+  </div>
+</div>
+
+<style>
+  .circular-reveal {
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+  }
+  .cr-frame {
+    position: relative;
+    width: 60%;
+    height: 80%;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+  }
+  .cr-page {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    align-content: start;
+    gap: 10px;
+    padding: 12px;
+    background: var(--surface);
+  }
+  /* 새 페이지는 다른 바탕색으로 두어 원의 가장자리가 보이게 한다 */
+  .cr-page--b {
+    background: var(--stage);
+  }
+  .cr-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .cr-bar {
+    width: 40%;
+    height: 8px;
+    border-radius: 2px;
+    background: var(--ink);
+  }
+  .cr-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+  .cr-hero {
+    display: grid;
+    place-items: center;
+    aspect-ratio: 16 / 7;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--on-accent);
+    background: var(--accent);
+    border-radius: 4px;
+  }
+  .cr-tiles {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .cr-tile {
+    display: grid;
+    place-items: center;
+    aspect-ratio: 4 / 3;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--ink);
+    background: var(--demo-muted);
+    border-radius: 4px;
+  }
+  .cr-tile:first-child {
+    color: var(--on-accent);
+    background: var(--accent-strong);
+  }
+  .cr-line {
+    height: 8px;
+    border-radius: 2px;
+    background: var(--demo-muted);
+  }
+  .cr-line--short {
+    width: 60%;
+  }
+  /* 보일 페이지를 위로 — 꺼짐이면 A, 켜짐이면 B */
+  .circular-reveal:not(.is-on) .cr-page--a,
+  .circular-reveal.is-on .cr-page--b {
+    z-index: 1;
+  }
+  .circular-reveal:not(.is-on).is-playing .cr-page--a,
+  .circular-reveal.is-on.is-playing .cr-page--b {
+    animation: circular-reveal-grow 650ms cubic-bezier(0.65, 0, 0.35, 1) both;
+  }
+  /* 원의 중심 = 머리줄 동그라미(오른쪽 위). 150%면 반대쪽 모서리까지 덮는다 */
+  @keyframes circular-reveal-grow {
+    from {
+      clip-path: circle(0 at calc(100% - 18px) 18px);
+    }
+    to {
+      clip-path: circle(150% at calc(100% - 18px) 18px);
+    }
+  }
+</style>

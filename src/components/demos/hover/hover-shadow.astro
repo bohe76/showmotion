@@ -1,0 +1,29 @@
+---
+// Hover Shadow 데모 — 마우스를 올리면(.is-active) 블록은 제자리에 있고 아래 그림자만 깊어져 떠 보인다
+---
+<div class="hover-shadow" data-demo-root aria-hidden="true">
+  <div class="hs-box">A</div>
+</div>
+
+<style>
+  .hover-shadow {
+    display: grid;
+    place-items: center;
+  }
+  .hs-box {
+    display: grid;
+    place-items: center;
+    width: 40%;
+    aspect-ratio: 16 / 10;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--ink);
+    background: var(--surface);
+    border-radius: 6px;
+    box-shadow: 0 1px 2px rgb(0 0 0 / 0.12);
+    transition: box-shadow 300ms ease-out;
+  }
+  .hover-shadow.is-active .hs-box {
+    box-shadow: 0 16px 24px -8px rgb(0 0 0 / 0.4);
+  }
+</style>

@@ -1,0 +1,60 @@
+---
+// Typewriter 데모 — .is-playing 이 붙으면 글자가 --i 순서로 하나씩 나타나고 캐럿이 몇 번 깜박인 뒤 멈춘다. 없으면 최종 상태(전부 보임)
+// 글자 칸의 최대 폭을 0 에서 한 번에 펴서 캐럿이 마지막 글자 바로 뒤를 따라가게 한다
+// 캐럿 깜박임은 횟수를 정해 둔다 — 한 번 재생 데모는 끝없이 움직이지 않는다
+const letters = 'ABC DEFG'.split('');
+---
+<div class="typewriter" data-demo-root aria-hidden="true">
+  <span class="tw-line">
+    {letters.map((letter, i) => <span class="tw-char" style={`--i: ${i}`}>{letter}</span>)}
+    <span class="tw-caret"></span>
+  </span>
+</div>
+
+<style>
+  .typewriter {
+    display: grid;
+    place-items: center;
+    container-type: inline-size;
+  }
+  .tw-line {
+    display: flex;
+    align-items: center;
+    font-family: ui-monospace, 'Cascadia Mono', Consolas, monospace;
+    font-size: clamp(1.75rem, 10cqi, 3.75rem);
+    font-weight: 700;
+    line-height: 1.2;
+    color: var(--ink);
+  }
+  .tw-char {
+    overflow: hidden;
+    white-space: pre;
+  }
+  .tw-caret {
+    width: 0.08em;
+    height: 1em;
+    margin-left: 0.06em;
+    background: var(--accent);
+  }
+  .typewriter.is-playing .tw-char {
+    animation: typewriter-key 1ms both;
+    animation-delay: calc(300ms + var(--i) * 130ms);
+  }
+  .typewriter.is-playing .tw-caret {
+    /* 타자가 끝난 뒤(약 1.2초)부터 깜박인다 */
+    animation: typewriter-blink 1s steps(1) 1.3s 4;
+  }
+  @keyframes typewriter-key {
+    from {
+      max-width: 0;
+    }
+    to {
+      max-width: 1em;
+    }
+  }
+  @keyframes typewriter-blink {
+    50% {
+      opacity: 0;
+    }
+  }
+</style>

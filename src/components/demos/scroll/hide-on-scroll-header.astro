@@ -1,0 +1,118 @@
+---
+// Hide on Scroll Header 데모 — 작은 페이지([data-scroller])를 내리면 머리글이 위로 숨고, 조금이라도 올리면 다시 내려온다
+// 방향은 --scroll 한 값으로 알 수 없어 아래 스크립트가 직전 위치와 비교해 루트에 .is-header-hidden 을 붙인다
+const paragraphs = [
+  [92, 78, 64],
+  [86, 90, 58],
+  [80, 72, 88],
+  [94, 66, 76],
+  [84, 70, 52],
+];
+---
+<div class="hide-header" data-demo-root aria-hidden="true">
+  <div class="hh-page" data-scroller>
+    <div class="hh-bar">
+      <span class="hh-logo"></span>
+      <span class="hh-nav"></span>
+      <span class="hh-nav"></span>
+      <span class="hh-nav"></span>
+    </div>
+    <div class="hh-body">
+      {paragraphs.map((lines) => (
+        <div class="hh-para">
+          {lines.map((width) => <div class="hh-line" style={`width: ${width}%`}></div>)}
+        </div>
+      ))}
+    </div>
+  </div>
+</div>
+
+<style>
+  .hide-header {
+    display: grid;
+    /* 행을 스테이지 높이로 묶어야 안쪽 페이지가 넘치지 않고 스크롤된다 */
+    grid-template-rows: minmax(0, 1fr);
+    padding: 14px 14% 0;
+  }
+  .hh-page {
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+    /* 본문 길이를 스테이지 높이(cqh)에 맞춰, 카드든 상세든 스크롤할 거리가 생긴다 */
+    container-type: size;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-bottom: 0;
+    border-radius: 6px 6px 0 0;
+  }
+  .hh-bar {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    height: 40px;
+    padding: 0 14px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--line);
+    transition: transform 250ms ease;
+  }
+  .hide-header.is-header-hidden .hh-bar {
+    transform: translateY(-100%);
+  }
+  .hh-logo {
+    width: 20px;
+    height: 20px;
+    margin-right: auto;
+    border-radius: 4px;
+    background: var(--accent);
+  }
+  .hh-nav {
+    width: 12%;
+    height: 8px;
+    border-radius: 2px;
+    background: var(--demo-muted);
+  }
+  .hh-body {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 300cqh;
+    padding: 18px 16px 24px;
+  }
+  .hh-para {
+    display: grid;
+    gap: 10px;
+  }
+  .hh-line {
+    height: 8px;
+    border-radius: 2px;
+    background: var(--demo-muted);
+  }
+  .hh-line:first-child {
+    height: 12px;
+    background: var(--ink);
+  }
+</style>
+
+<script>
+  document.querySelectorAll<HTMLElement>('.hide-header').forEach((root) => {
+    const scroller = root.querySelector<HTMLElement>('[data-scroller]');
+    const bar = root.querySelector<HTMLElement>('.hh-bar');
+    if (!scroller || !bar) return;
+    let last = scroller.scrollTop;
+    scroller.addEventListener(
+      'scroll',
+      () => {
+        const top = scroller.scrollTop;
+        // 맨 위 근처에서는 늘 보이고, 관성 끝의 작은 흔들림은 무시한다
+        if (top <= bar.offsetHeight) root.classList.remove('is-header-hidden');
+        else if (Math.abs(top - last) < 4) return;
+        else root.classList.toggle('is-header-hidden', top > last);
+        last = top;
+      },
+      { passive: true },
+    );
+  });
+</script>

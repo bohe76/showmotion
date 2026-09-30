@@ -1,0 +1,98 @@
+---
+// Drag-to-Reorder List 데모 — 끄는 동안(.is-dragging) 항목 B가 세로 이동량(--dy)을 따라가고, 반 칸 넘게 지나친 이웃은 빈자리로 미끄러져 비켜 준다
+// 놓으면 B는 가장 가까운 칸에 안착한다(round). 한 칸 = 행 높이 34px + 간격 8px = 42px
+// CSS만으로는 실제 순서를 바꿔 저장할 수 없어, 다음에 누르면 --dy 가 0으로 돌아가 처음 순서에서 다시 시작한다
+import GripVertical from '@lucide/astro/icons/grip-vertical';
+
+const rows = [
+  { letter: 'A', width: 64 },
+  { letter: 'B', width: 48 },
+  { letter: 'C', width: 72 },
+  { letter: 'D', width: 56 },
+];
+---
+<div class="drag-reorder" data-demo-root aria-hidden="true">
+  <ul class="dr-list">
+    {rows.map((row) => (
+      <li class="dr-row">
+        <span class="dr-letter">{row.letter}</span>
+        <span class="dr-bar" style={`width: ${row.width}%`}></span>
+        <GripVertical class="dr-grip" size={16} aria-hidden="true" />
+      </li>
+    ))}
+  </ul>
+</div>
+
+<style>
+  .drag-reorder {
+    display: grid;
+    place-items: center;
+    cursor: grab;
+    /* 세로로 끄는 동안 페이지가 대신 스크롤되지 않게 한다 */
+    touch-action: none;
+    -webkit-user-select: none; /* Safari 는 접두어만 안다 */
+    user-select: none;
+  }
+  .drag-reorder.is-dragging {
+    cursor: grabbing;
+  }
+  .dr-list {
+    display: grid;
+    grid-auto-rows: 34px;
+    gap: 8px;
+    width: 56%;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .dr-row {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0 12px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    transition: transform 250ms ease-out;
+  }
+  .dr-letter {
+    font-weight: 700;
+    color: var(--ink);
+  }
+  .dr-bar {
+    height: 8px;
+    border-radius: 2px;
+    background: var(--demo-muted);
+  }
+  /* 끌기 손잡이 아이콘 — Lucide 컴포넌트가 그리므로 :global 로 잡는다 */
+  .dr-row :global(.dr-grip) {
+    flex: none;
+    margin-left: auto;
+    color: var(--demo-muted);
+  }
+  /* 끄는 항목 B — 놓으면 가장 가까운 칸으로 안착, 끄는 동안에는 손가락을 바로 따라간다 */
+  .dr-row:nth-child(2) {
+    z-index: 1;
+    border-color: var(--accent);
+    transform: translateY(clamp(-42px, round(var(--dy, 0px), 42px), 84px));
+  }
+  .dr-row:nth-child(2) :global(.dr-grip) {
+    color: var(--accent);
+  }
+  .drag-reorder.is-dragging .dr-row:nth-child(2) {
+    transform: translateY(clamp(-42px, var(--dy, 0px), 84px)) scale(1.04);
+    transition: none;
+    outline: 2px solid var(--accent);
+  }
+  /* 이웃은 B가 반 칸(21px)을 넘어 오면 한 칸 비켜 준다 — 큰 배수로 곱해 계단처럼 만들고 transition 으로 미끄러지게 한다 */
+  .dr-row:nth-child(1) {
+    transform: translateY(clamp(0px, (-21px - var(--dy, 0px)) * 100, 42px));
+  }
+  .dr-row:nth-child(3) {
+    transform: translateY(calc(-1 * clamp(0px, (var(--dy, 0px) - 21px) * 100, 42px)));
+  }
+  .dr-row:nth-child(4) {
+    transform: translateY(calc(-1 * clamp(0px, (var(--dy, 0px) - 63px) * 100, 42px)));
+  }
+</style>

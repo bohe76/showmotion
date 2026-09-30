@@ -1,0 +1,97 @@
+---
+// Glitch Text 데모 — 마우스를 올리면(.is-active) 글자가 떨리고, 두 색 사본이 가는 가로 조각으로 잘려 옆으로 튄다
+// 색은 토큰만 쓴다 — 빨강·청록 분리 대신 강조색과 보조색 사본으로 나눈다
+---
+<div class="glitch-text" data-demo-root aria-hidden="true">
+  <span class="gt-word" data-text="ABCDEF">ABCDEF</span>
+</div>
+
+<style>
+  .glitch-text {
+    display: grid;
+    place-items: center;
+    container-type: inline-size;
+  }
+  .gt-word {
+    position: relative;
+    font-size: clamp(2rem, 13cqi, 4.5rem);
+    font-weight: 900;
+    line-height: 1.1;
+    color: var(--ink);
+  }
+  .gt-word::before,
+  .gt-word::after {
+    content: attr(data-text);
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+  }
+  .gt-word::before {
+    color: var(--accent);
+  }
+  .gt-word::after {
+    color: var(--muted);
+  }
+  .glitch-text.is-active .gt-word {
+    animation: glitch-text-jitter 300ms steps(1) infinite;
+  }
+  .glitch-text.is-active .gt-word::before {
+    opacity: 1;
+    animation: glitch-text-slice-a 900ms steps(1) infinite;
+  }
+  .glitch-text.is-active .gt-word::after {
+    opacity: 1;
+    animation: glitch-text-slice-b 700ms steps(1) infinite;
+  }
+  @keyframes glitch-text-jitter {
+    0% {
+      transform: translate(0, 0);
+    }
+    33% {
+      transform: translate(-0.02em, 0.01em);
+    }
+    66% {
+      transform: translate(0.02em, -0.01em);
+    }
+  }
+  @keyframes glitch-text-slice-a {
+    0% {
+      clip-path: inset(10% 0 72% 0);
+      transform: translateX(-0.06em);
+    }
+    20% {
+      clip-path: inset(58% 0 24% 0);
+      transform: translateX(0.07em);
+    }
+    40% {
+      clip-path: inset(30% 0 55% 0);
+      transform: translateX(-0.04em);
+    }
+    60% {
+      clip-path: inset(80% 0 6% 0);
+      transform: translateX(0.05em);
+    }
+    80% {
+      clip-path: inset(4% 0 86% 0);
+      transform: translateX(-0.08em);
+    }
+  }
+  @keyframes glitch-text-slice-b {
+    0% {
+      clip-path: inset(66% 0 16% 0);
+      transform: translateX(0.06em);
+    }
+    25% {
+      clip-path: inset(18% 0 68% 0);
+      transform: translateX(-0.05em);
+    }
+    50% {
+      clip-path: inset(44% 0 40% 0);
+      transform: translateX(0.08em);
+    }
+    75% {
+      clip-path: inset(86% 0 2% 0);
+      transform: translateX(-0.06em);
+    }
+  }
+</style>

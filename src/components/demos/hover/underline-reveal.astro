@@ -1,0 +1,41 @@
+---
+// Underline Reveal 데모 — 마우스를 올리면(.is-active) 글자 아래 가장자리 밖에 숨어 있던 선이 처음부터 전체 폭으로 위로 밀려 올라온다
+---
+<div class="underline-reveal" data-demo-root aria-hidden="true">
+  <div class="ur-link">
+    ABC
+    <span class="ur-line"></span>
+  </div>
+</div>
+
+<style>
+  .underline-reveal {
+    display: grid;
+    place-items: center;
+    container-type: inline-size;
+  }
+  /* overflow 로 아래 가장자리를 잘라 선이 그 밖에서 올라오게 한다 */
+  .ur-link {
+    position: relative;
+    padding-bottom: 0.3em;
+    overflow: hidden;
+    font-size: 9cqi;
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: 0.08em;
+    color: var(--ink);
+  }
+  .ur-line {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    height: 6px;
+    background: var(--accent);
+    translate: 0 100%;
+    transition: translate 400ms ease-out;
+  }
+  .underline-reveal.is-active .ur-line {
+    translate: 0 0;
+  }
+</style>

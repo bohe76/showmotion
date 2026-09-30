@@ -1,0 +1,85 @@
+---
+// Carousel Slide 데모 — 누를 때마다 줄 전체가 옆으로 한 칸 미끄러져 다음 장이 가운데에 맞는다 (A → B → C → A)
+// 트랙 폭 = 보기 창 폭이라 한 칸은 80%(장 76% + 간격 4%) — A를 가운데 두는 12%에서 한 칸씩 뺀다
+const slides = ['A', 'B', 'C'];
+---
+<div class="carousel-slide" data-demo-root aria-hidden="true">
+  <div class="cs-view">
+    <div class="cs-track">
+      {slides.map((letter) => <div class="cs-slide">{letter}</div>)}
+    </div>
+  </div>
+  <div class="cs-dots">
+    {slides.map(() => <span class="cs-dot"></span>)}
+  </div>
+</div>
+
+<style>
+  .carousel-slide {
+    display: grid;
+    grid-template-columns: 72%;
+    place-content: center;
+    justify-items: center;
+    gap: 12px;
+    cursor: pointer;
+  }
+  .cs-view {
+    width: 100%;
+    overflow: hidden;
+  }
+  .cs-track {
+    display: flex;
+    transform: translateX(calc(12% - var(--index, 0) * 80%));
+    transition: transform 450ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .cs-slide {
+    flex: 0 0 76%;
+    display: grid;
+    place-items: center;
+    margin-right: 4%;
+    aspect-ratio: 16 / 10;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--ink);
+    background: var(--demo-muted);
+    border-radius: 6px;
+  }
+  .cs-slide:nth-child(2) {
+    color: var(--on-accent);
+    background: var(--accent);
+  }
+  .cs-dots {
+    display: flex;
+    gap: 6px;
+  }
+  .cs-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--demo-muted);
+    transition: background-color 300ms ease-out;
+  }
+  .carousel-slide:not([data-index]) .cs-dot:nth-child(1),
+  .carousel-slide[data-index='0'] .cs-dot:nth-child(1),
+  .carousel-slide[data-index='1'] .cs-dot:nth-child(2),
+  .carousel-slide[data-index='2'] .cs-dot:nth-child(3) {
+    background: var(--ink);
+  }
+</style>
+
+<script>
+  // gallery.ts 는 누를 때마다 .is-on 토글과 .is-playing 재시작만 한다 — 몇 번째 장인지는 여기서 센다 (cube-rotate 와 같은 방식)
+  // 스테이지 누르기와 다시 보기 버튼 모두 is-playing 을 뗐다 다시 붙이므로, class 변화에서 is-playing 이 새로 붙은 횟수를 센다
+  document.querySelectorAll<HTMLElement>('.carousel-slide').forEach((root) => {
+    const count = root.querySelectorAll('.cs-slide').length;
+    let step = 0;
+    new MutationObserver((records) => {
+      const states = records.map((record) => (record.oldValue ?? '').split(/\s+/).includes('is-playing'));
+      states.push(root.classList.contains('is-playing'));
+      for (let i = 1; i < states.length; i++) if (!states[i - 1] && states[i]) step++;
+      const index = String(step % count);
+      root.dataset.index = index;
+      root.style.setProperty('--index', index);
+    }).observe(root, { attributes: true, attributeFilter: ['class'], attributeOldValue: true });
+  });
+</script>

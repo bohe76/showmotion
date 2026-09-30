@@ -1,0 +1,43 @@
+---
+// Rotate In 데모 — .is-playing 이 붙으면 왼쪽 아래 모서리를 축으로 기울어진 채 돌아 들어오며 서서히 나타난다 (Rotate In Down Left)
+---
+<div class="rotate-in" data-demo-root aria-hidden="true">
+  <div class="rti-block">A</div>
+</div>
+
+<style>
+  .rotate-in {
+    display: grid;
+    place-items: center;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    container-type: inline-size;
+  }
+  .rti-block {
+    display: grid;
+    place-items: center;
+    width: 30%;
+    aspect-ratio: 1;
+    border-radius: 6px;
+    background: var(--accent);
+    color: var(--on-accent);
+    font-size: 12cqw;
+    font-weight: 700;
+    line-height: 1;
+    transform-origin: left bottom;
+  }
+  .rotate-in.is-playing .rti-block {
+    animation: rotate-in-down-left 900ms ease-out both;
+  }
+  @keyframes rotate-in-down-left {
+    from {
+      opacity: 0;
+      transform: rotate(-45deg);
+    }
+    to {
+      opacity: 1;
+      transform: rotate(0);
+    }
+  }
+</style>

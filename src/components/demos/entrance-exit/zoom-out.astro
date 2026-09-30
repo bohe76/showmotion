@@ -1,0 +1,43 @@
+---
+// Zoom Out 데모 — 평소에는 보이는 처음 상태, .is-playing 이 붙으면 작아지며 투명해져 사라진다(forwards)
+---
+<div class="zoom-out" data-demo-root aria-hidden="true">
+  <div class="zo-block">A</div>
+</div>
+
+<style>
+  .zoom-out {
+    display: grid;
+    place-items: center;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    container-type: inline-size;
+  }
+  .zo-block {
+    display: grid;
+    place-items: center;
+    width: 30%;
+    aspect-ratio: 1;
+    border-radius: 6px;
+    background: var(--accent);
+    color: var(--on-accent);
+    font-size: 12cqw;
+    font-weight: 700;
+    line-height: 1;
+  }
+  .zoom-out.is-playing .zo-block {
+    animation: zoom-out-shrink 600ms ease-in forwards;
+  }
+  @keyframes zoom-out-shrink {
+    0% {
+      opacity: 1;
+      transform: scale(1);
+    }
+    50%,
+    100% {
+      opacity: 0;
+      transform: scale(0.3);
+    }
+  }
+</style>

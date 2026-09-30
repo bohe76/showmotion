@@ -1,0 +1,95 @@
+---
+// Masonry / Grid Shuffle 데모 — 누를 때마다(.is-on 토글) 필터가 바뀐다: 회색 칸은 제자리에서 작아지며 사라지고, 색 칸은 앞쪽 빈 칸으로 미끄러져 모인다
+// 칸 위치는 transform 으로만 잡는다 — 한 칸 = 칸 크기(100%) + 간격 8px. --c·--r 은 평소 자리, --c2·--r2 는 필터 뒤 자리
+const tiles = [
+  { letter: 'A', c: 0, r: 0 },
+  { letter: 'B', c: 1, r: 0, c2: 0, r2: 0 },
+  { letter: 'C', c: 2, r: 0, c2: 1, r2: 0 },
+  { letter: 'D', c: 3, r: 0 },
+  { letter: 'E', c: 0, r: 1, c2: 2, r2: 0 },
+  { letter: 'F', c: 1, r: 1 },
+  { letter: 'G', c: 2, r: 1 },
+  { letter: 'H', c: 3, r: 1, c2: 3, r2: 0 },
+];
+---
+<div class="grid-shuffle" data-demo-root aria-hidden="true">
+  <div class="gs-chips">
+    <span class="gs-chip gs-chip--all"></span>
+    <span class="gs-chip gs-chip--accent"></span>
+  </div>
+  <ul class="gs-grid">
+    {tiles.map((tile) => (
+      <li
+        class={tile.c2 === undefined ? 'gs-tile' : 'gs-tile gs-tile--keep'}
+        style={`--c: ${tile.c}; --r: ${tile.r}; --c2: ${tile.c2 ?? tile.c}; --r2: ${tile.r2 ?? tile.r}`}
+      >
+        {tile.letter}
+      </li>
+    ))}
+  </ul>
+</div>
+
+<style>
+  .grid-shuffle {
+    display: grid;
+    grid-template-columns: 64%;
+    place-content: center;
+    gap: 12px;
+    cursor: pointer;
+  }
+  .gs-chips {
+    display: flex;
+    gap: 8px;
+  }
+  .gs-chip {
+    width: 40px;
+    height: 16px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: var(--surface);
+    transition:
+      background-color 200ms ease-out,
+      border-color 200ms ease-out;
+  }
+  .grid-shuffle:not(.is-on) .gs-chip--all,
+  .grid-shuffle.is-on .gs-chip--accent {
+    border-color: var(--accent);
+    background: var(--accent);
+  }
+  .gs-grid {
+    position: relative;
+    aspect-ratio: 2 / 1;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .gs-tile {
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: grid;
+    place-items: center;
+    width: calc((100% - 24px) / 4);
+    height: calc((100% - 8px) / 2);
+    font-weight: 700;
+    color: var(--ink);
+    background: var(--demo-muted);
+    border-radius: 4px;
+    transform: translate(calc(var(--c) * (100% + 8px)), calc(var(--r) * (100% + 8px)));
+    transition:
+      transform 500ms cubic-bezier(0.22, 1, 0.36, 1),
+      opacity 300ms ease-out;
+  }
+  .gs-tile--keep {
+    color: var(--on-accent);
+    background: var(--accent);
+  }
+  .grid-shuffle.is-on .gs-tile {
+    transform: translate(calc(var(--c) * (100% + 8px)), calc(var(--r) * (100% + 8px))) scale(0.6);
+    opacity: 0;
+  }
+  .grid-shuffle.is-on .gs-tile--keep {
+    transform: translate(calc(var(--c2) * (100% + 8px)), calc(var(--r2) * (100% + 8px)));
+    opacity: 1;
+  }
+</style>

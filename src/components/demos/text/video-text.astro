@@ -1,0 +1,63 @@
+---
+// Video Text 데모 — 영상 대신 움직이는 도형 장면을 글자 모양으로 잘라 보여 준다
+// 영상은 계속 재생되므로 once 가 아니라 loop 로 보인다. 도형은 각자 다른 속도로 오가 장면이 계속 바뀌어 보인다
+---
+<div class="video-text" data-demo-root aria-hidden="true">
+  <svg class="vt-svg" viewBox="0 0 400 150">
+    <defs>
+      <clipPath id="video-text-clip">
+        <text x="200" y="124" text-anchor="middle" font-size="140" font-weight="900">ABC</text>
+      </clipPath>
+    </defs>
+    <g clip-path="url(#video-text-clip)">
+      <rect class="vt-sky" width="400" height="150" />
+      <circle class="vt-sun" cx="80" cy="60" r="46" />
+      <rect class="vt-band" x="-40" y="84" width="220" height="40" rx="20" />
+      <rect class="vt-ground" x="0" y="112" width="400" height="38" />
+    </g>
+  </svg>
+</div>
+
+<style>
+  .video-text {
+    display: grid;
+    place-items: center;
+  }
+  .vt-svg {
+    width: 78%;
+    height: auto;
+  }
+  .vt-sky {
+    fill: var(--ink);
+  }
+  .vt-sun {
+    fill: var(--accent);
+    animation: video-text-drift 7s ease-in-out infinite alternate;
+  }
+  .vt-band {
+    fill: var(--highlight);
+    animation: video-text-pass 4.5s linear infinite;
+  }
+  .vt-ground {
+    fill: var(--accent-strong);
+    animation: video-text-bob 3s ease-in-out infinite alternate;
+  }
+  @keyframes video-text-drift {
+    to {
+      transform: translate(240px, 20px);
+    }
+  }
+  @keyframes video-text-pass {
+    from {
+      transform: translateX(-200px);
+    }
+    to {
+      transform: translateX(460px);
+    }
+  }
+  @keyframes video-text-bob {
+    to {
+      transform: translateY(-22px);
+    }
+  }
+</style>

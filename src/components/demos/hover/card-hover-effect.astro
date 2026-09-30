@@ -1,0 +1,56 @@
+---
+// Card Hover Effect 데모 — 포인터가 있는 카드(--mx, --my 로 계산) 뒤로 강조 배경이 미끄러져 따라간다
+// 포인터가 없으면(.is-active 없음) 강조 배경을 숨긴다
+const letters = ['A', 'B', 'C', 'D', 'E', 'F'];
+---
+<div class="card-hover-effect" data-demo-root aria-hidden="true">
+  <div class="che-grid">
+    <span class="che-highlight"></span>
+    {letters.map((letter) => <span class="che-card">{letter}</span>)}
+  </div>
+</div>
+
+<style>
+  .card-hover-effect {
+    position: relative;
+  }
+  /* 격자는 루트의 가운데 72% — 포인터 비율(0~1)을 격자 안 비율로 바꿔 몇 번째 칸인지 구한다 */
+  .che-grid {
+    --col: clamp(0, round(down, calc((var(--mx, 0.5) - 0.14) / 0.72 * 3), 1), 2);
+    --row: clamp(0, round(down, calc((var(--my, 0.5) - 0.14) / 0.72 * 2), 1), 1);
+    position: absolute;
+    inset: 14%;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(2, 1fr);
+    gap: 8px;
+  }
+  .che-highlight {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: calc((100% - 16px) / 3);
+    height: calc((100% - 8px) / 2);
+    background: var(--highlight);
+    border-radius: 10px;
+    opacity: 0;
+    translate: calc(var(--col) * (100% + 8px)) calc(var(--row) * (100% + 8px));
+    transition:
+      translate 250ms ease-out,
+      opacity 200ms ease-out;
+  }
+  .card-hover-effect.is-active .che-highlight {
+    opacity: 1;
+  }
+  .che-card {
+    position: relative;
+    display: grid;
+    place-items: center;
+    margin: 8%;
+    font-weight: 700;
+    color: var(--ink);
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+  }
+</style>

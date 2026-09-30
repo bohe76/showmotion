@@ -1,0 +1,76 @@
+---
+// Odometer 데모 — .is-playing 이 붙으면 3,482 가 잠깐 머문 뒤 자리마다 숫자 띠가 세로로 굴러 3,516 이 된다, 없으면 3,516
+// 자리마다 0~9 를 두 번 이은 띠(20줄) 하나 — 8 → 1 처럼 작아지는 자리는 두 번째 1(11번째 줄)로 앞으로 굴러 되감기지 않는다
+const strip = '01234567890123456789'.split('').join('\n');
+const digits = [
+  { from: 3, to: 3 },
+  { from: 4, to: 5 },
+  { from: 8, to: 11 },
+  { from: 2, to: 6 },
+];
+---
+<div class="odometer" data-demo-root aria-hidden="true">
+  <div class="od-panel">
+    <div class="od-number">
+      {digits.map((d, i) => (
+        <>
+          {i === 1 && <span class="od-comma">,</span>}
+          <span class="od-digit">
+            <span class="od-strip" style={`--from: ${d.from}; --to: ${d.to}; --i: ${i}`}>{strip}</span>
+          </span>
+        </>
+      ))}
+    </div>
+    <span class="od-label"></span>
+  </div>
+</div>
+
+<style>
+  .odometer {
+    display: grid;
+    place-items: center;
+    container-type: inline-size;
+  }
+  .od-panel {
+    display: grid;
+    justify-items: center;
+    gap: 14px;
+    padding: 20px 28px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+  }
+  .od-number {
+    display: flex;
+    font-size: clamp(2rem, 12cqi, 4.5rem);
+    font-weight: 800;
+    line-height: 1.15;
+    color: var(--ink);
+    font-variant-numeric: tabular-nums;
+  }
+  .od-digit {
+    height: 1.15em;
+    overflow: hidden;
+  }
+  .od-strip {
+    display: block;
+    white-space: pre;
+    transform: translateY(calc(var(--to) * -1.15em));
+  }
+  .od-label {
+    width: 70%;
+    height: 8px;
+    background: var(--demo-muted);
+    border-radius: 2px;
+  }
+  .odometer.is-playing .od-strip {
+    animation: odometer-roll 1100ms cubic-bezier(0.34, 1.25, 0.64, 1) both;
+    animation-delay: calc(var(--i) * 90ms);
+  }
+  @keyframes odometer-roll {
+    0%,
+    25% {
+      transform: translateY(calc(var(--from) * -1.15em));
+    }
+  }
+</style>

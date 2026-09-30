@@ -1,0 +1,53 @@
+---
+// Line Drawing 데모 — .is-playing 이 붙으면 원이 그려지고 이어서 체크 표시가 그려진다, 없으면 다 그려진 상태
+// Lucide circle-check 의 경로에 선을 건다 — dasharray 를 선 길이보다 조금 길게 두면 dashoffset 길이 → 0 이 "안 보임 → 다 그려짐"이 된다
+import CircleCheck from '@lucide/astro/icons/circle-check';
+---
+<div class="line-drawing" data-demo-root aria-hidden="true">
+  <CircleCheck class="ld-svg" stroke-width={1.25} aria-hidden="true" />
+</div>
+
+<style>
+  .line-drawing {
+    display: grid;
+    place-items: center;
+    container-type: size;
+  }
+  /* 아이콘은 Lucide 컴포넌트가 그리므로 :global 로 잡는다 */
+  .line-drawing :global(.ld-svg) {
+    width: 62cqmin;
+    height: 62cqmin;
+    overflow: visible;
+  }
+  /* 원 둘레는 약 62.8(viewBox 24 기준) — 12시 방향에서 시계 방향으로 그려지게 돌려 둔다 */
+  .line-drawing :global(.ld-svg circle) {
+    stroke: var(--ink);
+    stroke-dasharray: 63;
+    stroke-dashoffset: 0;
+    transform: rotate(-90deg);
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+  /* 체크는 약 11.3 — 긴 획 끝에서 시작하므로 음수 쪽에서 옮겨야 짧은 획부터 그려진다 */
+  .line-drawing :global(.ld-svg path) {
+    stroke: var(--accent);
+    stroke-dasharray: 12;
+    stroke-dashoffset: 0;
+  }
+  .line-drawing.is-playing :global(.ld-svg circle) {
+    animation: line-drawing-ring 900ms ease-in-out both;
+  }
+  .line-drawing.is-playing :global(.ld-svg path) {
+    animation: line-drawing-check 450ms ease-out 750ms both;
+  }
+  @keyframes line-drawing-ring {
+    from {
+      stroke-dashoffset: 63;
+    }
+  }
+  @keyframes line-drawing-check {
+    from {
+      stroke-dashoffset: -12;
+    }
+  }
+</style>

@@ -1,0 +1,40 @@
+---
+// Toggle Switch 데모 — 누를 때마다(.is-on 토글) 손잡이가 반대쪽으로 미끄러지고 트랙 색이 바뀐다
+---
+<div class="toggle-switch" data-demo-root aria-hidden="true">
+  <div class="ts-track">
+    <div class="ts-knob"></div>
+  </div>
+</div>
+
+<style>
+  .toggle-switch {
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+  }
+  .ts-track {
+    position: relative;
+    width: 96px;
+    height: 52px;
+    background: var(--demo-muted);
+    border-radius: 999px;
+    transition: background-color 200ms ease-out;
+  }
+  .ts-knob {
+    position: absolute;
+    top: 6px;
+    left: 6px;
+    width: 40px;
+    height: 40px;
+    background: var(--surface);
+    border-radius: 50%;
+    transition: transform 200ms ease-out;
+  }
+  .toggle-switch.is-on .ts-track {
+    background: var(--accent);
+  }
+  .toggle-switch.is-on .ts-knob {
+    transform: translateX(44px);
+  }
+</style>

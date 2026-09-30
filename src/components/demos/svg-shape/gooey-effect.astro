@@ -1,0 +1,60 @@
+---
+// Gooey Effect 데모 — 마우스를 올리면(.is-active) 작은 원들이 가운데 원에서 떨어져 나가며 액체처럼 늘어났다 끊긴다
+// 흐림(blur) 뒤 알파 대비를 세게 올리는 SVG 필터가 가까운 원끼리 이어 붙인다 — 필터는 원을 담은 작은 상자에만 건다
+---
+<div class="gooey-effect" data-demo-root aria-hidden="true">
+  <svg class="ge-defs" width="0" height="0">
+    <filter id="gooey-effect-goo" color-interpolation-filters="sRGB">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="8" result="blur" />
+      <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 20 -8" result="goo" />
+      <feComposite in="SourceGraphic" in2="goo" operator="atop" />
+    </filter>
+  </svg>
+  <div class="ge-goo">
+    <span class="ge-drop" style="--x: -1; --y: 0; --i: 0"></span>
+    <span class="ge-drop" style="--x: 0; --y: -1; --i: 1"></span>
+    <span class="ge-drop" style="--x: 1; --y: 0; --i: 2"></span>
+    <span class="ge-core"></span>
+  </div>
+</div>
+
+<style>
+  .gooey-effect {
+    position: relative;
+    display: grid;
+    place-items: center;
+  }
+  .ge-defs {
+    position: absolute;
+  }
+  .ge-goo {
+    position: relative;
+    width: 70%;
+    height: 70%;
+    filter: url(#gooey-effect-goo);
+  }
+  /* 세로 margin % 도 가로 폭 기준이라 정사각형 원을 정확히 가운데에 둔다 */
+  .ge-core,
+  .ge-drop {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    aspect-ratio: 1;
+    background: var(--accent);
+    border-radius: 50%;
+  }
+  .ge-core {
+    width: 24%;
+    margin: -12% 0 0 -12%;
+  }
+  .ge-drop {
+    width: 15%;
+    margin: -7.5% 0 0 -7.5%;
+    transition: transform 700ms cubic-bezier(0.5, 0, 0.2, 1);
+    transition-delay: calc((2 - var(--i)) * 60ms);
+  }
+  .gooey-effect.is-active .ge-drop {
+    transform: translate(calc(var(--x) * 190%), calc(var(--y) * 180%));
+    transition-delay: calc(var(--i) * 60ms);
+  }
+</style>

@@ -1,0 +1,50 @@
+---
+// Bounce Out 데모 — 평소에는 보이는 처음 상태, .is-playing 이 붙으면 한 번 움찔 부풀었다가 작아지며 사라진다(forwards)
+---
+<div class="bounce-out" data-demo-root aria-hidden="true">
+  <div class="bno-block">A</div>
+</div>
+
+<style>
+  .bounce-out {
+    display: grid;
+    place-items: center;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    container-type: inline-size;
+  }
+  .bno-block {
+    display: grid;
+    place-items: center;
+    width: 30%;
+    aspect-ratio: 1;
+    border-radius: 6px;
+    background: var(--accent);
+    color: var(--on-accent);
+    font-size: 12cqw;
+    font-weight: 700;
+    line-height: 1;
+  }
+  .bounce-out.is-playing .bno-block {
+    animation: bounce-out-shrink 750ms forwards;
+  }
+  @keyframes bounce-out-shrink {
+    0% {
+      opacity: 1;
+      transform: scale(1);
+    }
+    20% {
+      transform: scale(0.9);
+    }
+    50%,
+    55% {
+      opacity: 1;
+      transform: scale(1.1);
+    }
+    100% {
+      opacity: 0;
+      transform: scale(0.3);
+    }
+  }
+</style>

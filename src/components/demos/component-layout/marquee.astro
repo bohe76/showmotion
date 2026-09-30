@@ -1,0 +1,79 @@
+---
+// Marquee 데모 — 같은 내용을 두 번 이어 붙이고 트랙을 -50% 이동해 이음매를 숨긴다
+// 속도: 한 벌 폭 약 716px / 18s ≈ 40px/s — 프롬프트의 "slow, steady" 기준값
+// 데모 항목은 의미 없는 기호로 둔다 — 사이트에 없는 모션 이름 같은 가짜 콘텐츠를 넣지 않는다
+// 한 벌 폭이 가장 넓은 스테이지(1열 레이아웃, 약 606px)보다 넓어야 이음매 틈이 보이지 않는다
+const words = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N'];
+---
+<div class="marquee" data-demo-root aria-hidden="true">
+  <div class="mq-track">
+    <ul class="mq-group">
+      {words.map((word) => <li class="mq-item">{word}</li>)}
+    </ul>
+    <ul class="mq-group">
+      {words.map((word) => <li class="mq-item">{word}</li>)}
+    </ul>
+  </div>
+</div>
+
+<style>
+  .marquee {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    mask-image: linear-gradient(to right, transparent, #000 12%, #000 88%, transparent);
+  }
+  .mq-track {
+    display: flex;
+    width: max-content;
+    animation: marquee-scroll 18s linear infinite;
+  }
+  /* 명시적으로 정지하면 멈춘다 */
+  .marquee.is-paused .mq-track {
+    animation-play-state: paused;
+  }
+  /* 트랙 위에 마우스가 있으면 멈춘다 — 재생 버튼 위는 제외(버튼 동작을 가리지 않게), 터치 기기 제외 */
+  @media (hover: hover) {
+    .marquee:hover .mq-track {
+      animation-play-state: paused;
+    }
+  }
+  /* reduced-motion: JS 없이도 멈춘 상태로 시작, 사용자가 재생하면(is-running) 흐른다 */
+  @media (prefers-reduced-motion: reduce) {
+    .marquee:not(.is-running) .mq-track {
+      animation-play-state: paused;
+    }
+  }
+  .mq-group {
+    display: flex;
+    gap: 12px;
+    margin: 0;
+    padding: 0 12px 0 0;
+    list-style: none;
+  }
+  .mq-item {
+    padding: 8px 14px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    color: var(--ink);
+    font-size: 0.9rem;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .mq-item:nth-child(3n + 1) {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--on-accent);
+  }
+  @keyframes marquee-scroll {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-50%);
+    }
+  }
+</style>

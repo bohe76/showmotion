@@ -1,0 +1,84 @@
+---
+// Text Marquee on Scroll 데모 — 작은 페이지를 세로로 내리면 큰 글자 두 줄이 --scroll 에 맞춰 서로 반대 방향으로 옆으로 흐른다
+// 줄을 충분히 길게 둬야 가장 넓은 상세 스테이지에서도 흐르는 동안 줄 끝이 보이지 않는다
+const letters = 'A B C D E F G H I J K L M N O P Q R S T '.repeat(2).trim();
+---
+<div class="text-marquee" data-demo-root aria-hidden="true">
+  <div class="tq-page" data-scroller>
+    <div class="tq-para">
+      <div class="tq-line tq-line--title"></div>
+      <div class="tq-line" style="width: 88%"></div>
+      <div class="tq-line" style="width: 64%"></div>
+    </div>
+    <div class="tq-band">
+      <div class="tq-row">{letters}</div>
+      <div class="tq-row tq-row--reverse">{letters}</div>
+    </div>
+    <div class="tq-para tq-para--end">
+      <div class="tq-line tq-line--title"></div>
+      <div class="tq-line" style="width: 82%"></div>
+      <div class="tq-line" style="width: 58%"></div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .text-marquee {
+    display: grid;
+    /* 행을 스테이지 높이로 묶어야 안쪽 페이지가 넘치지 않고 스크롤된다 */
+    grid-template-rows: minmax(0, 1fr);
+    padding: 14px 14% 0;
+  }
+  .tq-page {
+    /* 옆으로 넘치는 글자 줄 때문에 가로 스크롤바가 생기지 않게 막는다 */
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+    container-type: size;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-bottom: 0;
+    border-radius: 6px 6px 0 0;
+  }
+  .tq-para {
+    display: grid;
+    gap: 10px;
+    padding: 18px 16px;
+  }
+  /* 띠 뒤 여백을 페이지 높이(cqh)로 잡아, 띠가 보이는 동안 충분히 스크롤할 수 있게 한다 */
+  .tq-para--end {
+    margin: 30cqh 0 60cqh;
+  }
+  .tq-line {
+    height: 8px;
+    border-radius: 2px;
+    background: var(--demo-muted);
+  }
+  .tq-line--title {
+    width: 55%;
+    height: 12px;
+    background: var(--ink);
+  }
+  .tq-band {
+    display: grid;
+    gap: 4px;
+    margin-top: 14cqh;
+    padding: 10px 0;
+    overflow: hidden;
+    border-block: 1px solid var(--line);
+  }
+  .tq-row {
+    width: max-content;
+    font-size: 2rem;
+    font-weight: 800;
+    line-height: 1.1;
+    white-space: nowrap;
+    color: var(--ink);
+    transform: translateX(calc(var(--scroll, 0) * -40%));
+  }
+  .tq-row--reverse {
+    color: var(--accent);
+    transform: translateX(calc(-40% + var(--scroll, 0) * 40%));
+  }
+</style>

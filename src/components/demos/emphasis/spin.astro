@@ -1,0 +1,26 @@
+---
+// Spin 데모 — 로딩 고리가 같은 속도로 끝없이 돈다 (linear 라야 한 바퀴 이음매가 튀지 않는다)
+---
+<div class="spin" data-demo-root aria-hidden="true">
+  <div class="sn-ring"></div>
+</div>
+
+<style>
+  .spin {
+    display: grid;
+    place-items: center;
+  }
+  .sn-ring {
+    width: clamp(48px, 18%, 96px);
+    aspect-ratio: 1;
+    border: 6px solid var(--demo-muted);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin-turn 0.9s linear infinite;
+  }
+  @keyframes spin-turn {
+    to {
+      transform: rotate(1turn);
+    }
+  }
+</style>

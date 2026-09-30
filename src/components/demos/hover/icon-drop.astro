@@ -1,0 +1,68 @@
+---
+// Icon Drop 데모 — 마우스를 올리면(.is-active) 아이콘이 아래로 떨어져 사라졌다가 위에서 다시 내려와 자리를 잡는다 (올릴 때마다 1회)
+---
+<div class="icon-drop" data-demo-root aria-hidden="true">
+  <div class="idr-btn">
+    <span class="idr-icon">A</span>
+    <span class="idr-bar"></span>
+  </div>
+</div>
+
+<style>
+  .icon-drop {
+    display: grid;
+    place-items: center;
+  }
+  .idr-btn {
+    display: flex;
+    align-items: center;
+    gap: 10%;
+    width: 48%;
+    aspect-ratio: 3 / 1;
+    padding: 0 9%;
+    overflow: hidden;
+    background: var(--accent);
+    border-radius: 6px;
+  }
+  .idr-icon {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 22%;
+    aspect-ratio: 1;
+    font-weight: 700;
+    color: var(--accent);
+    background: var(--on-accent);
+    border-radius: 50%;
+  }
+  .idr-bar {
+    flex: 1;
+    height: 8px;
+    background: var(--on-accent);
+    border-radius: 4px;
+    opacity: 0.6;
+  }
+  .icon-drop.is-active .idr-icon {
+    animation: icon-drop-fall 700ms;
+  }
+  @keyframes icon-drop-fall {
+    0% {
+      translate: 0 0;
+      opacity: 1;
+      animation-timing-function: ease-in;
+    }
+    40% {
+      translate: 0 220%;
+      opacity: 0;
+    }
+    41% {
+      translate: 0 -220%;
+      opacity: 0;
+      animation-timing-function: ease-out;
+    }
+    100% {
+      translate: 0 0;
+      opacity: 1;
+    }
+  }
+</style>

@@ -1,0 +1,55 @@
+---
+// Hover State Layer 데모 — 마우스를 올리면(.is-active) 내용 색을 옅게 깐 반투명 층이 빠르게 덮여 올려 둔 상태를 알린다
+---
+<div class="hover-state-layer" data-demo-root aria-hidden="true">
+  <div class="hsl-box">
+    <span class="hsl-layer"></span>
+    <span class="hsl-icon">A</span>
+    <span class="hsl-bar"></span>
+  </div>
+</div>
+
+<style>
+  .hover-state-layer {
+    display: grid;
+    place-items: center;
+  }
+  .hsl-box {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 10%;
+    width: 48%;
+    aspect-ratio: 3 / 1;
+    padding: 0 9%;
+    overflow: hidden;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+  }
+  /* 층의 색은 내용 색(강조색)과 같게 — 투명도만 바꾼다 */
+  .hsl-layer {
+    position: absolute;
+    inset: 0;
+    background: var(--accent);
+    opacity: 0;
+    transition: opacity 150ms ease-out;
+  }
+  .hover-state-layer.is-active .hsl-layer {
+    opacity: 0.12;
+  }
+  .hsl-icon {
+    position: relative;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--accent);
+  }
+  .hsl-bar {
+    position: relative;
+    flex: 1;
+    height: 8px;
+    background: var(--accent);
+    border-radius: 4px;
+    opacity: 0.45;
+  }
+</style>

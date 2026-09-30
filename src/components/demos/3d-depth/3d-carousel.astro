@@ -1,0 +1,70 @@
+---
+// 3D Carousel 데모 — 고리로 둘러선 판 6개(A~F)가 누를 때마다 세로축을 따라 한 칸(60도)씩 돌아 다음 판이 앞으로 온다
+// 클래스·키프레임 이름은 숫자로 시작할 수 없어 carousel-3d 로 쓴다
+const panels = ['A', 'B', 'C', 'D', 'E', 'F'];
+---
+<div class="carousel-3d" data-demo-root aria-hidden="true">
+  <div class="c3-view">
+    <div class="c3-ring">
+      {panels.map((letter, i) => (
+        <span class="c3-panel" style={`--i: ${i}`}>{letter}</span>
+      ))}
+    </div>
+  </div>
+</div>
+
+<style>
+  .carousel-3d {
+    overflow: hidden;
+    container-type: inline-size;
+    cursor: pointer;
+  }
+  /* cqw 는 자기 자신이 아니라 조상 컨테이너(루트) 기준이라, 원근은 루트 안쪽 층에 준다 */
+  .c3-view {
+    display: grid;
+    place-items: center;
+    height: 100%;
+    perspective: 110cqw;
+  }
+  /* 판 폭 22cqw 인 육각 고리의 반지름 ≈ 22cqw — 고리를 그만큼 뒤로 밀어 앞 판이 원래 크기로 보인다 */
+  .c3-ring {
+    position: relative;
+    width: 22cqw;
+    aspect-ratio: 3 / 4;
+    transform-style: preserve-3d;
+    transform: translateZ(-22cqw) rotateY(calc(var(--step, 0) * -60deg));
+    transition: transform 700ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .c3-panel {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    font-size: 7cqw;
+    font-weight: 700;
+    color: var(--on-accent);
+    background: var(--accent);
+    border: 1px solid var(--accent-strong);
+    border-radius: 6px;
+    transform: rotateY(calc(var(--i) * 60deg)) translateZ(22cqw);
+  }
+  .c3-panel:nth-child(2n) {
+    color: var(--ink);
+    background: var(--surface);
+    border-color: var(--line);
+  }
+</style>
+
+<script>
+  // gallery.ts 는 누를 때마다 .is-on 토글과 .is-playing 재시작만 한다 — 몇 번째 판인지는 여기서 센다
+  // 스테이지 누르기와 다시 보기 버튼 모두 is-playing 을 뗐다 다시 붙이므로, class 변화에서 is-playing 이 새로 붙은 횟수를 센다
+  document.querySelectorAll<HTMLElement>('.carousel-3d').forEach((root) => {
+    let step = 0;
+    new MutationObserver((records) => {
+      const states = records.map((record) => (record.oldValue ?? '').split(/\s+/).includes('is-playing'));
+      states.push(root.classList.contains('is-playing'));
+      for (let i = 1; i < states.length; i++) if (!states[i - 1] && states[i]) step++;
+      root.style.setProperty('--step', String(step));
+    }).observe(root, { attributes: true, attributeFilter: ['class'], attributeOldValue: true });
+  });
+</script>

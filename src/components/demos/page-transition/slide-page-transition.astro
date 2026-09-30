@@ -1,0 +1,101 @@
+---
+// Slide Page Transition 데모 — 누를 때마다(.is-on 토글) 앞으로 가면 B가 오른쪽에서 밀고 들어와 A를 왼쪽으로 밀어내고, 되돌아가면 반대 방향으로 움직인다
+---
+<div class="slide-page" data-demo-root aria-hidden="true">
+  <div class="sl-frame">
+    <div class="sl-page sl-page--a">
+      <span class="sl-bar"></span>
+      <span class="sl-hero">A</span>
+      <span class="sl-line"></span>
+      <span class="sl-line sl-line--short"></span>
+    </div>
+    <div class="sl-page sl-page--b">
+      <span class="sl-bar"></span>
+      <div class="sl-tiles">
+        <span class="sl-tile">B</span>
+        <span class="sl-tile"></span>
+      </div>
+      <span class="sl-line sl-line--short"></span>
+      <span class="sl-line"></span>
+    </div>
+  </div>
+</div>
+
+<style>
+  .slide-page {
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+  }
+  .sl-frame {
+    position: relative;
+    width: 60%;
+    height: 80%;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+  }
+  .sl-page {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    align-content: start;
+    gap: 10px;
+    padding: 12px;
+    background: var(--surface);
+    transition: transform 450ms cubic-bezier(0.65, 0, 0.35, 1);
+  }
+  .sl-page--b {
+    background: var(--stage);
+    transform: translateX(100%);
+  }
+  .slide-page.is-on .sl-page--a {
+    transform: translateX(-100%);
+  }
+  .slide-page.is-on .sl-page--b {
+    transform: translateX(0);
+  }
+  .sl-bar {
+    width: 40%;
+    height: 8px;
+    border-radius: 2px;
+    background: var(--ink);
+  }
+  .sl-hero {
+    display: grid;
+    place-items: center;
+    aspect-ratio: 16 / 7;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--on-accent);
+    background: var(--accent);
+    border-radius: 4px;
+  }
+  .sl-tiles {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .sl-tile {
+    display: grid;
+    place-items: center;
+    aspect-ratio: 4 / 3;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--ink);
+    background: var(--demo-muted);
+    border-radius: 4px;
+  }
+  .sl-tile:first-child {
+    color: var(--on-accent);
+    background: var(--accent-strong);
+  }
+  .sl-line {
+    height: 8px;
+    border-radius: 2px;
+    background: var(--demo-muted);
+  }
+  .sl-line--short {
+    width: 60%;
+  }
+</style>

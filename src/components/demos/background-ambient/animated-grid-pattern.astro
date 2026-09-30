@@ -1,0 +1,54 @@
+---
+// Animated Grid Pattern 데모 — 격자선은 배경 이미지로 고정하고, 칸 12개만 서로 다른 때에 켜졌다 꺼진다
+// 칸 크기는 스테이지 폭의 1/10(cqw) — 격자선과 칸 위치가 같은 단위라 어긋나지 않는다
+const cells = [
+  [1, 1, 0], [4, 0, 1.6], [7, 2, 0.8], [2, 4, 2.4], [8, 5, 3.2], [5, 3, 4],
+  [0, 3, 1.2], [6, 6, 2.8], [9, 1, 3.6], [3, 2, 4.4], [7, 4, 0.4], [1, 5, 2],
+];
+---
+<div class="animated-grid-pattern" data-demo-root aria-hidden="true">
+  <span class="agp-lines"></span>
+  {cells.map(([x, y, delay]) => (
+    <span class="agp-cell" style={`--x: ${x}; --y: ${y}; animation-delay: ${delay}s`}></span>
+  ))}
+</div>
+
+<style>
+  .animated-grid-pattern {
+    position: relative;
+    overflow: hidden;
+    container-type: inline-size;
+  }
+  /* cqw 는 자기 자신이 아니라 조상 컨테이너(루트) 기준이라, 격자선은 루트 안쪽 층에 그린다 */
+  .agp-lines {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(var(--line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line) 1px, transparent 1px);
+    background-size: 10cqw 10cqw;
+  }
+  .agp-cell {
+    position: absolute;
+    top: calc(var(--y) * 10cqw + 1px);
+    left: calc(var(--x) * 10cqw + 1px);
+    width: calc(10cqw - 1px);
+    height: calc(10cqw - 1px);
+    background: var(--accent);
+    opacity: 0;
+    animation: animated-grid-pattern-flicker 4.8s ease-in-out infinite;
+  }
+  @keyframes animated-grid-pattern-flicker {
+    0%,
+    100% {
+      opacity: 0;
+    }
+    20%,
+    35% {
+      opacity: 0.55;
+    }
+    55% {
+      opacity: 0;
+    }
+  }
+</style>

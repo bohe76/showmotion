@@ -1,0 +1,87 @@
+---
+// Number Ticker 데모 — .is-playing 이 붙으면(화면에 들어올 때) 숫자 셋이 0에서 목표값까지 빠르게 올라가다 천천히 멈춘다, 없으면 목표값
+// JS 없이 센다: 정수로 등록한 --number-ticker-n 을 애니메이션하고, counter() 로 글자로 보여 준다
+// 자릿수 폭을 목표값 기준으로 잡고 tabular-nums 로 숫자 폭을 고정해 세는 동안 옆 글자가 흔들리지 않는다
+const stats = [
+  { to: 128, unit: '' },
+  { to: 86, unit: '%' },
+  { to: 512, unit: '' },
+];
+---
+<div class="number-ticker" data-demo-root aria-hidden="true">
+  <ul class="nt-stats">
+    {stats.map((s) => (
+      <li class="nt-stat">
+        <span class="nt-figure">
+          <span class="nt-value" style={`--to: ${s.to}; width: ${String(s.to).length}ch`}></span>
+          {s.unit && <span class="nt-unit">{s.unit}</span>}
+        </span>
+        <span class="nt-label"></span>
+      </li>
+    ))}
+  </ul>
+</div>
+
+<style>
+  @property --number-ticker-n {
+    syntax: '<integer>';
+    inherits: false;
+    initial-value: 0;
+  }
+  .number-ticker {
+    display: grid;
+    place-items: center;
+    container-type: inline-size;
+  }
+  .nt-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6%;
+    width: 78%;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .nt-stat {
+    display: grid;
+    justify-items: center;
+    gap: 10px;
+    padding: 14px 6px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+  }
+  .nt-figure {
+    font-size: clamp(1.5rem, 8cqi, 3rem);
+    font-weight: 800;
+    line-height: 1;
+    color: var(--ink);
+    font-variant-numeric: tabular-nums;
+  }
+  .nt-value {
+    display: inline-block;
+    text-align: right;
+    --number-ticker-n: var(--to);
+    counter-reset: number-ticker var(--number-ticker-n);
+  }
+  .nt-value::after {
+    content: counter(number-ticker);
+  }
+  .nt-unit {
+    color: var(--accent);
+  }
+  .nt-label {
+    width: 60%;
+    height: 8px;
+    background: var(--demo-muted);
+    border-radius: 2px;
+  }
+  .number-ticker.is-playing .nt-value {
+    animation: number-ticker-count 1600ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+  @keyframes number-ticker-count {
+    from {
+      --number-ticker-n: 0;
+    }
+  }
+</style>

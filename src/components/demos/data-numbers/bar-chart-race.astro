@@ -1,0 +1,101 @@
+---
+// Bar Chart Race 데모 — 가로 막대 넷(A~D)의 값이 네 구간에 걸쳐 바뀌고, 값 순서대로 줄이 자리를 바꾼다
+// 줄마다 keyframes 하나로 자리(translateY, 한 칸 = 줄 높이 125%)와 값(--bar-chart-race-v, 막대 scaleX)을 함께 움직인다
+// 네 구간: 0~17% · 25~42% · 50~67% · 75~92% 머무르고, 사이에서 바뀐다. 100% 는 0% 와 같아 이음매가 없다
+const rows = ['A', 'B', 'C', 'D'];
+---
+<div class="bar-chart-race" data-demo-root aria-hidden="true">
+  <div class="bcr-board">
+    {rows.map((letter) => (
+      <div class={`bcr-row bcr-row--${letter.toLowerCase()}`}>
+        <span class="bcr-label">{letter}</span>
+        <span class="bcr-track"><span class="bcr-bar"></span></span>
+      </div>
+    ))}
+  </div>
+</div>
+
+<style>
+  @property --bar-chart-race-v {
+    syntax: '<number>';
+    inherits: true;
+    initial-value: 0;
+  }
+  .bar-chart-race {
+    display: grid;
+    place-items: center;
+  }
+  .bcr-board {
+    position: relative;
+    width: 66%;
+    height: 56%;
+  }
+  .bcr-row {
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    height: 20%;
+  }
+  .bcr-label {
+    flex: none;
+    width: 1.2em;
+    font-weight: 700;
+    color: var(--ink);
+  }
+  .bcr-track {
+    flex: 1;
+    height: 100%;
+  }
+  .bcr-bar {
+    display: block;
+    height: 100%;
+    background: var(--c);
+    border-radius: 3px;
+    transform: scaleX(var(--bar-chart-race-v));
+    transform-origin: left;
+  }
+  .bcr-row--a {
+    --c: var(--accent);
+    animation: bar-chart-race-a 8s ease-in-out infinite;
+  }
+  .bcr-row--b {
+    --c: var(--ink);
+    animation: bar-chart-race-b 8s ease-in-out infinite;
+  }
+  .bcr-row--c {
+    --c: var(--muted);
+    animation: bar-chart-race-c 8s ease-in-out infinite;
+  }
+  .bcr-row--d {
+    --c: var(--demo-muted);
+    animation: bar-chart-race-d 8s ease-in-out infinite;
+  }
+  @keyframes bar-chart-race-a {
+    0%, 17%, 100% { transform: translateY(0); --bar-chart-race-v: 0.9; }
+    25%, 42% { transform: translateY(125%); --bar-chart-race-v: 0.75; }
+    50%, 67% { transform: translateY(375%); --bar-chart-race-v: 0.6; }
+    75%, 92% { transform: translateY(125%); --bar-chart-race-v: 0.82; }
+  }
+  @keyframes bar-chart-race-b {
+    0%, 17%, 100% { transform: translateY(125%); --bar-chart-race-v: 0.7; }
+    25%, 42% { transform: translateY(0); --bar-chart-race-v: 0.85; }
+    50%, 67% { transform: translateY(125%); --bar-chart-race-v: 0.8; }
+    75%, 92% { transform: translateY(375%); --bar-chart-race-v: 0.65; }
+  }
+  @keyframes bar-chart-race-c {
+    0%, 17%, 100% { transform: translateY(250%); --bar-chart-race-v: 0.55; }
+    25%, 42% { transform: translateY(375%); --bar-chart-race-v: 0.5; }
+    50%, 67% { transform: translateY(0); --bar-chart-race-v: 0.88; }
+    75%, 92% { transform: translateY(250%); --bar-chart-race-v: 0.76; }
+  }
+  @keyframes bar-chart-race-d {
+    0%, 17%, 100% { transform: translateY(375%); --bar-chart-race-v: 0.35; }
+    25%, 42% { transform: translateY(250%); --bar-chart-race-v: 0.6; }
+    50%, 67% { transform: translateY(250%); --bar-chart-race-v: 0.7; }
+    75%, 92% { transform: translateY(0); --bar-chart-race-v: 0.92; }
+  }
+</style>

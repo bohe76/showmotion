@@ -1,0 +1,2 @@
+/* 한국어 페이지에만 링크하는 글꼴 선언 (src/layouts/Base.astro) */
+@import '@fontsource-variable/noto-sans-kr';

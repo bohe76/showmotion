@@ -1,0 +1,49 @@
+---
+// Background Bounce Sweep 데모 — 마우스를 올리면(.is-active) 색이 왼쪽에서 채워지며 오른쪽 끝을 살짝 넘었다가 자리를 잡는다
+---
+<div class="background-bounce-sweep" data-demo-root aria-hidden="true">
+  <div class="bbs-box">
+    <span class="bbs-fill"></span>
+    <span class="bbs-label">A</span>
+  </div>
+</div>
+
+<style>
+  .background-bounce-sweep {
+    display: grid;
+    place-items: center;
+  }
+  /* overflow 를 자르지 않는다 — 채움이 끝을 넘었다가 돌아오는 튕김이 보여야 Background Sweep 과 구별된다 */
+  .bbs-box {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 40%;
+    aspect-ratio: 16 / 10;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--ink);
+    background: var(--surface);
+    border-radius: 6px;
+    transition: color 300ms ease-out;
+  }
+  .bbs-fill {
+    position: absolute;
+    inset: 0;
+    background: var(--accent);
+    border-radius: inherit;
+    transform: scaleX(0);
+    transform-origin: left center;
+    transition: transform 500ms ease-out;
+  }
+  .bbs-label {
+    position: relative;
+  }
+  .background-bounce-sweep.is-active .bbs-box {
+    color: var(--on-accent);
+  }
+  .background-bounce-sweep.is-active .bbs-fill {
+    transform: scaleX(1);
+    transition-timing-function: cubic-bezier(0.52, 1.64, 0.37, 0.66);
+  }
+</style>

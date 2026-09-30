@@ -1,0 +1,78 @@
+---
+// Zoom on Scroll 데모 — 고정된 장면 안의 작은 카드가 --scroll 에 맞춰 화면을 가득 채울 만큼 커지고, 올리면 다시 작아진다
+// 트랙 250cqh + 뒤 글 60cqh → 장면이 고정되는 동안은 --scroll 0~약 0.71, 이를 0~1 로 늘려 쓴다
+---
+<div class="zoom-scroll" data-demo-root aria-hidden="true">
+  <div class="zm-page" data-scroller>
+    <div class="zm-track">
+      <div class="zm-frame">
+        <div class="zm-card">A</div>
+      </div>
+    </div>
+    <div class="zm-outro">
+      <div class="zm-line zm-line--title"></div>
+      <div class="zm-line" style="width: 86%"></div>
+      <div class="zm-line" style="width: 62%"></div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .zoom-scroll {
+    display: grid;
+    /* 행을 스테이지 높이로 묶어야 안쪽 페이지가 넘치지 않고 스크롤된다 */
+    grid-template-rows: minmax(0, 1fr);
+    padding: 14px 14% 0;
+  }
+  .zm-page {
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+    container-type: size;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-bottom: 0;
+    border-radius: 6px 6px 0 0;
+  }
+  .zm-track {
+    height: 250cqh;
+  }
+  .zm-frame {
+    position: sticky;
+    top: 0;
+    display: grid;
+    place-items: center;
+    height: 100cqh;
+    overflow: hidden;
+  }
+  /* 폭 30% × 최대 3.6배 ≈ 108% — 끝에서는 장면을 가득 채운다 */
+  .zm-card {
+    display: grid;
+    place-items: center;
+    width: 30%;
+    aspect-ratio: 4 / 3;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--on-accent);
+    background: var(--accent);
+    border-radius: 6px;
+    transform: scale(calc(1 + clamp(0, var(--scroll, 0) * 1.4, 1) * 2.6));
+  }
+  .zm-outro {
+    display: grid;
+    align-content: center;
+    gap: 10px;
+    height: 60cqh;
+    padding: 0 16px;
+  }
+  .zm-line {
+    height: 8px;
+    border-radius: 2px;
+    background: var(--demo-muted);
+  }
+  .zm-line--title {
+    width: 55%;
+    height: 12px;
+    background: var(--ink);
+  }
+</style>

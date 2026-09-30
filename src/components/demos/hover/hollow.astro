@@ -1,0 +1,33 @@
+---
+// Hollow 데모 — 마우스를 올리면(.is-active) 채워진 배경이 빠지고 테두리만 남는다
+---
+<div class="hollow" data-demo-root aria-hidden="true">
+  <div class="ho-box">A</div>
+</div>
+
+<style>
+  .hollow {
+    display: grid;
+    place-items: center;
+  }
+  /* 테두리는 처음부터 배경과 같은 색으로 있다 — 배경만 빠지면 테두리가 남는다 */
+  .ho-box {
+    display: grid;
+    place-items: center;
+    width: 40%;
+    aspect-ratio: 16 / 10;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--on-accent);
+    background: var(--accent);
+    border-radius: 6px;
+    box-shadow: inset 0 0 0 4px var(--accent);
+    transition:
+      background-color 300ms ease-out,
+      color 300ms ease-out;
+  }
+  .hollow.is-active .ho-box {
+    color: var(--ink);
+    background: transparent;
+  }
+</style>

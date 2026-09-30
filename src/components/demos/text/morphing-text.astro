@@ -1,0 +1,58 @@
+---
+// Morphing Text 데모 — 같은 자리의 세 단어가 차례로 흐려지며 다음 단어로 번진다
+// 흐림(blur) 위에 알파 문턱 필터를 걸어 두 단어가 겹치는 순간 끈적하게 이어져 보이게 한다
+const words = ['ABC', 'DEF', 'GHI'];
+---
+<div class="morphing-text" data-demo-root aria-hidden="true">
+  <svg class="mt-defs" width="0" height="0">
+    <filter id="morphing-text-threshold">
+      <feColorMatrix type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 255 -140" />
+    </filter>
+  </svg>
+  <div class="mt-stack">
+    {words.map((word, i) => <span class="mt-word" style={`--i: ${i}`}>{word}</span>)}
+  </div>
+</div>
+
+<style>
+  .morphing-text {
+    display: grid;
+    place-items: center;
+    container-type: inline-size;
+  }
+  .mt-defs {
+    position: absolute;
+  }
+  .mt-stack {
+    display: grid;
+    font-size: clamp(2.25rem, 16cqi, 5.5rem);
+    font-weight: 800;
+    line-height: 1.1;
+    color: var(--ink);
+    filter: url(#morphing-text-threshold);
+  }
+  .mt-word {
+    grid-area: 1 / 1;
+    text-align: center;
+    opacity: 0;
+    /* 한 바퀴 6초 중 단어마다 2초씩 — 음수 지연으로 셋이 엇갈려 돈다 */
+    animation: morphing-text-cycle 6s linear infinite;
+    animation-delay: calc(var(--i) * 2s - 6s);
+  }
+  @keyframes morphing-text-cycle {
+    0% {
+      opacity: 0;
+      filter: blur(0.15em);
+    }
+    12%,
+    30% {
+      opacity: 1;
+      filter: blur(0);
+    }
+    42%,
+    100% {
+      opacity: 0;
+      filter: blur(0.15em);
+    }
+  }
+</style>

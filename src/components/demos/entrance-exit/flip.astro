@@ -1,0 +1,53 @@
+---
+// Flip 데모 — .is-playing 이 붙으면 세로축으로 한 바퀴 돌며 앞으로 살짝 다가왔다가 제자리로 돌아온다
+---
+<div class="flip" data-demo-root aria-hidden="true">
+  <div class="fp-block">A</div>
+</div>
+
+<style>
+  .flip {
+    display: grid;
+    place-items: center;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    container-type: inline-size;
+  }
+  .fp-block {
+    display: grid;
+    place-items: center;
+    width: 30%;
+    aspect-ratio: 1;
+    border-radius: 6px;
+    background: var(--accent);
+    color: var(--on-accent);
+    font-size: 12cqw;
+    font-weight: 700;
+    line-height: 1;
+  }
+  .flip.is-playing .fp-block {
+    animation: flip-turn 1000ms both;
+  }
+  @keyframes flip-turn {
+    0% {
+      transform: perspective(400px) translateZ(0) rotateY(-360deg) scale(1);
+      animation-timing-function: ease-out;
+    }
+    40% {
+      transform: perspective(400px) translateZ(100px) rotateY(-190deg) scale(1);
+      animation-timing-function: ease-out;
+    }
+    50% {
+      transform: perspective(400px) translateZ(100px) rotateY(-170deg) scale(1);
+      animation-timing-function: ease-in;
+    }
+    80% {
+      transform: perspective(400px) translateZ(0) rotateY(0) scale(0.95);
+      animation-timing-function: ease-in;
+    }
+    100% {
+      transform: perspective(400px) translateZ(0) rotateY(0) scale(1);
+    }
+  }
+</style>

@@ -1,0 +1,50 @@
+---
+// Background Boxes 데모 — 기울인 격자의 칸 위로 포인터가 지나가면 그 칸이 바로 켜지고 천천히 꺼진다
+// 칸마다 켜야 해서 루트 단위 .is-active 로는 안 된다 — 아래 스크립트가 포인터가 들어온 칸에만 is-lit 을 잠깐 붙인다
+const tiles = Array.from({ length: 35 }, (_, i) => i);
+---
+<div class="background-boxes" data-demo-root aria-hidden="true">
+  <div class="bx-grid">
+    {tiles.map(() => <span class="bx-tile"></span>)}
+  </div>
+</div>
+
+<style>
+  .background-boxes {
+    position: relative;
+    overflow: hidden;
+  }
+  .bx-grid {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    width: 120%;
+    aspect-ratio: 7 / 5;
+    border-top: 1px solid var(--line);
+    border-left: 1px solid var(--line);
+    transform: translate(-50%, -50%) skewX(-40deg) skewY(12deg) scale(0.9);
+  }
+  .bx-tile {
+    border-right: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    transition: background-color 900ms ease-out;
+  }
+  .bx-tile.is-lit {
+    background: var(--accent);
+    transition: none;
+  }
+</style>
+
+<script>
+  // 켜진 뒤 곧바로 떼어 내면 CSS transition 으로 천천히 꺼지며 자취가 남는다 (반복 루프 없음)
+  document.querySelectorAll<HTMLElement>('.background-boxes').forEach((root) => {
+    root.addEventListener('pointerover', (event) => {
+      const tile = (event.target as Element).closest<HTMLElement>('.bx-tile');
+      if (!tile) return;
+      tile.classList.add('is-lit');
+      window.setTimeout(() => tile.classList.remove('is-lit'), 120);
+    });
+  });
+</script>

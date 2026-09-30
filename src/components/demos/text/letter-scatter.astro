@@ -1,0 +1,42 @@
+---
+// Letter Scatter 데모 — 마우스를 올리면(.is-active) 글자마다 정해 둔 방향(--x, --y)으로 흩어지며 살짝 돌고, 떼면 제자리로 모인다
+const letters = [
+  { letter: 'A', x: -0.9, y: -0.6, r: -25 },
+  { letter: 'B', x: -0.45, y: 0.7, r: 18 },
+  { letter: 'C', x: -0.1, y: -0.85, r: -12 },
+  { letter: 'D', x: 0.2, y: 0.8, r: 30 },
+  { letter: 'E', x: 0.5, y: -0.7, r: -20 },
+  { letter: 'F', x: 0.9, y: 0.5, r: 22 },
+];
+---
+<div class="letter-scatter" data-demo-root aria-hidden="true">
+  <span class="ls-word">
+    {letters.map(({ letter, x, y, r }) => (
+      <span class="ls-letter" style={`--x: ${x}em; --y: ${y}em; --r: ${r}deg`}>{letter}</span>
+    ))}
+  </span>
+</div>
+
+<style>
+  .letter-scatter {
+    display: grid;
+    place-items: center;
+    container-type: inline-size;
+  }
+  .ls-word {
+    font-size: clamp(2rem, 13cqi, 4.5rem);
+    font-weight: 800;
+    line-height: 1.1;
+    color: var(--ink);
+  }
+  .ls-letter {
+    display: inline-block;
+    transition: transform 450ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .ls-letter:nth-child(even) {
+    color: var(--accent);
+  }
+  .letter-scatter.is-active .ls-letter {
+    transform: translate(var(--x), var(--y)) rotate(var(--r));
+  }
+</style>

@@ -1,0 +1,61 @@
+---
+// Liquid Fill Text 데모 — 글자 모양으로 자른 영역 안에서 물결 면이 옆으로 흐르고(한 파장만큼 이동해 반복) 수위가 천천히 오르내린다
+// 물결 경로는 파장 100 단위로 폭 500까지 그려 한 파장 이동해도 빈틈이 없게 한다
+const crests = Array.from({ length: 9 }, (_, i) => `T${100 + i * 50} 60`).join(' ');
+const wave = `M0 60 Q25 40 50 60 ${crests} V170 H0 Z`;
+---
+<div class="liquid-fill-text" data-demo-root aria-hidden="true">
+  <svg class="lft-svg" viewBox="0 0 400 140">
+    <defs>
+      <clipPath id="liquid-fill-text-clip">
+        <text x="200" y="108" text-anchor="middle" font-size="112" font-weight="800">ABCD</text>
+      </clipPath>
+    </defs>
+    <g clip-path="url(#liquid-fill-text-clip)">
+      <g class="lft-level">
+        <path class="lft-wave" d={wave} />
+      </g>
+    </g>
+    <text class="lft-outline" x="200" y="108" text-anchor="middle" font-size="112" font-weight="800">ABCD</text>
+  </svg>
+</div>
+
+<style>
+  .liquid-fill-text {
+    display: grid;
+    place-items: center;
+  }
+  .lft-svg {
+    width: 76%;
+    height: auto;
+    overflow: visible;
+  }
+  .lft-wave {
+    fill: var(--accent);
+    animation: liquid-fill-text-roll 2.4s linear infinite;
+  }
+  .lft-level {
+    animation: liquid-fill-text-level 6s ease-in-out infinite alternate;
+  }
+  .lft-outline {
+    fill: none;
+    stroke: var(--accent);
+    stroke-width: 2;
+  }
+  @keyframes liquid-fill-text-roll {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-100px);
+    }
+  }
+  @keyframes liquid-fill-text-level {
+    from {
+      transform: translateY(30px);
+    }
+    to {
+      transform: translateY(-36px);
+    }
+  }
+</style>

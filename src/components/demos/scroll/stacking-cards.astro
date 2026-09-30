@@ -1,0 +1,79 @@
+---
+// Stacking Cards 데모 — 카드마다 위쪽에 조금씩 어긋나게 달라붙고(sticky), 다음 카드가 덮을 때 아래 카드는 --scroll 에 맞춰 살짝 줄어든다
+// 카드 한 칸 80cqh, 끝 여백 20cqh → 카드 i 가 자리에 닿는 때가 --scroll 약 i/3
+const cards = ['A', 'B', 'C', 'D'];
+---
+<div class="stacking-cards" data-demo-root aria-hidden="true">
+  <div class="stk-page" data-scroller>
+    <div class="stk-list">
+      {cards.map((letter, i) => (
+        <div class="stk-card" style={`--i: ${i}`}>
+          <span class="stk-letter">{letter}</span>
+          <span class="stk-line"></span>
+          <span class="stk-line stk-line--short"></span>
+        </div>
+      ))}
+      <div class="stk-end"></div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .stacking-cards {
+    display: grid;
+    /* 행을 스테이지 높이로 묶어야 안쪽 페이지가 넘치지 않고 스크롤된다 */
+    grid-template-rows: minmax(0, 1fr);
+    padding: 14px 14% 0;
+  }
+  .stk-page {
+    padding: 8px 12px 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+    container-type: size;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-bottom: 0;
+    border-radius: 6px 6px 0 0;
+  }
+  .stk-card {
+    position: sticky;
+    /* 앞 카드의 윗단이 조금씩 보이게 달라붙는 높이를 한 칸씩 내린다 */
+    top: calc(var(--i) * 10px);
+    display: grid;
+    align-content: center;
+    gap: 10px;
+    height: 72cqh;
+    margin-bottom: 8cqh;
+    padding: 0 16px;
+    color: var(--ink);
+    background: var(--stage);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    transform-origin: top center;
+    /* 뒤따르는 카드 수만큼 줄어든다: 덮이기 시작한 뒤(--scroll × 3 − i)를 0 ~ (3 − i) 로 묶는다 */
+    transform: scale(calc(1 - clamp(0, var(--scroll, 0) * 3 - var(--i), 3 - var(--i)) * 0.05));
+  }
+  .stk-card:nth-child(odd) {
+    color: var(--on-accent);
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+  .stk-letter {
+    font-size: 1.5rem;
+    font-weight: 700;
+  }
+  .stk-line {
+    width: 70%;
+    height: 8px;
+    border-radius: 2px;
+    background: currentColor;
+    opacity: 0.35;
+  }
+  .stk-line--short {
+    width: 46%;
+  }
+  .stk-end {
+    height: 20cqh;
+  }
+</style>

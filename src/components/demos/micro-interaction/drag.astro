@@ -1,0 +1,54 @@
+---
+// Drag 데모 — 끄는 동안(.is-dragging) 블록이 이동량(--dx, --dy)을 따라가되 점선 영역 밖으로는 나가지 않고, 놓으면 가운데로 튕기듯 돌아온다
+---
+<div class="drag" data-demo-root aria-hidden="true">
+  <div class="dg-area">
+    <div class="dg-block">A</div>
+  </div>
+</div>
+
+<style>
+  .drag {
+    display: grid;
+    place-items: center;
+    container-type: size;
+    cursor: grab;
+    touch-action: none;
+    -webkit-user-select: none; /* Safari 는 접두어만 안다 */
+    user-select: none;
+  }
+  .drag.is-dragging {
+    cursor: grabbing;
+  }
+  .dg-area {
+    display: grid;
+    place-items: center;
+    width: 64cqw;
+    height: 56cqh;
+    border: 2px dashed var(--line);
+    border-radius: 10px;
+  }
+  .dg-block {
+    display: grid;
+    place-items: center;
+    width: 14cqw;
+    aspect-ratio: 1;
+    font-size: clamp(1rem, 4.5cqw, 2rem);
+    font-weight: 700;
+    color: var(--on-accent);
+    background: var(--accent);
+    border-radius: 8px;
+    /* 영역 안쪽으로만 — 가로 (64 - 14 × 1.06) / 2, 세로 (56cqh - 14cqw × 1.06) / 2 (끄는 동안 1.06배로 커진 크기 기준)
+       이동은 개별 translate 로 — transform 에 두면 끄는 동안의 scale 이 이동량까지 키워 영역 밖으로 나간다 */
+    translate: clamp(-24.5cqw, var(--dx, 0px), 24.5cqw) clamp(calc(7.5cqw - 28cqh), var(--dy, 0px), calc(28cqh - 7.5cqw));
+  }
+  /* 놓으면 가운데로 — --dx·--dy 는 놓아도 남으므로 제자리 값을 따로 준다 */
+  .drag:not(.is-dragging) .dg-block {
+    translate: 0 0;
+    transition: translate 450ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .drag.is-dragging .dg-block {
+    scale: 1.06;
+    background: var(--accent-strong);
+  }
+</style>

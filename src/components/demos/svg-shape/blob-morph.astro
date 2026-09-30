@@ -1,0 +1,36 @@
+---
+// Blob Morph 데모 — border-radius 여덟 값을 바꿔 가며 덩어리 윤곽이 끊김 없이 계속 출렁인다
+---
+<div class="blob-morph" data-demo-root aria-hidden="true">
+  <div class="bm-blob"></div>
+</div>
+
+<style>
+  .blob-morph {
+    display: grid;
+    place-items: center;
+  }
+  .bm-blob {
+    width: 38%;
+    aspect-ratio: 1;
+    background: var(--accent);
+    border-radius: 42% 58% 63% 37% / 41% 44% 56% 59%;
+    animation: blob-morph-shape 8s ease-in-out infinite;
+  }
+  /* 처음과 끝 모양이 같아야 루프 이음매가 튀지 않는다 */
+  @keyframes blob-morph-shape {
+    0%,
+    100% {
+      border-radius: 42% 58% 63% 37% / 41% 44% 56% 59%;
+      transform: rotate(0deg);
+    }
+    33% {
+      border-radius: 63% 37% 45% 55% / 55% 62% 38% 45%;
+      transform: rotate(40deg);
+    }
+    66% {
+      border-radius: 36% 64% 52% 48% / 62% 36% 64% 38%;
+      transform: rotate(-30deg);
+    }
+  }
+</style>

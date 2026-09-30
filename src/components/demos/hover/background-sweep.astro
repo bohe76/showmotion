@@ -1,0 +1,47 @@
+---
+// Background Sweep 데모 — 마우스를 올리면(.is-active) 색이 왼쪽 끝에서 오른쪽으로 부드럽게 채워지고, 떼면 되돌아간다
+---
+<div class="background-sweep" data-demo-root aria-hidden="true">
+  <div class="bs-box">
+    <span class="bs-fill"></span>
+    <span class="bs-label">A</span>
+  </div>
+</div>
+
+<style>
+  .background-sweep {
+    display: grid;
+    place-items: center;
+  }
+  .bs-box {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 40%;
+    aspect-ratio: 16 / 10;
+    overflow: hidden;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--ink);
+    background: var(--surface);
+    border-radius: 6px;
+    transition: color 300ms ease-out;
+  }
+  .bs-fill {
+    position: absolute;
+    inset: 0;
+    background: var(--accent);
+    transform: scaleX(0);
+    transform-origin: left center;
+    transition: transform 300ms ease-out;
+  }
+  .bs-label {
+    position: relative;
+  }
+  .background-sweep.is-active .bs-box {
+    color: var(--on-accent);
+  }
+  .background-sweep.is-active .bs-fill {
+    transform: scaleX(1);
+  }
+</style>

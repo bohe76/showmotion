@@ -1,0 +1,92 @@
+---
+// Button Loading State 데모 — .is-playing 이 붙으면 버튼이 눌리고, 글자 자리에 스피너가 몇 바퀴 돈 뒤 다시 글자로 돌아온다
+// 재생이 끝나면 멈춰야 하므로(once) 스피너는 정해진 바퀴만 돈다. 없으면 평소 버튼(최종 상태)
+// 글자와 스피너를 같은 칸에 겹쳐 두어 바뀌는 동안 버튼 폭이 변하지 않는다
+---
+<div class="button-loading-state" data-demo-root aria-hidden="true">
+  <div class="bls-button">
+    <span class="bls-label"></span>
+    <span class="bls-spinner"></span>
+  </div>
+</div>
+
+<style>
+  .button-loading-state {
+    display: grid;
+    place-items: center;
+  }
+  .bls-button {
+    display: grid;
+    place-items: center;
+    width: 44%;
+    height: 52px;
+    background: var(--accent);
+    border-radius: 999px;
+  }
+  .bls-label,
+  .bls-spinner {
+    grid-area: 1 / 1;
+  }
+  .bls-label {
+    width: 72px;
+    height: 8px;
+    background: var(--on-accent);
+    border-radius: 2px;
+  }
+  .bls-spinner {
+    width: 22px;
+    height: 22px;
+    border: 3px solid color-mix(in srgb, var(--on-accent) 35%, transparent);
+    border-top-color: var(--on-accent);
+    border-radius: 50%;
+    opacity: 0;
+  }
+  .button-loading-state.is-playing .bls-button {
+    animation: button-loading-state-press 3s ease-out both;
+  }
+  .button-loading-state.is-playing .bls-label {
+    animation: button-loading-state-label 3s ease-out both;
+  }
+  .button-loading-state.is-playing .bls-spinner {
+    animation:
+      button-loading-state-spinner 3s ease-out both,
+      button-loading-state-spin 0.7s linear 0.3s 4;
+  }
+  @keyframes button-loading-state-press {
+    4% {
+      transform: scale(0.95);
+    }
+    9% {
+      transform: scale(1);
+    }
+    14%,
+    84% {
+      opacity: 0.8;
+    }
+  }
+  @keyframes button-loading-state-label {
+    0%,
+    9% {
+      opacity: 1;
+    }
+    14%,
+    84% {
+      opacity: 0;
+    }
+  }
+  @keyframes button-loading-state-spinner {
+    0%,
+    9% {
+      opacity: 0;
+    }
+    14%,
+    84% {
+      opacity: 1;
+    }
+  }
+  @keyframes button-loading-state-spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+</style>

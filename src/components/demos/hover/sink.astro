@@ -1,0 +1,37 @@
+---
+// Sink 데모 — 마우스를 올리면(.is-active) 블록이 아래로 가라앉아 머물고, 떼면 올라온다
+// 점선 칸은 원래 자리 — 얼마나 내려갔는지 보이게 한다
+---
+<div class="sink" data-demo-root aria-hidden="true">
+  <div class="si-ghost"></div>
+  <div class="si-box">A</div>
+</div>
+
+<style>
+  .sink {
+    display: grid;
+    place-items: center;
+  }
+  .si-ghost,
+  .si-box {
+    grid-area: 1 / 1;
+    width: 40%;
+    aspect-ratio: 16 / 10;
+    border-radius: 6px;
+  }
+  .si-ghost {
+    border: 2px dashed var(--demo-muted);
+  }
+  .si-box {
+    display: grid;
+    place-items: center;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--on-accent);
+    background: var(--accent);
+    transition: transform 300ms ease-out;
+  }
+  .sink.is-active .si-box {
+    transform: translateY(16%);
+  }
+</style>

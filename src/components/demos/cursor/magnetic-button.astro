@@ -1,0 +1,42 @@
+---
+// Magnetic Button 데모 — 포인터가 들어오면(.is-active) 블록이 포인터 쪽(--mx, --my)으로 끌려가고 글자는 조금 더 끌려간다. 나가면 살짝 튕기며 제자리로 돌아온다
+---
+<div class="magnetic-button" data-demo-root aria-hidden="true">
+  <div class="mb-button">
+    <span class="mb-label">A</span>
+  </div>
+</div>
+
+<style>
+  .magnetic-button {
+    display: grid;
+    place-items: center;
+  }
+  .mb-button {
+    display: grid;
+    place-items: center;
+    width: 34%;
+    aspect-ratio: 5 / 2;
+    background: var(--accent);
+    border-radius: 999px;
+    /* 떠날 때 — 제자리로 돌아오며 살짝 튕긴다 */
+    transition: transform 600ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .mb-label {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--on-accent);
+    transition: transform 600ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .magnetic-button.is-active .mb-button {
+    /* 가운데에서 포인터까지 거리의 일부만큼 따라간다 (% 는 블록 자기 크기 기준) */
+    transform: translate(calc((var(--mx, 0.5) - 0.5) * 70%), calc((var(--my, 0.5) - 0.5) * 120%));
+    transition-duration: 200ms;
+    transition-timing-function: ease-out;
+  }
+  .magnetic-button.is-active .mb-label {
+    transform: translate(calc((var(--mx, 0.5) - 0.5) * 1.6em), calc((var(--my, 0.5) - 0.5) * 1.2em));
+    transition-duration: 200ms;
+    transition-timing-function: ease-out;
+  }
+</style>

@@ -1,0 +1,30 @@
+---
+// Animated Gradient Text 데모 — 글자를 채운 그라데이션이 옆으로 끝없이 흐른다
+// 그라데이션 양 끝 색을 같게 두고 한 벌(200%)만큼 이동해 이음매를 숨긴다
+---
+<div class="animated-gradient-text" data-demo-root aria-hidden="true">
+  <span class="agt-word">ABCDEF</span>
+</div>
+
+<style>
+  .animated-gradient-text {
+    display: grid;
+    place-items: center;
+    container-type: inline-size;
+  }
+  .agt-word {
+    font-size: clamp(2rem, 13cqi, 4.5rem);
+    font-weight: 800;
+    line-height: 1.1;
+    color: transparent;
+    background: linear-gradient(90deg, var(--accent), var(--ink), var(--accent-strong), var(--muted), var(--accent)) 0 0 / 200% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    animation: animated-gradient-text-flow 6s linear infinite;
+  }
+  @keyframes animated-gradient-text-flow {
+    to {
+      background-position: 200% 0;
+    }
+  }
+</style>

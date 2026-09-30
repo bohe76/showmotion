@@ -1,0 +1,106 @@
+---
+// Top Loading Bar 데모 — .is-playing 이 붙으면 작은 페이지 맨 위의 얇은 막대가 빠르게 나갔다 점점 느리게 기어가고,
+// 로드가 끝나면 끝까지 채운 뒤 사라지며 흐리던 내용이 또렷해진다. 없으면 로드가 끝난 상태(막대 없음)
+---
+<div class="top-loading-bar" data-demo-root aria-hidden="true">
+  <div class="tlb-page">
+    <div class="tlb-bar"></div>
+    <div class="tlb-content">
+      <span class="tlb-title"></span>
+      <span class="tlb-media"></span>
+      <span class="tlb-line"></span>
+      <span class="tlb-line tlb-line--short"></span>
+    </div>
+  </div>
+</div>
+
+<style>
+  .top-loading-bar {
+    display: grid;
+    place-items: center;
+  }
+  .tlb-page {
+    position: relative;
+    width: 64%;
+    aspect-ratio: 16 / 11;
+    overflow: hidden;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+  }
+  .tlb-bar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: var(--accent);
+    transform-origin: left;
+    opacity: 0;
+  }
+  .tlb-content {
+    display: grid;
+    align-content: start;
+    gap: 10px;
+    height: 100%;
+    padding: 18px 16px;
+  }
+  .tlb-title {
+    width: 55%;
+    height: 12px;
+    background: var(--ink);
+    border-radius: 2px;
+  }
+  .tlb-media {
+    aspect-ratio: 16 / 5;
+    background: var(--demo-muted);
+    border-radius: 3px;
+  }
+  .tlb-line {
+    height: 8px;
+    background: var(--demo-muted);
+    border-radius: 2px;
+  }
+  .tlb-line--short {
+    width: 60%;
+  }
+  .top-loading-bar.is-playing .tlb-bar {
+    animation: top-loading-bar-progress 2600ms ease-out both;
+  }
+  .top-loading-bar.is-playing .tlb-content {
+    animation: top-loading-bar-content 2600ms ease-out both;
+  }
+  /* 앞은 빠르고 뒤로 갈수록 느리게 기어가다(로드 대기), 끝나면 단번에 채우고 사라진다 */
+  @keyframes top-loading-bar-progress {
+    0% {
+      opacity: 1;
+      transform: scaleX(0);
+    }
+    12% {
+      transform: scaleX(0.3);
+    }
+    40% {
+      transform: scaleX(0.55);
+    }
+    70% {
+      transform: scaleX(0.7);
+    }
+    80% {
+      opacity: 1;
+      transform: scaleX(1);
+    }
+    100% {
+      opacity: 0;
+      transform: scaleX(1);
+    }
+  }
+  @keyframes top-loading-bar-content {
+    0%,
+    72% {
+      opacity: 0.35;
+    }
+    88% {
+      opacity: 1;
+    }
+  }
+</style>

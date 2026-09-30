@@ -1,0 +1,61 @@
+---
+// Lightbox Zoom 데모 — 누를 때마다(.is-on 토글) 썸네일 A가 제자리에서 가운데로 커지며 나오고 뒤가 흐려진다. 다시 누르면 제자리로 돌아간다
+---
+<div class="lightbox-zoom" data-demo-root aria-hidden="true">
+  <div class="lz-row">
+    <div class="lz-thumb lz-main">A</div>
+    <div class="lz-thumb">B</div>
+    <div class="lz-thumb">C</div>
+  </div>
+  <div class="lz-backdrop"></div>
+</div>
+
+<style>
+  .lightbox-zoom {
+    position: relative;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    cursor: pointer;
+  }
+  .lz-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    /* 스테이지 폭 기준으로 썸네일 24%, 간격 4% — 아래 이동량이 이 값에 맞춰져 있다 */
+    column-gap: 5%;
+    width: 80%;
+  }
+  .lz-thumb {
+    display: grid;
+    place-items: center;
+    aspect-ratio: 4 / 3;
+    font-weight: 700;
+    color: var(--ink);
+    background: var(--demo-muted);
+    border-radius: 4px;
+  }
+  .lz-main {
+    position: relative;
+    z-index: 2;
+    color: var(--on-accent);
+    background: var(--accent);
+    transition: transform 350ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .lz-backdrop {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    /* 페이지 바탕색으로 덮어 라이트·다크 모두 뒤가 물러나 보인다 */
+    background: var(--surface);
+    opacity: 0;
+    transition: opacity 350ms ease-out;
+    pointer-events: none;
+  }
+  /* 썸네일 A의 가운데(스테이지 22%)를 스테이지 가운데(50%)로 — 28% ÷ 썸네일 폭 24% */
+  .lightbox-zoom.is-on .lz-main {
+    transform: translateX(116.67%) scale(2.4);
+  }
+  .lightbox-zoom.is-on .lz-backdrop {
+    opacity: 0.9;
+  }
+</style>

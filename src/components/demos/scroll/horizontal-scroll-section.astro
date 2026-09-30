@@ -1,0 +1,99 @@
+---
+// Horizontal Scroll Section 데모 — 작은 페이지를 세로로 내리면 가운데 구간이 고정되고, 그동안 패널 줄이 옆으로 흐른다
+// 구간 높이: 앞 40cqh + 고정 트랙 300cqh + 뒤 40cqh → 고정되는 동안은 --scroll 1/7~6/7, 이를 0~1 로 늘려 쓴다
+const panels = ['A', 'B', 'C', 'D', 'E'];
+---
+<div class="horizontal-scroll" data-demo-root aria-hidden="true">
+  <div class="hz-page" data-scroller>
+    <div class="hz-text">
+      <div class="hz-line hz-line--title"></div>
+      <div class="hz-line" style="width: 86%"></div>
+      <div class="hz-line" style="width: 64%"></div>
+    </div>
+    <div class="hz-track">
+      <div class="hz-view">
+        <div class="hz-row">
+          {panels.map((letter) => <div class="hz-panel">{letter}</div>)}
+        </div>
+      </div>
+    </div>
+    <div class="hz-text">
+      <div class="hz-line hz-line--title"></div>
+      <div class="hz-line" style="width: 78%"></div>
+      <div class="hz-line" style="width: 56%"></div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .horizontal-scroll {
+    display: grid;
+    /* 행을 스테이지 높이로 묶어야 안쪽 페이지가 넘치지 않고 스크롤된다 */
+    grid-template-rows: minmax(0, 1fr);
+    padding: 14px 14% 0;
+  }
+  .hz-page {
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+    /* 구간 높이를 페이지 높이(cqh) 기준으로 잡는다 */
+    container-type: size;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-bottom: 0;
+    border-radius: 6px 6px 0 0;
+  }
+  .hz-text {
+    display: grid;
+    align-content: center;
+    gap: 10px;
+    height: 40cqh;
+    padding: 0 16px;
+  }
+  .hz-line {
+    height: 8px;
+    border-radius: 2px;
+    background: var(--demo-muted);
+  }
+  .hz-line--title {
+    width: 55%;
+    height: 12px;
+    background: var(--ink);
+  }
+  .hz-track {
+    height: 300cqh;
+  }
+  .hz-view {
+    position: sticky;
+    top: 0;
+    display: flex;
+    align-items: center;
+    height: 100cqh;
+    overflow: hidden;
+  }
+  /* 줄 폭 340% 중 화면 밖 240% 만큼(= 줄의 약 70.6%) 옮기면 마지막 패널이 오른쪽 끝에 닿는다 */
+  .hz-row {
+    flex: none;
+    display: flex;
+    gap: 10px;
+    width: 340%;
+    height: 62%;
+    padding: 0 12px;
+    transform: translateX(calc(clamp(0, (var(--scroll, 0) - 0.1429) * 1.4, 1) * -70.59%));
+  }
+  .hz-panel {
+    flex: 1;
+    display: grid;
+    place-items: center;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--ink);
+    background: var(--demo-muted);
+    border-radius: 6px;
+  }
+  .hz-panel:nth-child(odd) {
+    color: var(--on-accent);
+    background: var(--accent);
+  }
+</style>

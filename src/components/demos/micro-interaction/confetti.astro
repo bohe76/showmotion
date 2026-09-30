@@ -1,0 +1,110 @@
+---
+// Confetti 데모 — 누를 때마다(.is-playing) 가운데 블록에서 종이 조각이 사방으로 터져 나갔다가 빙글 돌며 떨어진다
+// 조각마다 날아갈 방향(--x, --y, cq 단위)·회전·색을 달리 준다
+const pieces = [
+  { x: -34, y: -30, r: 320, c: 'var(--accent)' },
+  { x: -22, y: -40, r: -260, c: 'var(--highlight)' },
+  { x: -8, y: -44, r: 280, c: 'var(--ink)' },
+  { x: 6, y: -42, r: -300, c: 'var(--accent-strong)' },
+  { x: 20, y: -38, r: 240, c: 'var(--accent)' },
+  { x: 33, y: -28, r: -340, c: 'var(--highlight)' },
+  { x: -40, y: -12, r: 260, c: 'var(--accent-strong)' },
+  { x: 40, y: -14, r: -280, c: 'var(--ink)' },
+  { x: -28, y: -20, r: -220, c: 'var(--demo-muted)' },
+  { x: 27, y: -22, r: 300, c: 'var(--accent)' },
+  { x: -14, y: -32, r: 200, c: 'var(--accent)' },
+  { x: 14, y: -30, r: -240, c: 'var(--highlight)' },
+  { x: -2, y: -26, r: 360, c: 'var(--accent-strong)' },
+  { x: 36, y: -36, r: 220, c: 'var(--demo-muted)' },
+];
+---
+<div class="confetti" data-demo-root aria-hidden="true">
+  <div class="cf-origin">
+    {pieces.map((p, i) => (
+      <span
+        class:list={['cf-piece', i % 3 === 0 && 'cf-piece--dot']}
+        style={`--x: ${p.x}cqw; --y: ${p.y}cqh; --r: ${p.r}deg; --c: ${p.c}`}
+      ></span>
+    ))}
+  </div>
+  <div class="cf-button">A</div>
+</div>
+
+<style>
+  .confetti {
+    position: relative;
+    overflow: hidden;
+    container-type: size;
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+  }
+  .cf-button {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 26%;
+    aspect-ratio: 2.4;
+    font-size: clamp(1rem, 4cqw, 1.75rem);
+    font-weight: 700;
+    color: var(--on-accent);
+    background: var(--accent);
+    border-radius: 999px;
+  }
+  /* 조각은 버튼 가운데 한 점에서 출발한다 */
+  .cf-origin {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    z-index: 1;
+  }
+  .cf-piece {
+    position: absolute;
+    width: 8px;
+    height: 12px;
+    margin: -6px 0 0 -4px;
+    background: var(--c);
+    border-radius: 1px;
+    opacity: 0;
+  }
+  .cf-piece--dot {
+    width: 8px;
+    height: 8px;
+    margin-top: -4px;
+    border-radius: 50%;
+  }
+  .confetti.is-playing .cf-button {
+    animation: confetti-press 320ms ease-out both;
+  }
+  .confetti.is-playing .cf-piece {
+    animation: confetti-burst 1400ms linear both;
+  }
+  @keyframes confetti-press {
+    40% {
+      transform: scale(0.92);
+    }
+    to {
+      transform: scale(1);
+    }
+  }
+  /* 앞 30% 는 빠르게 퍼지고, 나머지는 중력처럼 천천히 떨어지며 사라진다 */
+  @keyframes confetti-burst {
+    0% {
+      opacity: 1;
+      transform: translate(0, 0) rotate(0deg);
+      animation-timing-function: cubic-bezier(0.2, 0.8, 0.3, 1);
+    }
+    30% {
+      opacity: 1;
+      transform: translate(var(--x), var(--y)) rotate(calc(var(--r) * 0.4));
+      animation-timing-function: ease-in;
+    }
+    80% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+      transform: translate(calc(var(--x) * 1.2), calc(var(--y) + 45cqh)) rotate(var(--r));
+    }
+  }
+</style>

@@ -1,0 +1,42 @@
+---
+// Text Generate 데모 — .is-playing 이 붙으면 단어마다 --i 로 차례로 흐림이 걷히며 나타나고, 없으면 최종 상태(보임)
+const words = ['ABC', 'DEFG', 'HI', 'JKLM', 'NOP', 'QR', 'STUV', 'WX'];
+---
+<div class="text-generate" data-demo-root aria-hidden="true">
+  <p class="tg-text">
+    {words.map((word, i) => <span class="tg-word" style={`--i: ${i}`}>{word}</span>)}
+  </p>
+</div>
+
+<style>
+  .text-generate {
+    display: grid;
+    place-items: center;
+    container-type: inline-size;
+  }
+  .tg-text {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.15em 0.35em;
+    width: 72%;
+    margin: 0;
+    font-size: clamp(1.25rem, 7cqi, 2.5rem);
+    font-weight: 700;
+    line-height: 1.25;
+    color: var(--ink);
+  }
+  .text-generate.is-playing .tg-word {
+    animation: text-generate-in 700ms ease-out both;
+    animation-delay: calc(var(--i) * 160ms);
+  }
+  @keyframes text-generate-in {
+    from {
+      opacity: 0;
+      filter: blur(0.25em);
+    }
+    to {
+      opacity: 1;
+      filter: blur(0);
+    }
+  }
+</style>

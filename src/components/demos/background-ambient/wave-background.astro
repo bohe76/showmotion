@@ -1,0 +1,55 @@
+---
+// Wave Background 데모 — 높이가 다른 물결 3겹이 서로 다른 속도로 옆으로 흘러 겹친다
+// 물결 한 주기(400)를 두 번 이은 2배 폭 SVG 를 -50% 옮겨 이음매 없이 반복한다
+const waves = [
+  ['M0 50 Q 100 10 200 50 T 400 50 T 600 50 T 800 50 V 100 H 0 Z', 'wv-layer--back'],
+  ['M0 50 Q 100 80 200 50 T 400 50 T 600 50 T 800 50 V 100 H 0 Z', 'wv-layer--mid'],
+  ['M0 50 Q 100 25 200 50 T 400 50 T 600 50 T 800 50 V 100 H 0 Z', 'wv-layer--front'],
+];
+---
+<div class="wave-background" data-demo-root aria-hidden="true">
+  {waves.map(([d, modifier]) => (
+    <svg class:list={['wv-layer', modifier]} viewBox="0 0 800 100" preserveAspectRatio="none">
+      <path d={d} />
+    </svg>
+  ))}
+</div>
+
+<style>
+  .wave-background {
+    position: relative;
+    overflow: hidden;
+  }
+  .wv-layer {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    display: block;
+    width: 200%;
+    animation: wave-background-roll 14s linear infinite;
+  }
+  .wv-layer--back {
+    height: 62%;
+    fill: var(--highlight);
+  }
+  .wv-layer--mid {
+    height: 50%;
+    fill: var(--accent);
+    opacity: 0.45;
+    animation-duration: 10s;
+    animation-direction: reverse;
+  }
+  .wv-layer--front {
+    height: 36%;
+    fill: var(--accent);
+    animation-duration: 7s;
+  }
+  @keyframes wave-background-roll {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-50%);
+    }
+  }
+</style>
