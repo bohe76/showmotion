@@ -52,7 +52,6 @@ type UiStrings = {
   aliases: string;
   useFor: string;
   close: string;
-  footer: string;
   categoriesLabel: string;
   // 카테고리 페이지 <meta description> — 카테고리 이름은 모든 언어에서 영어
   categoryDescription: (category: string, n: number) => string;
@@ -110,7 +109,6 @@ export const ui: Record<Locale, UiStrings> = {
     aliases: 'Also called',
     useFor: 'Use for',
     close: 'Close',
-    footer: 'ShowMotion · a bohehub project',
     categoriesLabel: 'Categories',
     categoryDescription: (c, n) =>
       `${c}: ${n === 1 ? '1 motion' : `${n} motions`} shown live, each with a copy-ready prompt for your AI coding agent.`,
@@ -164,7 +162,6 @@ export const ui: Record<Locale, UiStrings> = {
     aliases: 'También llamado',
     useFor: 'Se usa en',
     close: 'Cerrar',
-    footer: 'ShowMotion · un proyecto de bohehub',
     categoriesLabel: 'Categorías',
     categoryDescription: (c, n) =>
       `${c}: ${n === 1 ? '1 animación' : `${n} animaciones`} en acción, cada una con un prompt listo para copiar en tu agente de IA.`,
@@ -218,7 +215,6 @@ export const ui: Record<Locale, UiStrings> = {
     aliases: 'Auch genannt',
     useFor: 'Einsatz',
     close: 'Schließen',
-    footer: 'ShowMotion · ein bohehub-Projekt',
     categoriesLabel: 'Kategorien',
     categoryDescription: (c, n) =>
       `${c}: ${n === 1 ? '1 Animation' : `${n} Animationen`} live ansehen, jeweils mit einem kopierfertigen Prompt für deinen KI-Coding-Agenten.`,
@@ -272,7 +268,6 @@ export const ui: Record<Locale, UiStrings> = {
     aliases: 'Aussi appelée',
     useFor: 'Usages',
     close: 'Fermer',
-    footer: 'ShowMotion · un projet bohehub',
     categoriesLabel: 'Catégories',
     categoryDescription: (c, n) =>
       `${c} : ${n <= 1 ? `${n} animation` : `${n} animations`} en direct, chacune avec un prompt prêt à copier pour votre agent de code IA.`,
@@ -326,7 +321,6 @@ export const ui: Record<Locale, UiStrings> = {
     aliases: 'Também chamada',
     useFor: 'Onde usar',
     close: 'Fechar',
-    footer: 'ShowMotion · um projeto bohehub',
     categoriesLabel: 'Categorias',
     categoryDescription: (c, n) =>
       `${c}: ${n === 1 ? '1 animação' : `${n} animações`} ao vivo, cada uma com um prompt pronto para colar no seu agente de IA.`,
@@ -380,7 +374,6 @@ export const ui: Record<Locale, UiStrings> = {
     aliases: '別名',
     useFor: '使いどころ',
     close: '閉じる',
-    footer: 'ShowMotion · bohehub プロジェクト',
     categoriesLabel: 'カテゴリー',
     categoryDescription: (c, n) =>
       `${c}の${n}種類のモーションを実際に再生して確認し、AIコーディングエージェント用のプロンプトをコピーできます。`,
@@ -434,7 +427,6 @@ export const ui: Record<Locale, UiStrings> = {
     aliases: '다른 이름',
     useFor: '쓰는 곳',
     close: '닫기',
-    footer: 'ShowMotion · bohehub 프로젝트',
     categoriesLabel: '카테고리',
     categoryDescription: (c, n) =>
       `${c} 모션 ${n}개를 직접 재생해 보고, AI 코딩 에이전트에 붙여 넣을 프롬프트를 복사할 수 있습니다.`,
@@ -488,7 +480,6 @@ export const ui: Record<Locale, UiStrings> = {
     aliases: '别称',
     useFor: '适用场景',
     close: '关闭',
-    footer: 'ShowMotion · bohehub 项目',
     categoriesLabel: '分类',
     categoryDescription: (c, n) => `实时查看 ${c} 类的 ${n} 个动效，并复制可直接交给 AI 编程智能体实现的提示词。`,
     searchLabel: '搜索动效',
@@ -541,7 +532,6 @@ export const ui: Record<Locale, UiStrings> = {
     aliases: '別稱',
     useFor: '適用情境',
     close: '關閉',
-    footer: 'ShowMotion · bohehub 專案',
     categoriesLabel: '分類',
     categoryDescription: (c, n) => `即時觀看 ${c} 類的 ${n} 個動效，並複製可以直接交給 AI 程式設計代理實作的提示詞。`,
     searchLabel: '搜尋動效',
