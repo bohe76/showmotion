@@ -1,0 +1,33 @@
+---
+// Tilt 데모 — 카메라가 제자리에서 위아래로 돈다. 장면 전체(세 레이어와 바닥)가 같은 거리만큼 반대쪽으로 밀린다(깊이 차이 없음)
+// Pedestal 과 나란히 보면 차이가 보인다: 가운데 레이어(B)의 이동량은 두 데모가 같다. Pan ↔ Truck 의 세로판이다
+// 변형: up(기본 — 카메라가 위로 돌아 화면이 아래로 밀린다) · down. --mg-dir 이 방향이다(위 -1, 아래 1)
+// 장면이 위로 밀려 있을 때 밑이 비지 않게 바닥과 기둥을 화면 밖까지 잇는다(bleed)
+import MgFrame from '../../mg/MgFrame.astro';
+import MgScene from '../../mg/MgScene.astro';
+---
+<div class="mg-tilt" data-demo-root aria-hidden="true">
+  <MgFrame duration="3s">
+    <MgScene bleed />
+  </MgFrame>
+</div>
+
+<style>
+  .mg-tilt {
+    --mg-dir: -1;
+  }
+  .mg-tilt[data-variant='down'] {
+    --mg-dir: 1;
+  }
+  .mg-tilt :global(.mgs) {
+    translate: 0 calc(7cqw * var(--mg-dir));
+  }
+  .mg-tilt.is-playing :global(.mgs) {
+    animation: mg-tilt-move var(--mg-duration) ease-in-out forwards;
+  }
+  @keyframes mg-tilt-move {
+    to {
+      translate: 0 calc(-7cqw * var(--mg-dir));
+    }
+  }
+</style>

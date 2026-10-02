@@ -1,0 +1,77 @@
+---
+// RGB Split 데모 — 색 채널이 좌우로 어긋나 물체의 가장자리마다 색 테두리가 생긴다. 그것 하나뿐이다: 그림은 깨지지도 밀리지도 않는다
+// 처음에는 테두리가 없다. 시간 막대의 띠가 어긋나 있는 구간이다(30~90%): 박자에 맞춰 네 번 탁 벌어졌다가(30 · 46 · 62 · 80%) 스르르 좁아진다. 마지막에는 다시 맞아떨어진다
+// 색은 토큰이 아니라 고정색이다(2026-10-02 사용자 결정) — 빨강·초록·파랑이 이 용어의 이름이자 모습이라서다. 빨강은 왼쪽으로, 파랑은 오른쪽으로 어긋나고 초록은 그 절반만 오른쪽으로 어긋난다
+//   사본을 따로 두지 않고 블록마다 양옆에 딱딱한 그림자를 낸다(글자는 text-shadow) — 물체마다 제 가장자리에 테두리가 붙고, 앞에 있는 물체가 뒤 물체의 테두리를 가린다
+//   테두리 색은 조금 비친다: 뒤의 물체가 테두리 너머로 보인다. 라이트·다크에서 같은 색을 쓴다
+// 어긋난 거리는 등록한 길이 변수 하나(--mg-rgb-split-d)다. 장면(.mgs)에서 움직이면 그 안의 모든 블록이 같이 벌어진다
+// 화면이 띠로 잘려 튀고 조각나는 것은 Glitch Effect 다 — 이쪽은 그 가운데 색 어긋남 하나만 떼어 낸 것이다
+import MgFrame from '../../mg/MgFrame.astro';
+import MgFxFootage from '../../mg/MgFxFootage.astro';
+---
+<div class="mg-rgb-split" data-demo-root aria-hidden="true">
+  <MgFrame duration="4s" ranges={[[30, 90]]}>
+    <MgFxFootage />
+  </MgFrame>
+</div>
+
+<style>
+  @property --mg-rgb-split-d {
+    syntax: '<length>';
+    inherits: true;
+    initial-value: 0px;
+  }
+  .mg-rgb-split {
+    --mg-rgb-split-r: color-mix(in srgb, #ff2147 78%, transparent);
+    --mg-rgb-split-g: color-mix(in srgb, #1fd66c 78%, transparent);
+    --mg-rgb-split-b: color-mix(in srgb, #2a6bff 78%, transparent);
+  }
+  /* 먼저 적은 그림자가 위에 온다: 오른쪽은 초록(절반 거리)이 파랑 위에 놓여 초록 띠 · 파랑 띠가 나란히 보인다 */
+  .mg-rgb-split :global(.mgs-c),
+  .mg-rgb-split :global(.mgs-b),
+  .mg-rgb-split :global(.mgs-a) {
+    text-shadow:
+      calc(var(--mg-rgb-split-d) * -0.6) 0 0 var(--mg-rgb-split-r),
+      calc(var(--mg-rgb-split-d) * 0.3) 0 0 var(--mg-rgb-split-g),
+      calc(var(--mg-rgb-split-d) * 0.6) 0 0 var(--mg-rgb-split-b);
+    box-shadow:
+      calc(var(--mg-rgb-split-d) * -1) 0 0 0 var(--mg-rgb-split-r),
+      calc(var(--mg-rgb-split-d) * 0.5) 0 0 0 var(--mg-rgb-split-g),
+      var(--mg-rgb-split-d) 0 0 0 var(--mg-rgb-split-b);
+  }
+  .mg-rgb-split.is-playing :global(.mgs) {
+    animation: mg-rgb-split-hit var(--mg-duration) ease-out forwards;
+  }
+  /* 벌어질 때는 한순간에(같은 값을 바로 앞까지 붙들어 둔다), 좁아질 때는 천천히 */
+  @keyframes mg-rgb-split-hit {
+    0%,
+    29.9% {
+      --mg-rgb-split-d: 0cqw;
+    }
+    30% {
+      --mg-rgb-split-d: 2.4cqw;
+    }
+    45.9% {
+      --mg-rgb-split-d: 0.5cqw;
+    }
+    46% {
+      --mg-rgb-split-d: 1.7cqw;
+    }
+    61.9% {
+      --mg-rgb-split-d: 0.5cqw;
+    }
+    62% {
+      --mg-rgb-split-d: 3cqw;
+    }
+    79.9% {
+      --mg-rgb-split-d: 0.6cqw;
+    }
+    80% {
+      --mg-rgb-split-d: 1.5cqw;
+    }
+    90%,
+    100% {
+      --mg-rgb-split-d: 0cqw;
+    }
+  }
+</style>

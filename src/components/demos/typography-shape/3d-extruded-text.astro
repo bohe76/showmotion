@@ -1,0 +1,63 @@
+---
+// 3D Extruded Text 데모 — 두께가 있는 글자가 3D 공간에서 다가오며 돌고, 도는 동안 옆면이 받는 빛이 달라진다
+// 두께는 같은 글자를 앞뒤로 겹쳐 쌓아 만든다(층마다 조금씩 뒤로 — translateZ). 맨 앞 층이 앞면이고, 그 뒤의 층들이 옆면으로 보인다
+// 처음에는 오른쪽 옆면이 보이다가, 돌아서 왼쪽 옆면이 드러나면 옆면의 밝기가 달라진다 — 앞면의 색은 그대로다
+// 재생 전에도 비스듬히 서 있다 — 정면으로 서면 두께가 보이지 않는다
+// 옆면의 색은 강조색에서 바탕색을 섞은 색으로 간다(토큰만 쓴다) — 라이트에서는 밝아지고 다크에서는 어두워지지만, 어느 쪽이든 앞면(잉크색)과 겹치지 않는다
+import MgFrame from '../../mg/MgFrame.astro';
+
+const layers = Array.from({ length: 14 }, (_, i) => i);
+---
+<div class="mg-3d-extruded-text" data-demo-root aria-hidden="true">
+  <MgFrame duration="4s">
+    <div class="mg-3d-extruded-text-space">
+      <div class="mg-3d-extruded-text-body">
+        {layers.map((i) => <span class="mg-3d-extruded-text-layer" style={`--i: ${i}`}>ABC</span>)}
+      </div>
+    </div>
+  </MgFrame>
+</div>
+
+<style>
+  .mg-3d-extruded-text-space {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    perspective: 90cqw;
+  }
+  /* 멀리서 오른쪽으로 돌아선 채 시작한다 */
+  .mg-3d-extruded-text-body {
+    display: grid;
+    font-size: 25cqw;
+    font-weight: 900;
+    line-height: 1;
+    transform-style: preserve-3d;
+    transform: translateZ(-26cqw) rotateX(12deg) rotateY(-40deg);
+  }
+  /* 층: 두께의 가운데가 도는 축에 오게 앞뒤로 반씩 나눈다 */
+  .mg-3d-extruded-text-layer {
+    grid-area: 1 / 1;
+    color: var(--accent);
+    transform: translateZ(calc((6.5 - var(--i)) * 0.44cqw));
+  }
+  .mg-3d-extruded-text-layer:first-child {
+    color: var(--ink);
+  }
+  .mg-3d-extruded-text.is-playing .mg-3d-extruded-text-body {
+    animation: mg-3d-extruded-text-turn var(--mg-duration) ease-in-out forwards;
+  }
+  .mg-3d-extruded-text.is-playing .mg-3d-extruded-text-layer:not(:first-child) {
+    animation: mg-3d-extruded-text-light var(--mg-duration) ease-in-out forwards;
+  }
+  @keyframes mg-3d-extruded-text-turn {
+    to {
+      transform: translateZ(0) rotateX(-8deg) rotateY(38deg);
+    }
+  }
+  @keyframes mg-3d-extruded-text-light {
+    to {
+      color: color-mix(in srgb, var(--accent) 50%, var(--surface));
+    }
+  }
+</style>

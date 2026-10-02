@@ -1,0 +1,84 @@
+---
+// Exaggeration 데모 — 같은 동작을 실제보다 과하게 밀어붙인다. 뒤로 물러나 움츠렸다가 쏜살같이 가서 도착선을 넘쳤다 되돌아와 멈추는 동작이다
+// B 는 크게 물러나 잔뜩 움츠리고, 길게 늘어나며 가고, 도착선을 한참 넘어 찌그러졌다 돌아온다. 아래 옅은 블록은 같은 동작을 같은 때에 사실적인 세기로 한다(조금 물러나고 조금 넘는다)
+// 두 블록은 같은 키프레임 하나를 쓴다 — 다른 것은 세기(--mg-exaggeration-k) 하나뿐이다. 이 용어는 따로 있는 움직임이 아니라 세기의 선택이라서 그렇다
+// 그래서 Anticipation·Overshoot·Squash and Stretch 와 겹쳐 보이는 것이 맞다 — 그 원칙들을 어디까지 밀 것인가가 이 용어다
+// 눈금은 감춘다 — 자기 키프레임으로 가는 길이라 맞지 않는다
+import MgFrame from '../../mg/MgFrame.astro';
+import MgTrack from '../../mg/MgTrack.astro';
+---
+<div class="mg-exaggeration" data-demo-root aria-hidden="true">
+  <MgFrame duration="3s">
+    <MgTrack />
+  </MgFrame>
+</div>
+
+<style>
+  .mg-exaggeration :global(.mgtr-hero) {
+    --mg-exaggeration-k: 1;
+  }
+  .mg-exaggeration :global(.mgtr-ghost) {
+    --mg-exaggeration-k: 0.22;
+  }
+  .mg-exaggeration :global(.mgtr-tick) {
+    display: none;
+  }
+  /* 기울고 눌리는 기준은 바닥이다. 기울기(skew)는 transform, 이동과 배율은 개별 속성 — 기울기가 이동량을 끌고 가지 않는다 */
+  .mg-exaggeration :global(.mgtr-block) {
+    transform-origin: 50% 100%;
+  }
+  .mg-exaggeration.is-playing :global(.mgtr-block) {
+    animation: mg-exaggeration-dash var(--mg-duration) forwards;
+  }
+  /* 물러나 움츠림(0~34%) → 쏜살같이 감(34~46%) → 넘쳤다 돌아와 가라앉음(46~82%) */
+  @keyframes mg-exaggeration-dash {
+    0% {
+      translate: 0 0;
+      scale: 1 1;
+      transform: skewX(0deg);
+      animation-timing-function: cubic-bezier(0.3, 0, 0.4, 1);
+    }
+    28% {
+      translate: calc(-7cqw * var(--mg-exaggeration-k)) 0;
+      scale: calc(1 - 0.2 * var(--mg-exaggeration-k)) calc(1 + 0.24 * var(--mg-exaggeration-k));
+      transform: skewX(calc(12deg * var(--mg-exaggeration-k)));
+      animation-timing-function: linear;
+    }
+    34% {
+      translate: calc(-7.6cqw * var(--mg-exaggeration-k)) 0;
+      scale: calc(1 - 0.22 * var(--mg-exaggeration-k)) calc(1 + 0.27 * var(--mg-exaggeration-k));
+      transform: skewX(calc(13deg * var(--mg-exaggeration-k)));
+      animation-timing-function: cubic-bezier(0.6, 0, 1, 1);
+    }
+    40% {
+      translate: calc(var(--mgtr-distance) * 0.5) 0;
+      scale: calc(1 + 0.6 * var(--mg-exaggeration-k)) calc(1 - 0.36 * var(--mg-exaggeration-k));
+      transform: skewX(calc(-6deg * var(--mg-exaggeration-k)));
+      animation-timing-function: cubic-bezier(0, 0, 0.3, 1);
+    }
+    46% {
+      translate: calc(var(--mgtr-distance) + 6cqw * var(--mg-exaggeration-k)) 0;
+      scale: calc(1 - 0.25 * var(--mg-exaggeration-k)) calc(1 + 0.3 * var(--mg-exaggeration-k));
+      transform: skewX(calc(-10deg * var(--mg-exaggeration-k)));
+      animation-timing-function: ease-in-out;
+    }
+    58% {
+      translate: calc(var(--mgtr-distance) - 2.2cqw * var(--mg-exaggeration-k)) 0;
+      scale: calc(1 + 0.1 * var(--mg-exaggeration-k)) calc(1 - 0.09 * var(--mg-exaggeration-k));
+      transform: skewX(calc(6deg * var(--mg-exaggeration-k)));
+      animation-timing-function: ease-in-out;
+    }
+    70% {
+      translate: calc(var(--mgtr-distance) + 0.8cqw * var(--mg-exaggeration-k)) 0;
+      scale: calc(1 - 0.04 * var(--mg-exaggeration-k)) calc(1 + 0.04 * var(--mg-exaggeration-k));
+      transform: skewX(calc(-2deg * var(--mg-exaggeration-k)));
+      animation-timing-function: ease-in-out;
+    }
+    82%,
+    100% {
+      translate: var(--mgtr-distance) 0;
+      scale: 1 1;
+      transform: skewX(0deg);
+    }
+  }
+</style>

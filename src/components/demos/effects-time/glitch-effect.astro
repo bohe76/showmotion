@@ -1,0 +1,297 @@
+---
+// Glitch Effect 데모 — 영상이 잠깐씩 고장 난 것처럼 깨진다: 가로 띠가 옆으로 어긋나고, 색이 갈라지고, 네모 조각이 박히고, 화면이 툭툭 튄다. 그러고는 아무 일 없던 듯 돌아온다
+// 시간 막대의 띠 둘이 깨지는 구간이다(30~38% 짧게, 60~74% 길게). 그 밖에서는 멀쩡한 영상이다 — 순간적인 것이 요점이다(내내 걸려 있는 질감은 VHS Look)
+// 깨지는 동안은 매끄럽게 움직이지 않는다: 길이의 2% 마다 한 번씩 다른 모습으로 뚝뚝 바뀐다(step-end)
+// 여러 고장을 한데 모은 넓은 이름이다 — 색 어긋남 하나만 떼면 RGB Split, 컷 지점에서 앞 영상이 다음 영상을 끌고 녹이면 Datamosh
+// 겹:
+//   .mg-glitch-effect-pic — 밑의 영상. 깨지는 동안 통째로 조금씩 튄다
+//   .mg-glitch-effect-slice × 3 — 같은 영상을 가로 띠로 잘라(clip-path) 옆으로 민 것. 띠의 자리(--t)와 민 거리(--s)를 한 키프레임이 바꾸고, 띠마다 제 어긋남(--o · --h · --m)을 더한다
+//     띠 안의 블록에는 빨강(왼쪽)·초록·파랑(오른쪽) 테두리가 붙는다 — RGB Split 과 같은 고정색이다(2026-10-02 사용자 결정)
+//   .mg-glitch-effect-block × 4 — 잠깐 박혔다 사라지는 네모 조각. 둘은 빨강·파랑, 둘은 토큰 색(검정·회색)
+// 번쩍임: 화면 전체가 밝아졌다 어두워지는 것이 없다 — 바뀌는 것은 띠의 자리와 작은 조각뿐이라 짧게 재생해도 넓은 면이 번쩍이지 않는다
+import MgFrame from '../../mg/MgFrame.astro';
+import MgFxFootage from '../../mg/MgFxFootage.astro';
+
+// 띠: 세로 자리 어긋남(--o) · 높이(--h) · 민 거리의 배수(--m)
+const slices = [
+  { o: '0%', h: '17%', m: 1 },
+  { o: '27%', h: '11%', m: -0.8 },
+  { o: '13%', h: '4%', m: 2.2 },
+];
+---
+<div class="mg-glitch-effect" data-demo-root aria-hidden="true">
+  <MgFrame duration="4s" ranges={[[30, 38], [60, 74]]}>
+    <div class="mg-glitch-effect-pic">
+      <MgFxFootage bleed />
+    </div>
+    {slices.map(({ o, h, m }) => (
+      <div class="mg-glitch-effect-slice" style={`--o: ${o}; --h: ${h}; --m: ${m}`}>
+        <div class="mg-glitch-effect-shift">
+          <div class="mg-glitch-effect-view">
+            <MgFxFootage bleed />
+          </div>
+        </div>
+      </div>
+    ))}
+    <span class="mg-glitch-effect-block mg-glitch-effect-block-1"></span>
+    <span class="mg-glitch-effect-block mg-glitch-effect-block-2"></span>
+    <span class="mg-glitch-effect-block mg-glitch-effect-block-3"></span>
+    <span class="mg-glitch-effect-block mg-glitch-effect-block-4"></span>
+  </MgFrame>
+</div>
+
+<style>
+  @property --mg-glitch-effect-t {
+    syntax: '<percentage>';
+    inherits: true;
+    initial-value: 0%;
+  }
+  @property --mg-glitch-effect-s {
+    syntax: '<length>';
+    inherits: true;
+    initial-value: 0px;
+  }
+  /* 색 어긋남의 색 — 고정색이다(2026-10-02 사용자 결정). RGB Split 과 같은 빨강·초록·파랑 */
+  .mg-glitch-effect {
+    --mg-glitch-effect-r: #ff2147;
+    --mg-glitch-effect-g: #1fd66c;
+    --mg-glitch-effect-b: #2a6bff;
+  }
+  .mg-glitch-effect-pic {
+    position: absolute;
+    inset: 0;
+  }
+  .mg-glitch-effect-slice {
+    position: absolute;
+    inset: 0;
+    visibility: hidden;
+    clip-path: inset(
+      calc(var(--mg-glitch-effect-t) + var(--o)) -1px calc(100% - var(--mg-glitch-effect-t) - var(--o) - var(--h)) -1px
+    );
+  }
+  /* 민 띠의 빈 옆자리로 밑의 영상이 비치지 않게 좌우로 넓게 바탕색을 깐다. 그 안의 .mg-glitch-effect-view 가 화면 틀과 같은 자리다 */
+  .mg-glitch-effect-shift {
+    position: absolute;
+    inset: 0 -30cqw;
+    background: var(--surface);
+    translate: calc(var(--mg-glitch-effect-s) * var(--m)) 0;
+  }
+  .mg-glitch-effect-view {
+    position: absolute;
+    inset: 0 30cqw;
+  }
+  .mg-glitch-effect-slice :global(.mgs-c),
+  .mg-glitch-effect-slice :global(.mgs-b),
+  .mg-glitch-effect-slice :global(.mgs-a) {
+    box-shadow:
+      -1.5cqw 0 0 0 color-mix(in srgb, var(--mg-glitch-effect-r) 78%, transparent),
+      0.75cqw 0 0 0 color-mix(in srgb, var(--mg-glitch-effect-g) 78%, transparent),
+      1.5cqw 0 0 0 color-mix(in srgb, var(--mg-glitch-effect-b) 78%, transparent);
+  }
+  .mg-glitch-effect-block {
+    position: absolute;
+    visibility: hidden;
+  }
+  .mg-glitch-effect-block-1 {
+    top: 20%;
+    left: 58%;
+    width: 13cqw;
+    height: 4cqw;
+    background: var(--ink);
+  }
+  .mg-glitch-effect-block-2 {
+    top: 62%;
+    left: 22%;
+    width: 8cqw;
+    height: 6cqw;
+    background: var(--mg-glitch-effect-b);
+  }
+  .mg-glitch-effect-block-3 {
+    top: 44%;
+    left: 74%;
+    width: 6cqw;
+    height: 6cqw;
+    background: var(--demo-muted);
+  }
+  .mg-glitch-effect-block-4 {
+    top: 8%;
+    left: 12%;
+    width: 18cqw;
+    height: 2.5cqw;
+    background: var(--mg-glitch-effect-r);
+  }
+  .mg-glitch-effect.is-playing .mg-glitch-effect-pic {
+    animation: mg-glitch-effect-jump var(--mg-duration) step-end forwards;
+  }
+  .mg-glitch-effect.is-playing .mg-glitch-effect-slice {
+    animation: mg-glitch-effect-tear var(--mg-duration) step-end forwards;
+  }
+  .mg-glitch-effect.is-playing :is(.mg-glitch-effect-block-1, .mg-glitch-effect-block-3) {
+    animation: mg-glitch-effect-drop-a var(--mg-duration) step-end forwards;
+  }
+  .mg-glitch-effect.is-playing :is(.mg-glitch-effect-block-2, .mg-glitch-effect-block-4) {
+    animation: mg-glitch-effect-drop-b var(--mg-duration) step-end forwards;
+  }
+  @keyframes mg-glitch-effect-tear {
+    0% {
+      visibility: hidden;
+    }
+    30% {
+      visibility: visible;
+      --mg-glitch-effect-t: 18%;
+      --mg-glitch-effect-s: 7cqw;
+    }
+    32% {
+      visibility: visible;
+      --mg-glitch-effect-t: 48%;
+      --mg-glitch-effect-s: -5cqw;
+    }
+    34% {
+      visibility: visible;
+      --mg-glitch-effect-t: 8%;
+      --mg-glitch-effect-s: 3cqw;
+    }
+    36% {
+      visibility: visible;
+      --mg-glitch-effect-t: 56%;
+      --mg-glitch-effect-s: -9cqw;
+    }
+    38% {
+      visibility: hidden;
+    }
+    60% {
+      visibility: visible;
+      --mg-glitch-effect-t: 30%;
+      --mg-glitch-effect-s: -8cqw;
+    }
+    62% {
+      visibility: visible;
+      --mg-glitch-effect-t: 6%;
+      --mg-glitch-effect-s: 6cqw;
+    }
+    64% {
+      visibility: visible;
+      --mg-glitch-effect-t: 50%;
+      --mg-glitch-effect-s: 11cqw;
+    }
+    66% {
+      visibility: visible;
+      --mg-glitch-effect-t: 22%;
+      --mg-glitch-effect-s: -4cqw;
+    }
+    68% {
+      visibility: visible;
+      --mg-glitch-effect-t: 58%;
+      --mg-glitch-effect-s: 8cqw;
+    }
+    70% {
+      visibility: visible;
+      --mg-glitch-effect-t: 12%;
+      --mg-glitch-effect-s: -10cqw;
+    }
+    72% {
+      visibility: visible;
+      --mg-glitch-effect-t: 40%;
+      --mg-glitch-effect-s: 4cqw;
+    }
+    74%,
+    100% {
+      visibility: hidden;
+    }
+  }
+  @keyframes mg-glitch-effect-jump {
+    0% {
+      translate: 0 0;
+    }
+    30% {
+      translate: 0.8cqw 0;
+    }
+    32% {
+      translate: -0.6cqw 0.4cqw;
+    }
+    34% {
+      translate: 0 0;
+    }
+    36% {
+      translate: 1cqw -0.3cqw;
+    }
+    38% {
+      translate: 0 0;
+    }
+    60% {
+      translate: -1.2cqw 0;
+    }
+    62% {
+      translate: 0.8cqw 0.5cqw;
+    }
+    64% {
+      translate: 0 -0.6cqw;
+    }
+    66% {
+      translate: 1.4cqw 0;
+    }
+    68% {
+      translate: -0.8cqw 0;
+    }
+    70% {
+      translate: 0.5cqw 0.5cqw;
+    }
+    72% {
+      translate: -1cqw 0;
+    }
+    74%,
+    100% {
+      translate: 0 0;
+    }
+  }
+  @keyframes mg-glitch-effect-drop-a {
+    0% {
+      visibility: hidden;
+    }
+    32% {
+      visibility: visible;
+    }
+    36% {
+      visibility: hidden;
+    }
+    62% {
+      visibility: visible;
+    }
+    66% {
+      visibility: hidden;
+    }
+    70% {
+      visibility: visible;
+    }
+    74%,
+    100% {
+      visibility: hidden;
+    }
+  }
+  @keyframes mg-glitch-effect-drop-b {
+    0% {
+      visibility: hidden;
+    }
+    30% {
+      visibility: visible;
+    }
+    32% {
+      visibility: hidden;
+    }
+    36% {
+      visibility: visible;
+    }
+    38% {
+      visibility: hidden;
+    }
+    64% {
+      visibility: visible;
+    }
+    70% {
+      visibility: hidden;
+    }
+    100% {
+      visibility: hidden;
+    }
+  }
+</style>

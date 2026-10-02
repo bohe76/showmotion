@@ -1,0 +1,59 @@
+---
+// Clock Wipe 데모 — 화면 한가운데를 축으로 시곗바늘이 한 바퀴 돌고, 바늘이 지나간 자리에 다음 샷(E)이 드러난다
+// 시간 막대의 띠가 전환 구간이다(30~70%). 키프레임의 %와 같은 값이어야 한다. 바늘은 12시에서 떠나 고른 빠르기로 돈다
+// 변형: clockwise(기본) · counter-clockwise
+// 마스크는 원뿔 그라데이션이고 바늘이 돈 각도(--mg-clock-wipe-angle)로 그린다. 각도는 등록한 변수다 — 등록하지 않은 변수는 중간값 없이 툭 바뀐다
+// 경계에 0.3° 의 여유를 둔다(딱 끊으면 바늘 선이 계단처럼 보인다). 그래서 끝 각도가 360° 를 조금 넘는다
+import MgFrame from '../../mg/MgFrame.astro';
+import MgScene from '../../mg/MgScene.astro';
+import MgShot from '../../mg/MgShot.astro';
+---
+<div class="mg-clock-wipe" data-demo-root aria-hidden="true">
+  <MgFrame duration="4s" ranges={[[30, 70]]}>
+    <MgScene />
+    <MgShot shot="e" />
+  </MgFrame>
+</div>
+
+<style>
+  @property --mg-clock-wipe-angle {
+    syntax: '<angle>';
+    inherits: false;
+    initial-value: 0deg;
+  }
+  .mg-clock-wipe :global(.mgs-b),
+  .mg-clock-wipe :global(.mgsh-subject) {
+    translate: -8cqw 0;
+  }
+  .mg-clock-wipe :global(.mgsh) {
+    mask-image: conic-gradient(#000 calc(var(--mg-clock-wipe-angle) - 0.3deg), transparent var(--mg-clock-wipe-angle));
+  }
+  .mg-clock-wipe[data-variant='counter-clockwise'] :global(.mgsh) {
+    mask-image: conic-gradient(
+      transparent calc(360deg - var(--mg-clock-wipe-angle)),
+      #000 calc(360.3deg - var(--mg-clock-wipe-angle))
+    );
+  }
+  .mg-clock-wipe.is-playing :global(.mgs-b),
+  .mg-clock-wipe.is-playing :global(.mgsh-subject) {
+    animation: mg-clock-wipe-move var(--mg-duration) linear forwards;
+  }
+  .mg-clock-wipe.is-playing :global(.mgsh) {
+    animation: mg-clock-wipe-sweep var(--mg-duration) linear forwards;
+  }
+  @keyframes mg-clock-wipe-move {
+    to {
+      translate: 8cqw 0;
+    }
+  }
+  @keyframes mg-clock-wipe-sweep {
+    0%,
+    30% {
+      --mg-clock-wipe-angle: 0deg;
+    }
+    70%,
+    100% {
+      --mg-clock-wipe-angle: 360.3deg;
+    }
+  }
+</style>

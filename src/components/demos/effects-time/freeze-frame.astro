@@ -1,0 +1,25 @@
+---
+// Freeze Frame 데모 — 원래 속도로 흐르던 영상이 한 프레임에서 완전히 멈추고 사진처럼 그대로 있다. B 가 공중에 걸린 채다
+// 시간 막대의 눈금(20%)이 멈추는 순간이고 띠가 멈춰 있는 구간이다 — 키프레임의 % 와 같은 값이어야 한다
+// 멈춘 뒤에는 아무것도 움직이지 않는다. Bullet Time 과 나란히 보면 차이가 보인다: 같은 순간(시각 0.3)에 멈추는데, 저쪽은 시점이 그 둘레를 돈다
+import MgFrame from '../../mg/MgFrame.astro';
+import MgClip from '../../mg/MgClip.astro';
+---
+<div class="mg-freeze-frame" data-demo-root aria-hidden="true">
+  <MgFrame duration="3.6s" cuts={[20]} ranges={[[20, 100]]}>
+    <MgClip />
+  </MgFrame>
+</div>
+
+<style>
+  .mg-freeze-frame.is-playing :global(.mgs-b) {
+    animation: mg-freeze-frame-run var(--mg-duration) linear forwards;
+  }
+  /* 꼭대기를 막 지나 떨어지기 시작한 프레임에서 멈춘다 */
+  @keyframes mg-freeze-frame-run {
+    20%,
+    100% {
+      --mg-clip-t: 0.3;
+    }
+  }
+</style>

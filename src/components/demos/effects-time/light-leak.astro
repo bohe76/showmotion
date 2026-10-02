@@ -1,0 +1,173 @@
+---
+// Light Leak 데모 — 화면 가장자리에서 부드러운 빛이 번져 들어와 영상 위를 덮는다. 필름에 샌 빛을 흉내 낸 것이다
+// 처음에는 빛이 없다. 시간 막대의 띠가 빛이 새어 든 구간이다(25~85%). 끝에는 다시 걷힌다 — 밑의 영상은 내내 그대로 흐른다
+// 모양이 없다: 가장자리가 흐린 빛의 얼룩뿐이다. 고리·줄기·별 모양이 미끄러지는 Lens Flare 와 다르고, 장면 속 물체(B)에서 나와 물체를 따라가는 Bloom 과도 다르다(이쪽은 화면 틀에 붙어 있다)
+// 색은 토큰이 아니라 고정색이다(2026-10-02 사용자 결정) — 주황 → 빨강 → 자홍의 따뜻한 빛이 이 용어의 모습이라서다. 가운데는 주황으로 짙고 둘레로 갈수록 자홍으로 옅어지며 스민다. 그라데이션이 곧 효과다
+//   토큰 색(강조색의 번짐)으로 그렸을 때는 빛으로는 읽혀도 필름에 샌 빛으로는 읽히지 않았다. 라이트·다크에서 같은 색을 쓴다
+// 변형:
+//   edge-bloom(기본) — 오른쪽 위 가장자리에서 빛이 부풀어 들어와 머물다가 빠진다
+//   sweeping-leak — 빛의 띠가 화면 왼쪽 밖에서 들어와 오른쪽 밖으로 쓸고 지나간다
+//   flickering-leak — 같은 자리의 빛이 고르지 않게 깜빡인다(밝아졌다 어두워지기를 세 번 — 짧게 재생해도 초당 세 번을 넘지 않는다)
+//   colour-wash — 화면 전체가 한 색으로 엷게 물들었다가 풀린다
+// 빛은 화면 위에 얹은 겹 둘(큰 얼룩 + 곁의 작은 얼룩)이고, 변형마다 자리·모양·움직임을 바꾼다
+import MgFrame from '../../mg/MgFrame.astro';
+import MgFxFootage from '../../mg/MgFxFootage.astro';
+---
+<div class="mg-light-leak" data-demo-root aria-hidden="true">
+  <MgFrame duration="4s" ranges={[[25, 85]]}>
+    <MgFxFootage />
+    <span class="mg-light-leak-glow mg-light-leak-glow-a"></span>
+    <span class="mg-light-leak-glow mg-light-leak-glow-b"></span>
+  </MgFrame>
+</div>
+
+<style>
+  .mg-light-leak {
+    --mg-light-leak-core: color-mix(in srgb, #ff9a2e 92%, transparent);
+    --mg-light-leak-mid: color-mix(in srgb, #f2415f 70%, transparent);
+    --mg-light-leak-edge: color-mix(in srgb, #c93aa6 32%, transparent);
+  }
+  .mg-light-leak-glow {
+    position: absolute;
+    background: radial-gradient(closest-side, var(--mg-light-leak-core), var(--mg-light-leak-mid) 42%, var(--mg-light-leak-edge) 72%, transparent);
+    border-radius: 50%;
+    opacity: 0;
+  }
+  /* edge-bloom · flickering-leak 의 자리: 큰 얼룩은 오른쪽 가장자리에, 작은 얼룩은 위쪽 가장자리에 걸친다 */
+  .mg-light-leak-glow-a {
+    top: -24cqw;
+    left: 58cqw;
+    width: 84cqw;
+    height: 76cqw;
+  }
+  .mg-light-leak-glow-b {
+    --mg-light-leak-peak: 0.7;
+    top: -34cqw;
+    left: 34cqw;
+    width: 56cqw;
+    height: 52cqw;
+  }
+  .mg-light-leak:is(:not([data-variant]), [data-variant='edge-bloom']).is-playing .mg-light-leak-glow {
+    animation: mg-light-leak-bloom var(--mg-duration) ease-in-out forwards;
+  }
+  @keyframes mg-light-leak-bloom {
+    0%,
+    25% {
+      opacity: 0;
+      scale: 0.7;
+      translate: 0 0;
+    }
+    45% {
+      opacity: var(--mg-light-leak-peak, 1);
+      scale: 1;
+      translate: 0 2cqw;
+    }
+    65% {
+      opacity: var(--mg-light-leak-peak, 1);
+      scale: 1.1;
+      translate: -2cqw 6cqw;
+    }
+    85%,
+    100% {
+      opacity: 0;
+      scale: 0.8;
+      translate: -2cqw 8cqw;
+    }
+  }
+
+  /* flickering-leak — 같은 자리에서 밝기가 툭툭 바뀐다. 한 번 바뀌는 데 길이의 3% 쯤 */
+  .mg-light-leak[data-variant='flickering-leak'].is-playing .mg-light-leak-glow {
+    animation: mg-light-leak-flicker var(--mg-duration) linear forwards;
+  }
+  @keyframes mg-light-leak-flicker {
+    0%,
+    25% {
+      opacity: 0;
+    }
+    29%,
+    39% {
+      opacity: calc(var(--mg-light-leak-peak, 1) * 0.9);
+    }
+    42%,
+    45% {
+      opacity: calc(var(--mg-light-leak-peak, 1) * 0.35);
+    }
+    48%,
+    59% {
+      opacity: var(--mg-light-leak-peak, 1);
+    }
+    62%,
+    67% {
+      opacity: calc(var(--mg-light-leak-peak, 1) * 0.3);
+    }
+    70%,
+    79% {
+      opacity: calc(var(--mg-light-leak-peak, 1) * 0.85);
+    }
+    85%,
+    100% {
+      opacity: 0;
+    }
+  }
+
+  /* sweeping-leak — 기운 빛의 띠 둘이 왼쪽 밖에서 오른쪽 밖으로 지나간다(작은 띠가 조금 뒤따른다). 화면 밖에서 출발해 밖에서 끝난다 */
+  .mg-light-leak[data-variant='sweeping-leak'] .mg-light-leak-glow {
+    top: -40cqw;
+    height: 136cqw;
+    opacity: var(--mg-light-leak-peak, 1);
+    rotate: 16deg;
+  }
+  .mg-light-leak[data-variant='sweeping-leak'] .mg-light-leak-glow-a {
+    left: -70cqw;
+    width: 48cqw;
+  }
+  .mg-light-leak[data-variant='sweeping-leak'] .mg-light-leak-glow-b {
+    left: -92cqw;
+    width: 28cqw;
+  }
+  .mg-light-leak[data-variant='sweeping-leak'].is-playing .mg-light-leak-glow {
+    animation: mg-light-leak-sweep var(--mg-duration) linear forwards;
+  }
+  @keyframes mg-light-leak-sweep {
+    0%,
+    25% {
+      translate: 0 0;
+    }
+    85%,
+    100% {
+      translate: 210cqw 0;
+    }
+  }
+
+  /* colour-wash — 화면 전체를 덮는 엷은 물. 고르지 않게 한쪽이 짙고, 머무는 동안 천천히 흐른다 */
+  .mg-light-leak[data-variant='colour-wash'] .mg-light-leak-glow-a {
+    top: -10cqw;
+    left: -30cqw;
+    width: 160cqw;
+    height: 76cqw;
+    background: linear-gradient(100deg, var(--mg-light-leak-mid), var(--mg-light-leak-core) 45%, var(--mg-light-leak-mid) 75%, var(--mg-light-leak-core));
+    border-radius: 0;
+  }
+  .mg-light-leak[data-variant='colour-wash'] .mg-light-leak-glow-b {
+    display: none;
+  }
+  .mg-light-leak[data-variant='colour-wash'].is-playing .mg-light-leak-glow-a {
+    animation: mg-light-leak-wash var(--mg-duration) ease-in-out forwards;
+  }
+  @keyframes mg-light-leak-wash {
+    0%,
+    25% {
+      opacity: 0;
+      translate: -20cqw 0;
+    }
+    40%,
+    70% {
+      opacity: 0.45;
+    }
+    85%,
+    100% {
+      opacity: 0;
+      translate: 20cqw 0;
+    }
+  }
+</style>

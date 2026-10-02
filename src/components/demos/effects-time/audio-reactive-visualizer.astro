@@ -1,0 +1,276 @@
+---
+// Audio-Reactive Visualizer 데모 — 막대들이 소리의 크기와 주파수에 맞춰 움직인다. 소리가 없으니 박자를 시간 막대에 눈금으로 보여 준다
+// 눈금이 박이 치는 순간이다(8 · 20 · 32 · 38 · 44 · 56 · 68 · 80%) — 그 순간마다 막대가 치솟고 천천히 가라앉는다. 키프레임의 % 와 같은 값이어야 한다
+//   낮은 북(8 · 32 · 38 · 56 · 80%)은 왼쪽(낮은 음) 막대를, 높은 북(20 · 44 · 68%)은 가운데~오른쪽(높은 음) 막대를 올린다. 눈금 사이의 잔박(심벌)은 오른쪽 끝만 조금 건드린다
+//   박마다 세기도 다르다 — 규칙적으로 오르내리는 로딩 표시(Bar Loader (Equalizer))와 달리 소리에 따라 높이가 들쭉날쭉하다
+// 소리는 세 값이다(낮은 북 · 높은 북 · 심벌의 크기, 0~1). 등록한 숫자 변수 셋을 한 곳(.…-stage)에서 움직이고, 막대마다 제 가중치를 곱해 높이를 낸다 — 막대마다 키프레임을 따로 쓰지 않는다
+// 변형: bars(기본 — 주파수 막대) · waveform(가운데 줄을 따라 출렁이는 파형 한 줄. 소리가 클수록 위아래로 벌어진다) · analog-lines(막대 꼭대기들을 이은 꺾은선)
+//   꺾은선은 막대 사이마다 선분 하나다: 양 끝의 높이에서 길이(hypot)와 기울기(atan2)를 계산한다
+//   파형은 미리 그려 둔 한 줄(SVG)을 세로로 늘였다 줄인다 — 선 굵기는 그대로다(non-scaling-stroke)
+import MgFrame from '../../mg/MgFrame.astro';
+
+// 막대(낮은 음 → 높은 음)마다: 조용할 때의 높이 q, 낮은 북 · 높은 북 · 심벌에 반응하는 정도 k · s · h (합이 1 을 넘지 않는다)
+const bands = [
+  { q: 0.1, k: 0.82, s: 0.04, h: 0 },
+  { q: 0.13, k: 0.87, s: 0.06, h: 0 },
+  { q: 0.09, k: 0.6, s: 0.1, h: 0.02 },
+  { q: 0.12, k: 0.68, s: 0.22, h: 0.02 },
+  { q: 0.08, k: 0.38, s: 0.34, h: 0.04 },
+  { q: 0.1, k: 0.26, s: 0.52, h: 0.06 },
+  { q: 0.07, k: 0.14, s: 0.78, h: 0.08 },
+  { q: 0.09, k: 0.18, s: 0.6, h: 0.12 },
+  { q: 0.06, k: 0.07, s: 0.86, h: 0.18 },
+  { q: 0.07, k: 0.05, s: 0.5, h: 0.3 },
+  { q: 0.05, k: 0.05, s: 0.66, h: 0.24 },
+  { q: 0.06, k: 0.03, s: 0.32, h: 0.4 },
+  { q: 0.04, k: 0.02, s: 0.24, h: 0.3 },
+  { q: 0.05, k: 0.02, s: 0.14, h: 0.36 },
+];
+const vars = (b: (typeof bands)[number], n: string) => `--q${n}: ${b.q}; --k${n}: ${b.k}; --s${n}: ${b.s}; --h${n}: ${b.h}`;
+const segments = bands.slice(0, -1).map((b, i) => `--i: ${i}; ${vars(b, '0')}; ${vars(bands[i + 1], '1')}`);
+
+// 파형: 주기가 다른 물결 셋을 더하고 군데군데 잦아들게 한 줄. 가로 0~100, 세로는 가운데 20 에서 ±18
+const wave = Array.from({ length: 201 }, (_, n) => {
+  const x = n / 2;
+  const swell = 0.55 + 0.45 * Math.sin(x * 0.19 + 1);
+  const y = (0.5 * Math.sin(x * 0.72) + 0.32 * Math.sin(x * 1.63 + 0.8) + 0.18 * Math.sin(x * 3.1 + 2)) * swell;
+  return `${n === 0 ? 'M' : 'L'}${x} ${(20 - y * 18).toFixed(2)}`;
+}).join(' ');
+---
+<div class="mg-audio-reactive-visualizer" data-demo-root aria-hidden="true">
+  <MgFrame duration="4s" cuts={[8, 20, 32, 38, 44, 56, 68, 80]}>
+    <div class="mg-audio-reactive-visualizer-stage">
+      <div class="mg-audio-reactive-visualizer-bars">
+        {bands.map((b, i) => <span class="mg-audio-reactive-visualizer-bar" style={`--i: ${i}; ${vars(b, '0')}`}></span>)}
+      </div>
+      <div class="mg-audio-reactive-visualizer-lines">
+        {segments.map((style) => <span class="mg-audio-reactive-visualizer-segment" style={style}></span>)}
+      </div>
+      <svg class="mg-audio-reactive-visualizer-wave" viewBox="0 0 100 40" preserveAspectRatio="none" focusable="false">
+        <path d={wave}></path>
+      </svg>
+    </div>
+  </MgFrame>
+</div>
+
+<style>
+  @property --mg-audio-reactive-visualizer-kick {
+    syntax: '<number>';
+    inherits: true;
+    initial-value: 0;
+  }
+  @property --mg-audio-reactive-visualizer-snare {
+    syntax: '<number>';
+    inherits: true;
+    initial-value: 0;
+  }
+  @property --mg-audio-reactive-visualizer-hat {
+    syntax: '<number>';
+    inherits: true;
+    initial-value: 0;
+  }
+  .mg-audio-reactive-visualizer-stage,
+  .mg-audio-reactive-visualizer-bars,
+  .mg-audio-reactive-visualizer-lines {
+    position: absolute;
+    inset: 0;
+  }
+  .mg-audio-reactive-visualizer-lines,
+  .mg-audio-reactive-visualizer-wave,
+  .mg-audio-reactive-visualizer[data-variant='waveform'] .mg-audio-reactive-visualizer-bars,
+  .mg-audio-reactive-visualizer[data-variant='analog-lines'] .mg-audio-reactive-visualizer-bars {
+    display: none;
+  }
+  .mg-audio-reactive-visualizer[data-variant='waveform'] .mg-audio-reactive-visualizer-wave,
+  .mg-audio-reactive-visualizer[data-variant='analog-lines'] .mg-audio-reactive-visualizer-lines {
+    display: block;
+  }
+
+  /* 막대와 선분이 같이 쓰는 값: 지금 높이(0~1) — 조용할 때의 높이에 세 소리의 크기 × 가중치를 더한다. 가장 높을 때 38cqw, 막대 사이 5.6cqw */
+  .mg-audio-reactive-visualizer-bar,
+  .mg-audio-reactive-visualizer-segment {
+    --mg-audio-reactive-visualizer-a: calc(
+      var(--q0) + var(--k0) * var(--mg-audio-reactive-visualizer-kick) + var(--s0) * var(--mg-audio-reactive-visualizer-snare) + var(--h0) *
+        var(--mg-audio-reactive-visualizer-hat)
+    );
+    position: absolute;
+    bottom: 9cqw;
+    background: var(--accent);
+  }
+  .mg-audio-reactive-visualizer-bar {
+    left: calc(11.9cqw + 5.6cqw * var(--i));
+    width: 3.4cqw;
+    height: 38cqw;
+    border-radius: 2px 2px 0 0;
+    transform-origin: 50% 100%;
+    scale: 1 var(--mg-audio-reactive-visualizer-a);
+  }
+  /* 선분: 왼쪽 끝이 이 막대의 꼭대기 한가운데, 오른쪽 끝이 다음 막대의 꼭대기 한가운데다. 끝을 둥글려 꺾이는 곳이 이어져 보인다 */
+  .mg-audio-reactive-visualizer-segment {
+    --mg-audio-reactive-visualizer-b: calc(
+      var(--q1) + var(--k1) * var(--mg-audio-reactive-visualizer-kick) + var(--s1) * var(--mg-audio-reactive-visualizer-snare) + var(--h1) *
+        var(--mg-audio-reactive-visualizer-hat)
+    );
+    --mg-audio-reactive-visualizer-rise: calc((var(--mg-audio-reactive-visualizer-b) - var(--mg-audio-reactive-visualizer-a)) * 38);
+    left: calc(13.6cqw + 5.6cqw * var(--i));
+    width: calc(hypot(5.6, var(--mg-audio-reactive-visualizer-rise)) * 1cqw);
+    height: 1cqw;
+    margin-bottom: -0.5cqw;
+    border-radius: 0.5cqw;
+    transform-origin: 0 50%;
+    translate: 0 calc(var(--mg-audio-reactive-visualizer-a) * -38cqw);
+    rotate: atan2(calc(var(--mg-audio-reactive-visualizer-rise) * -1), 5.6);
+  }
+  .mg-audio-reactive-visualizer-wave {
+    position: absolute;
+    top: 8cqw;
+    left: 6cqw;
+    width: 88cqw;
+    height: 40cqw;
+    overflow: visible;
+    scale: 1
+      min(
+        1,
+        0.07 + 0.93 * var(--mg-audio-reactive-visualizer-kick) + 0.7 * var(--mg-audio-reactive-visualizer-snare) + 0.2 *
+          var(--mg-audio-reactive-visualizer-hat)
+      );
+  }
+  .mg-audio-reactive-visualizer-wave path {
+    fill: none;
+    stroke: var(--accent);
+    stroke-width: 0.8cqw;
+    stroke-linejoin: round;
+    vector-effect: non-scaling-stroke;
+  }
+
+  .mg-audio-reactive-visualizer.is-playing .mg-audio-reactive-visualizer-stage {
+    animation:
+      mg-audio-reactive-visualizer-kick var(--mg-duration) linear forwards,
+      mg-audio-reactive-visualizer-snare var(--mg-duration) linear forwards,
+      mg-audio-reactive-visualizer-hat var(--mg-duration) linear forwards;
+  }
+  /* 치는 순간에 한꺼번에 오르고(1% 동안), 빨리 떨어지다 천천히 가라앉는다 */
+  @keyframes mg-audio-reactive-visualizer-kick {
+    0%,
+    7% {
+      --mg-audio-reactive-visualizer-kick: 0;
+    }
+    8% {
+      --mg-audio-reactive-visualizer-kick: 1;
+      animation-timing-function: cubic-bezier(0.12, 0.7, 0.3, 1);
+    }
+    22%,
+    31% {
+      --mg-audio-reactive-visualizer-kick: 0;
+    }
+    32% {
+      --mg-audio-reactive-visualizer-kick: 0.9;
+      animation-timing-function: cubic-bezier(0.12, 0.7, 0.3, 1);
+    }
+    37% {
+      --mg-audio-reactive-visualizer-kick: 0.3;
+    }
+    38% {
+      --mg-audio-reactive-visualizer-kick: 0.7;
+      animation-timing-function: cubic-bezier(0.12, 0.7, 0.3, 1);
+    }
+    50%,
+    55% {
+      --mg-audio-reactive-visualizer-kick: 0;
+    }
+    56% {
+      --mg-audio-reactive-visualizer-kick: 1;
+      animation-timing-function: cubic-bezier(0.12, 0.7, 0.3, 1);
+    }
+    70%,
+    79% {
+      --mg-audio-reactive-visualizer-kick: 0;
+    }
+    80% {
+      --mg-audio-reactive-visualizer-kick: 1;
+      animation-timing-function: cubic-bezier(0.12, 0.7, 0.3, 1);
+    }
+    97%,
+    100% {
+      --mg-audio-reactive-visualizer-kick: 0;
+    }
+  }
+  @keyframes mg-audio-reactive-visualizer-snare {
+    0%,
+    19% {
+      --mg-audio-reactive-visualizer-snare: 0;
+    }
+    20% {
+      --mg-audio-reactive-visualizer-snare: 1;
+      animation-timing-function: cubic-bezier(0.12, 0.7, 0.3, 1);
+    }
+    33%,
+    43% {
+      --mg-audio-reactive-visualizer-snare: 0;
+    }
+    44% {
+      --mg-audio-reactive-visualizer-snare: 0.8;
+      animation-timing-function: cubic-bezier(0.12, 0.7, 0.3, 1);
+    }
+    57%,
+    67% {
+      --mg-audio-reactive-visualizer-snare: 0;
+    }
+    68% {
+      --mg-audio-reactive-visualizer-snare: 1;
+      animation-timing-function: cubic-bezier(0.12, 0.7, 0.3, 1);
+    }
+    82%,
+    100% {
+      --mg-audio-reactive-visualizer-snare: 0;
+    }
+  }
+  @keyframes mg-audio-reactive-visualizer-hat {
+    0%,
+    13% {
+      --mg-audio-reactive-visualizer-hat: 0;
+    }
+    14% {
+      --mg-audio-reactive-visualizer-hat: 1;
+    }
+    19%,
+    25% {
+      --mg-audio-reactive-visualizer-hat: 0;
+    }
+    26% {
+      --mg-audio-reactive-visualizer-hat: 0.8;
+    }
+    31%,
+    49% {
+      --mg-audio-reactive-visualizer-hat: 0;
+    }
+    50% {
+      --mg-audio-reactive-visualizer-hat: 1;
+    }
+    55%,
+    61% {
+      --mg-audio-reactive-visualizer-hat: 0;
+    }
+    62% {
+      --mg-audio-reactive-visualizer-hat: 0.8;
+    }
+    67%,
+    73% {
+      --mg-audio-reactive-visualizer-hat: 0;
+    }
+    74% {
+      --mg-audio-reactive-visualizer-hat: 1;
+    }
+    79%,
+    85% {
+      --mg-audio-reactive-visualizer-hat: 0;
+    }
+    86% {
+      --mg-audio-reactive-visualizer-hat: 0.7;
+    }
+    92%,
+    100% {
+      --mg-audio-reactive-visualizer-hat: 0;
+    }
+  }
+</style>

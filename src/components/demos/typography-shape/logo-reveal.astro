@@ -1,0 +1,481 @@
+---
+// Logo Reveal 데모 — 빈 화면에 로고가 움직임과 함께 드러난다. 로고 등장 연출 전반을 가리키는 이름이고, 변형이 그 연출 방식이다
+// Logo Resolve 와 같은 표식·같은 끝 장면이다: 저쪽은 흩어진 조각이 모여 마지막에야 로고가 되고, 여기는 로고가 제자리에서 드러난다
+// 재생 전에는 로고가 놓일 자리에 흐린 자리 표시가 있다(빈 화면이면 카드가 죽어 보인다). 재생하면 자리 표시가 먼저 걷히고(0~6%) 빈 화면에서 연출이 시작된다
+// 시간 막대의 띠가 로고가 드러나는 구간이다(8~75%). 그 뒤는 다 드러난 로고가 머문다. 변형마다 키프레임이 이 구간 안에서 끝나야 한다
+// 변형:
+//   clean(기본) — 표식이 아래에서 위로 닦이듯 올라오고, 낱말이 표식 뒤에서 밀려 나온다
+//   particle — 흩어진 점들이 로고 자리로 빨려 들고, 그 자리에서 로고가 떠오른다
+//   liquid — 방울이 떨어져 퍼지고, 그 물에서 조각들이 솟아 나온다(흐림 + 알파 문턱 필터로 끈끈하게 붙는다)
+//   glitch — 가로로 잘린 조각과 색 사본이 어긋나 튀다가 맞아떨어진다(색 분리는 빨강·파랑 사본으로 — 고정색)
+//   neon — 조각이 차례로 네온관처럼 깜박이며 켜진다. 끝 모습도 빛나는 분홍 외곽선이다(고정색. 깜박임은 조각마다 두 번뿐이다)
+//   3d-orbit — 옆을 보던 로고가 3D 로 돌아 정면에 선다
+// 필터 주소는 루트의 인라인 스타일에 둔다(따로 떨어진 CSS 파일 안의 url(#…) 을 그 파일 기준으로 찾는 브라우저가 있다)
+import MgFrame from '../../mg/MgFrame.astro';
+import MgMark from '../../mg/MgMark.astro';
+
+// particle 의 점: 로고 둘레에 고르게 흩어 두고(황금각), 로고 폭 안의 서로 다른 자리로 보낸다. 단위는 cqw, 화면 가운데가 원점
+const dots = Array.from({ length: 18 }, (_, k) => {
+  const angle = (k * 137.5 * Math.PI) / 180;
+  const radius = 30 + (k % 4) * 5;
+  const tx = ((k + 0.5) / 18 - 0.5) * 44;
+  const ty = (((k * 7) % 5) - 2) * 2.4;
+  const x = Math.cos(angle) * radius * 1.3 - tx;
+  const y = Math.sin(angle) * radius * 0.62 - ty;
+  return `--mg-logo-reveal-tx: ${tx.toFixed(1)}cqw; --mg-logo-reveal-ty: ${ty.toFixed(1)}cqw; --mg-logo-reveal-x: ${x.toFixed(1)}cqw; --mg-logo-reveal-y: ${y.toFixed(1)}cqw; --i: ${k % 6}`;
+});
+---
+<div class="mg-logo-reveal" data-demo-root aria-hidden="true" style="--mg-logo-reveal-goo: url(#mg-logo-reveal-goo)">
+  <MgFrame duration="4s" ranges={[[8, 75]]}>
+    <div class="mg-logo-reveal-layer mg-logo-reveal-ghost"><MgMark /></div>
+    <div class="mg-logo-reveal-layer mg-logo-reveal-copy mg-logo-reveal-copy-a"><MgMark /></div>
+    <div class="mg-logo-reveal-layer mg-logo-reveal-copy mg-logo-reveal-copy-b"><MgMark /></div>
+    <div class="mg-logo-reveal-layer mg-logo-reveal-goo">
+      <div class="mg-logo-reveal-layer mg-logo-reveal-soft">
+        <span class="mg-logo-reveal-blob"></span>
+        <div class="mg-logo-reveal-logo"><MgMark /></div>
+      </div>
+    </div>
+    <div class="mg-logo-reveal-layer mg-logo-reveal-dots">
+      {dots.map((style) => <span class="mg-logo-reveal-dot" style={style}></span>)}
+    </div>
+  </MgFrame>
+  <svg class="mg-logo-reveal-defs" width="0" height="0" focusable="false">
+    <defs>
+      <filter id="mg-logo-reveal-goo" color-interpolation-filters="sRGB">
+        <feColorMatrix type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -8"></feColorMatrix>
+      </filter>
+    </defs>
+  </svg>
+</div>
+
+<style>
+  /* glitch 의 색 사본과 neon 의 관 색 — 고정색이다(2026-10-02 사용자 결정). 빨강·파랑은 RGB Split 과 같다. 라이트·다크에서 같은 색을 쓴다 */
+  .mg-logo-reveal {
+    --mg-logo-reveal-red: #ff2147;
+    --mg-logo-reveal-blue: #2a6bff;
+    --mg-logo-reveal-neon: #ff2e97;
+  }
+  .mg-logo-reveal-defs {
+    position: absolute;
+  }
+  .mg-logo-reveal-layer {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+  }
+  /* 자리 표시: 로고 전체를 흐린 한 색으로 */
+  .mg-logo-reveal-ghost :global(.mgm-mark .mgm-piece) {
+    background: var(--demo-muted);
+  }
+  .mg-logo-reveal-ghost :global(.mgm-word) {
+    color: var(--demo-muted);
+  }
+  .mg-logo-reveal-logo {
+    opacity: 0;
+  }
+  .mg-logo-reveal-copy,
+  .mg-logo-reveal-blob,
+  .mg-logo-reveal-dots {
+    display: none;
+  }
+  .mg-logo-reveal.is-playing .mg-logo-reveal-ghost {
+    animation: mg-logo-reveal-ghost var(--mg-duration) linear forwards;
+  }
+  .mg-logo-reveal.is-playing .mg-logo-reveal-logo {
+    opacity: 1;
+  }
+  @keyframes mg-logo-reveal-ghost {
+    6%,
+    100% {
+      opacity: 0;
+    }
+  }
+
+  /* clean — 표식은 8~38% 에 아래에서 위로 닦이며 올라오고, 낱말은 34~70% 에 왼쪽(표식 쪽)에서 밀려 나온다 */
+  .mg-logo-reveal:is(:not([data-variant]), [data-variant='clean']).is-playing .mg-logo-reveal-logo :global(.mgm-mark) {
+    animation: mg-logo-reveal-clean-mark var(--mg-duration) linear forwards;
+  }
+  .mg-logo-reveal:is(:not([data-variant]), [data-variant='clean']).is-playing .mg-logo-reveal-logo :global(.mgm-word) {
+    animation: mg-logo-reveal-clean-word var(--mg-duration) linear forwards;
+  }
+  @keyframes mg-logo-reveal-clean-mark {
+    0%,
+    8% {
+      clip-path: inset(105% -5% -5% -5%);
+      translate: 0 3cqw;
+      animation-timing-function: cubic-bezier(0.2, 0.7, 0.2, 1);
+    }
+    38%,
+    100% {
+      clip-path: inset(-5% -5% -5% -5%);
+      translate: 0 0;
+    }
+  }
+  @keyframes mg-logo-reveal-clean-word {
+    0%,
+    34% {
+      clip-path: inset(-5% 105% -5% -5%);
+      translate: -6cqw 0;
+      animation-timing-function: cubic-bezier(0.2, 0.7, 0.2, 1);
+    }
+    70%,
+    100% {
+      clip-path: inset(-5% -5% -5% -5%);
+      translate: 0 0;
+    }
+  }
+
+  /* particle — 점은 길이의 40% 동안 날아든다(8~63%). 로고는 40~72% 에 떠오른다 */
+  .mg-logo-reveal[data-variant='particle'] .mg-logo-reveal-dots {
+    display: block;
+  }
+  .mg-logo-reveal-dot {
+    position: absolute;
+    top: calc(50% + var(--mg-logo-reveal-ty) - 0.8cqw);
+    left: calc(50% + var(--mg-logo-reveal-tx) - 0.8cqw);
+    width: 1.6cqw;
+    height: 1.6cqw;
+    background: var(--ink);
+    border-radius: 50%;
+    opacity: 0;
+  }
+  .mg-logo-reveal-dot:nth-child(3n) {
+    background: var(--accent);
+  }
+  .mg-logo-reveal[data-variant='particle'].is-playing .mg-logo-reveal-dot {
+    animation: mg-logo-reveal-particle-dot calc(var(--mg-duration) * 0.4) cubic-bezier(0.5, 0, 0.8, 0.5) calc(var(--mg-duration) * (0.08 + var(--i) * 0.03)) both;
+  }
+  .mg-logo-reveal[data-variant='particle'].is-playing .mg-logo-reveal-logo {
+    animation: mg-logo-reveal-particle-logo var(--mg-duration) linear forwards;
+  }
+  @keyframes mg-logo-reveal-particle-dot {
+    0% {
+      opacity: 0;
+      translate: var(--mg-logo-reveal-x) var(--mg-logo-reveal-y);
+      scale: 1;
+    }
+    15% {
+      opacity: 1;
+    }
+    85% {
+      opacity: 1;
+      scale: 1;
+    }
+    100% {
+      opacity: 1;
+      translate: 0 0;
+      scale: 0;
+    }
+  }
+  @keyframes mg-logo-reveal-particle-logo {
+    0%,
+    40% {
+      opacity: 0;
+      scale: 0.9;
+      animation-timing-function: ease-out;
+    }
+    72%,
+    100% {
+      opacity: 1;
+      scale: 1;
+    }
+  }
+
+  /* liquid — 방울이 8~26% 에 떨어지고, 퍼졌다가(40%) 빠지는 동안 조각들이 36~74% 에 차례로 솟는다 */
+  .mg-logo-reveal[data-variant='liquid'] .mg-logo-reveal-blob {
+    position: absolute;
+    display: block;
+    width: 13cqw;
+    height: 13cqw;
+    background: var(--accent);
+    border-radius: 50%;
+    translate: 0 -45cqw;
+  }
+  .mg-logo-reveal[data-variant='liquid'].is-playing .mg-logo-reveal-goo {
+    animation: mg-logo-reveal-liquid-goo var(--mg-duration) linear forwards;
+  }
+  .mg-logo-reveal[data-variant='liquid'].is-playing .mg-logo-reveal-soft {
+    animation: mg-logo-reveal-liquid-soft var(--mg-duration) linear forwards;
+  }
+  .mg-logo-reveal[data-variant='liquid'].is-playing .mg-logo-reveal-blob {
+    animation: mg-logo-reveal-liquid-blob var(--mg-duration) linear forwards;
+  }
+  .mg-logo-reveal[data-variant='liquid'].is-playing .mg-logo-reveal-logo :global(.mgm-piece) {
+    animation: mg-logo-reveal-liquid-piece calc(var(--mg-duration) * 0.2) ease-out calc(var(--mg-duration) * (0.36 + var(--i) * 0.035)) both;
+  }
+  @keyframes mg-logo-reveal-liquid-goo {
+    0%,
+    84%,
+    100% {
+      filter: none;
+    }
+    0.01%,
+    83.99% {
+      filter: var(--mg-logo-reveal-goo);
+    }
+  }
+  @keyframes mg-logo-reveal-liquid-soft {
+    0%,
+    84%,
+    100% {
+      filter: blur(0);
+    }
+    6%,
+    74% {
+      filter: blur(0.9cqw);
+    }
+  }
+  @keyframes mg-logo-reveal-liquid-blob {
+    0%,
+    8% {
+      translate: 0 -45cqw;
+      scale: 0.8 1.3;
+      animation-timing-function: ease-in;
+    }
+    26% {
+      translate: 0 0;
+      scale: 0.8 1.3;
+      animation-timing-function: ease-out;
+    }
+    32% {
+      translate: 0 0;
+      scale: 1.9 0.6;
+      animation-timing-function: ease-in-out;
+    }
+    42% {
+      translate: 0 0;
+      scale: 2.8 0.95;
+      animation-timing-function: ease-in-out;
+    }
+    72%,
+    100% {
+      translate: 0 0;
+      scale: 0;
+    }
+  }
+  @keyframes mg-logo-reveal-liquid-piece {
+    0% {
+      scale: 0;
+    }
+    60% {
+      scale: 1.2;
+    }
+    100% {
+      scale: 1;
+    }
+  }
+
+  /* glitch — 10~70% 에 잘린 조각이 좌우로 튄다(뚝뚝 끊어지게 — steps). 색 사본 둘은 본체와 어긋난 자리에서 따로 튀다가 70% 에 사라진다 */
+  .mg-logo-reveal-copy-a :global(.mgm-mark .mgm-piece) {
+    background: var(--mg-logo-reveal-red);
+  }
+  .mg-logo-reveal-copy-a :global(.mgm-word) {
+    color: var(--mg-logo-reveal-red);
+  }
+  .mg-logo-reveal-copy-b :global(.mgm-mark .mgm-piece) {
+    background: var(--mg-logo-reveal-blue);
+  }
+  .mg-logo-reveal-copy-b :global(.mgm-word) {
+    color: var(--mg-logo-reveal-blue);
+  }
+  .mg-logo-reveal[data-variant='glitch'] .mg-logo-reveal-copy {
+    display: grid;
+    opacity: 0;
+  }
+  .mg-logo-reveal[data-variant='glitch'].is-playing .mg-logo-reveal-logo {
+    animation: mg-logo-reveal-glitch var(--mg-duration) steps(1) forwards;
+  }
+  .mg-logo-reveal[data-variant='glitch'].is-playing .mg-logo-reveal-copy-a {
+    animation: mg-logo-reveal-glitch-a var(--mg-duration) steps(1) forwards;
+  }
+  .mg-logo-reveal[data-variant='glitch'].is-playing .mg-logo-reveal-copy-b {
+    animation: mg-logo-reveal-glitch-b var(--mg-duration) steps(1) forwards;
+  }
+  @keyframes mg-logo-reveal-glitch {
+    0% {
+      opacity: 0;
+    }
+    10% {
+      opacity: 1;
+      clip-path: inset(34% 0 52% 0);
+      translate: -3cqw 0;
+    }
+    17% {
+      opacity: 1;
+      clip-path: inset(56% 0 30% 0);
+      translate: 2.4cqw 0;
+    }
+    23% {
+      opacity: 0;
+    }
+    31% {
+      opacity: 1;
+      clip-path: inset(30% 0 44% 0);
+      translate: 1.6cqw 0;
+    }
+    38% {
+      opacity: 1;
+      clip-path: inset(46% 0 0 0);
+      translate: -2cqw 0;
+    }
+    45% {
+      opacity: 1;
+      clip-path: inset(0 0 0 0);
+      translate: 0.8cqw 0;
+    }
+    52% {
+      opacity: 1;
+      clip-path: inset(0 0 48% 0);
+      translate: -1.2cqw 0;
+    }
+    59% {
+      opacity: 1;
+      clip-path: inset(0 0 0 0);
+      translate: 0 0;
+    }
+    64% {
+      opacity: 1;
+      clip-path: inset(40% 0 36% 0);
+      translate: 1cqw 0;
+    }
+    70%,
+    100% {
+      opacity: 1;
+      clip-path: inset(0 0 0 0);
+      translate: 0 0;
+    }
+  }
+  @keyframes mg-logo-reveal-glitch-a {
+    0% {
+      opacity: 0;
+    }
+    10% {
+      opacity: 1;
+      clip-path: inset(40% 0 44% 0);
+      translate: 2.2cqw 0;
+    }
+    23% {
+      opacity: 1;
+      clip-path: inset(52% 0 36% 0);
+      translate: -2.6cqw 0;
+    }
+    31% {
+      opacity: 1;
+      clip-path: inset(36% 0 54% 0);
+      translate: -1.4cqw 0;
+    }
+    45% {
+      opacity: 1;
+      clip-path: inset(58% 0 30% 0);
+      translate: 1.8cqw 0;
+    }
+    59% {
+      opacity: 1;
+      clip-path: inset(44% 0 48% 0);
+      translate: -0.9cqw 0;
+    }
+    70%,
+    100% {
+      opacity: 0;
+    }
+  }
+  @keyframes mg-logo-reveal-glitch-b {
+    0% {
+      opacity: 0;
+    }
+    17% {
+      opacity: 1;
+      clip-path: inset(60% 0 28% 0);
+      translate: -1.8cqw 0;
+    }
+    31% {
+      opacity: 1;
+      clip-path: inset(48% 0 40% 0);
+      translate: 2.6cqw 0;
+    }
+    38% {
+      opacity: 1;
+      clip-path: inset(32% 0 58% 0);
+      translate: 1.2cqw 0;
+    }
+    52% {
+      opacity: 1;
+      clip-path: inset(54% 0 34% 0);
+      translate: -2cqw 0;
+    }
+    64% {
+      opacity: 1;
+      clip-path: inset(38% 0 52% 0);
+      translate: 0.8cqw 0;
+    }
+    70%,
+    100% {
+      opacity: 0;
+    }
+  }
+
+  /* neon — 속을 비우고 네온 분홍 외곽선과 빛 번짐만 남긴다. 조각마다 길이의 25% 동안 깜박이며 켜지고, 차례(--i)마다 8% 씩 늦다(8~73%) */
+  .mg-logo-reveal[data-variant='neon'] .mg-logo-reveal-logo {
+    filter: drop-shadow(0 0 0.7cqw var(--mg-logo-reveal-neon)) drop-shadow(0 0 1.8cqw var(--mg-logo-reveal-neon));
+  }
+  .mg-logo-reveal[data-variant='neon'] .mg-logo-reveal-logo :global(.mgm-mark .mgm-piece) {
+    background: transparent;
+    box-shadow: inset 0 0 0 0.4cqw var(--mg-logo-reveal-neon);
+  }
+  .mg-logo-reveal[data-variant='neon'] .mg-logo-reveal-logo :global(.mgm-word) {
+    color: transparent;
+    -webkit-text-stroke: 0.4cqw var(--mg-logo-reveal-neon);
+  }
+  .mg-logo-reveal[data-variant='neon'].is-playing .mg-logo-reveal-logo :global(.mgm-piece) {
+    animation: mg-logo-reveal-neon calc(var(--mg-duration) * 0.25) steps(1) calc(var(--mg-duration) * (0.08 + var(--i) * 0.08)) both;
+  }
+  @keyframes mg-logo-reveal-neon {
+    0% {
+      opacity: 0;
+    }
+    20% {
+      opacity: 1;
+    }
+    34% {
+      opacity: 0.25;
+    }
+    52% {
+      opacity: 1;
+    }
+    66% {
+      opacity: 0.45;
+    }
+    80%,
+    100% {
+      opacity: 1;
+    }
+  }
+
+  /* 3d-orbit — 8~75%: 옆을 보고 멀리 있던 로고가 돌아 나오며 정면을 살짝 지나쳤다 돌아와 선다 */
+  .mg-logo-reveal[data-variant='3d-orbit'].is-playing .mg-logo-reveal-logo {
+    animation: mg-logo-reveal-orbit var(--mg-duration) linear forwards;
+  }
+  @keyframes mg-logo-reveal-orbit {
+    0%,
+    8% {
+      opacity: 0;
+      transform: perspective(70cqw) translateZ(-30cqw) rotateX(18deg) rotateY(-110deg);
+      animation-timing-function: cubic-bezier(0.3, 0.1, 0.3, 1);
+    }
+    16% {
+      opacity: 1;
+    }
+    62% {
+      opacity: 1;
+      transform: perspective(70cqw) translateZ(0) rotateX(0deg) rotateY(12deg);
+      animation-timing-function: ease-in-out;
+    }
+    75%,
+    100% {
+      opacity: 1;
+      transform: perspective(70cqw) translateZ(0) rotateX(0deg) rotateY(0deg);
+    }
+  }
+</style>

@@ -1,0 +1,68 @@
+---
+// Zoom Transition 데모 — 한 점으로 빠르게 날아 들어가 컷을 뚫고 다음 샷(F)으로 나온다. 시간 막대의 띠가 전환 구간이다(35~65%)
+// 두 샷이 같은 점(B 의 한가운데 — 화면 위에서 68%)을 중심으로, 같은 방향으로 이어서 커지거나 줄어든다. 그래서 한 번의 움직임으로 보인다
+// 변형: in(기본) — 앞 샷이 그 점으로 확대돼 들어가고(가속), 다음 샷이 그 점에서 커져 나와 자리 잡는다(감속)
+//       out — 앞 샷이 그 점으로 줄어들어 사라지고(가속), 그 둘레로 다음 샷이 크게 확대된 모습에서 제 크기로 물러난다(감속)
+// Punch In 은 커지는 과정 없이 건너뛰고 같은 샷이며, 카메라의 Zoom 은 샷이 바뀌지 않는다
+// 앞 샷은 바탕색 있는 틀(.mg-zoom-transition-a)로 감싼다 — out 에서 한 장의 그림으로 줄어들어야 하고, 그때는 다음 샷 위에 놓인다
+//   --mg-zoom-transition-a-to(앞 샷의 끝 배율) · --mg-zoom-transition-b-from(다음 샷의 처음 배율)
+//   --mg-zoom-transition-b-at · -b-len(다음 샷이 움직이는 구간 — 전체 길이에 대한 비율). 앞 샷은 늘 35~55% 에 움직인다
+import MgFrame from '../../mg/MgFrame.astro';
+import MgScene from '../../mg/MgScene.astro';
+import MgShot from '../../mg/MgShot.astro';
+---
+<div class="mg-zoom-transition" data-demo-root aria-hidden="true">
+  <MgFrame duration="3s" ranges={[[35, 65]]}>
+    <div class="mg-zoom-transition-a"><MgScene /></div>
+    <MgShot shot="f" />
+  </MgFrame>
+</div>
+
+<style>
+  .mg-zoom-transition {
+    --mg-zoom-transition-a-to: 6;
+    --mg-zoom-transition-b-from: 0;
+    --mg-zoom-transition-b-at: 0.45;
+    --mg-zoom-transition-b-len: 0.2;
+  }
+  .mg-zoom-transition[data-variant='out'] {
+    --mg-zoom-transition-a-to: 0;
+    --mg-zoom-transition-b-from: 6;
+    --mg-zoom-transition-b-at: 0.35;
+    --mg-zoom-transition-b-len: 0.3;
+  }
+  .mg-zoom-transition-a {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    background: var(--surface);
+  }
+  .mg-zoom-transition[data-variant='out'] .mg-zoom-transition-a {
+    z-index: 1;
+  }
+  .mg-zoom-transition-a,
+  .mg-zoom-transition :global(.mgsh) {
+    transform-origin: 50% 68%;
+  }
+  .mg-zoom-transition :global(.mgsh) {
+    scale: var(--mg-zoom-transition-b-from);
+  }
+  .mg-zoom-transition.is-playing .mg-zoom-transition-a {
+    animation: mg-zoom-transition-a calc(var(--mg-duration) * 0.2) ease-in
+      calc(var(--mg-duration) * 0.35) forwards;
+  }
+  .mg-zoom-transition.is-playing :global(.mgsh) {
+    animation: mg-zoom-transition-b calc(var(--mg-duration) * var(--mg-zoom-transition-b-len)) ease-out
+      calc(var(--mg-duration) * var(--mg-zoom-transition-b-at)) forwards;
+  }
+  @keyframes mg-zoom-transition-a {
+    to {
+      scale: var(--mg-zoom-transition-a-to);
+    }
+  }
+  @keyframes mg-zoom-transition-b {
+    to {
+      scale: 1;
+    }
+  }
+</style>

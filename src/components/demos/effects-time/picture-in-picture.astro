@@ -1,0 +1,108 @@
+---
+// Picture-in-Picture 데모 — 본 화면(B 가 튀며 오가는 영상)이 화면을 가득 채운 채로, 그 위에 작은 창이 떠서 다른 영상(D)이 돈다
+// 창은 오른쪽 위로 들어오고(12~24%) → 왼쪽 위로 자리를 옮기고(44~58%) → 커진다(76~90%). 시간 막대의 띠가 그 세 구간이다 — 키프레임의 % 와 같은 값이어야 한다
+// 두 영상이 처음부터 끝까지 같이 흐른다: 본 화면의 B 는 건너갔다가 되돌아오고(--mgc-flip), 창 안의 D 는 창이 들어오기 전부터 움직이고 있다
+// 본 화면은 줄지도 밀리지도 않는다 — 창이 덮은 자리는 가려질 뿐이다. 화면을 칸으로 나누는 Split Screen 과 다르다
+// 창은 그 자체가 크기 기준(container)이라 안의 샷이 창 폭에 맞춰 통째로 줄어든다. 커지는 것은 scale 이다(창 테두리도 같이 굵어진다)
+import MgFrame from '../../mg/MgFrame.astro';
+import MgClip from '../../mg/MgClip.astro';
+import MgShot from '../../mg/MgShot.astro';
+---
+<div class="mg-picture-in-picture" data-demo-root aria-hidden="true">
+  <MgFrame duration="4.8s" ranges={[[12, 24], [44, 58], [76, 90]]}>
+    <MgClip />
+    <div class="mg-picture-in-picture-window">
+      <div class="mg-picture-in-picture-view">
+        <MgShot shot="d" />
+      </div>
+    </div>
+  </MgFrame>
+</div>
+
+<style>
+  /* 재생 전에는 화면 오른쪽 밖에 있다(왼쪽 끝이 102cqw) */
+  .mg-picture-in-picture-window {
+    position: absolute;
+    top: 4cqw;
+    left: 66cqw;
+    width: 30cqw;
+    aspect-ratio: 16 / 9;
+    outline: 0.5cqw solid var(--surface);
+    border-radius: 2px;
+    transform-origin: 0 0;
+    translate: 36cqw 0;
+  }
+  .mg-picture-in-picture-view {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    container-type: inline-size;
+    border-radius: 2px;
+  }
+  .mg-picture-in-picture :global(.mgsh-subject) {
+    translate: -8cqw 0;
+  }
+  .mg-picture-in-picture.is-playing :global(.mgs-b) {
+    animation: mg-picture-in-picture-run var(--mg-duration) linear forwards;
+  }
+  .mg-picture-in-picture.is-playing :global(.mgsh-subject) {
+    animation: mg-picture-in-picture-play var(--mg-duration) linear forwards;
+  }
+  .mg-picture-in-picture.is-playing .mg-picture-in-picture-window {
+    animation: mg-picture-in-picture-window var(--mg-duration) linear forwards;
+  }
+  /* 앞 절반에 한 번 건너가고, 뒤 절반에 같은 움직임으로 되돌아온다(둘 다 원래 속도) */
+  @keyframes mg-picture-in-picture-run {
+    0% {
+      --mg-clip-t: 0;
+      --mgc-flip: 0;
+    }
+    49.99% {
+      --mg-clip-t: 1;
+      --mgc-flip: 0;
+    }
+    50% {
+      --mg-clip-t: 0;
+      --mgc-flip: 1;
+    }
+    100% {
+      --mg-clip-t: 1;
+      --mgc-flip: 1;
+    }
+  }
+  @keyframes mg-picture-in-picture-play {
+    to {
+      translate: 24cqw 0;
+    }
+  }
+  @keyframes mg-picture-in-picture-window {
+    0% {
+      translate: 36cqw 0;
+      scale: 1;
+    }
+    12% {
+      translate: 36cqw 0;
+      animation-timing-function: cubic-bezier(0.2, 0.7, 0.3, 1);
+    }
+    24% {
+      translate: 0 0;
+    }
+    44% {
+      translate: 0 0;
+      animation-timing-function: cubic-bezier(0.5, 0, 0.3, 1);
+    }
+    58% {
+      translate: -62cqw 0;
+    }
+    76% {
+      translate: -62cqw 0;
+      scale: 1;
+      animation-timing-function: cubic-bezier(0.5, 0, 0.3, 1);
+    }
+    90%,
+    100% {
+      translate: -62cqw 0;
+      scale: 1.35;
+    }
+  }
+</style>

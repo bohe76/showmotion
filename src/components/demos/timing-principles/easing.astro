@@ -1,0 +1,33 @@
+---
+// Easing 데모 — 한 가지 모습이 아니라 "가는 동안 속도가 변한다"는 것 자체다. B 는 속도가 변하고, 아래 옅은 블록은 같은 거리를 등속(linear)으로 간다
+// 두 블록은 같은 순간에 떠나 같은 순간에 닿는다 — 달라지는 것은 그 사이의 빠르기뿐이고, 눈금의 간격이 그 빠르기다
+// 변형은 속도가 어디서 변하는가다(곡선 이름이 아니라 방향 — 이 용어가 아우르는 Ease In·Ease Out·Ease In-Out 을 한 무대에서 견준다):
+//   in-out(기본 — 양 끝이 느리다) · in(출발이 느리다) · out(도착이 느리다) · linear(이징 없음 — B 가 대조 블록과 똑같이 간다)
+// 세기는 모두 quint 다 — Ease In·Ease Out·Ease In-Out 의 기본(cubic)보다 세다(2026-10-02 사용자 결정). 같은 cubic 이면 이 카드가 Ease In-Out 카드와 똑같이 보인다,
+//   그리고 이 용어의 요점인 "등속과 다르다"가 센 곡선에서 더 잘 보인다. 곡선 이름(sine·expo 등)을 고르는 것은 저 셋의 변형에 있다
+import MgFrame from '../../mg/MgFrame.astro';
+import MgTrack from '../../mg/MgTrack.astro';
+---
+<div class="mg-easing" data-demo-root aria-hidden="true">
+  <MgFrame duration="3s">
+    <MgTrack />
+  </MgFrame>
+</div>
+
+<style>
+  .mg-easing {
+    --mgtr-curve: cubic-bezier(0.83, 0, 0.17, 1);
+  }
+  .mg-easing[data-variant='in'] {
+    --mgtr-curve: cubic-bezier(0.64, 0, 0.78, 0);
+  }
+  .mg-easing[data-variant='out'] {
+    --mgtr-curve: cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .mg-easing[data-variant='linear'] {
+    --mgtr-curve: linear;
+  }
+  .mg-easing.is-playing :global(.mgtr-hero) {
+    animation: mg-track-run var(--mg-duration) var(--mgtr-curve) forwards;
+  }
+</style>

@@ -1,0 +1,251 @@
+---
+// VHS Look 데모 — 영상이 낡은 비디오테이프처럼 보인다. 한순간 깨지는 Glitch Effect 와 달리 처음부터 끝까지 걸려 있는 질감이다(그래서 시간 막대에 띠가 없다)
+// 재료 넷이 늘 같이 깔려 있다:
+//   주사선 — 화면 전체의 가는 가로줄(멈춰 있다)
+//   색 번짐 — 물체 가장자리에서 빨강이 오른쪽으로 길게, 파랑이 왼쪽으로 짧게 흐리게 새어 나간다(RGB Split 처럼 딱딱하게 갈라졌다 붙지 않는다 — 부드럽게, 내내). 번짐의 색만 고정색이고 주사선·잡음은 토큰 색이다
+//   트래킹 떨림 — 가로 띠 하나가 옆으로 밀린 채 화면을 타고 내려가고(재생 전에는 맨 아래에 걸려 있다), 화면 전체가 위아래로 잘게 떤다
+//   테이프 잡음 — 가로로 긴 잡티가 프레임마다 다른 자리에 뜬다
+// 재생 전: 질감이 걸린 채 멈춘 화면이다(주사선·색 번짐·아래쪽의 밀린 띠). 잡음과 떨림은 재생할 때만 돈다
+// 변형은 네 재료 가운데 어느 것을 키우느냐다 — 나머지 셋은 옅게 남는다(하나만 남기면 VHS 로 읽히지 않는다):
+//   scanlines(기본) · chromatic-bleed · tracking-jitter · tape-noise
+// 밀린 띠는 같은 영상을 가로 띠로 자른 것이다(clip-path). 띠의 자리(--mg-vhs-look-t)가 매끄럽게 내려간다
+//   자리 = a% + b × 띠 높이. 등록한 숫자 a · b 를 움직이고 자리는 규칙에서 계산한다 — 띠 높이가 var 라서, 키프레임에 var() 가 든 값을 두면 Firefox 가 중간값 없이 건너뛴다
+// 잡음은 SVG 필터다: 가로로 긴 잡음(feTurbulence)의 짙은 곳만 남겨 토큰 색 겹을 뚫는다. 필터는 멈춰 있고, 겹의 자리를 프레임마다 옮겨 다른 잡음처럼 보이게 한다
+//   잡음·떨림은 초당 프레임 수가 일정해야 한다 — 길이 조작으로 재생이 길어지거나 짧아지면 바퀴 수를 그만큼 늘리거나 줄인다(Line Boil 과 같은 방법)
+// 화면 비율은 16:9 그대로 둔다(VHS 는 흔히 4:3 이지만 공통 장면의 양 끝 기둥이 잘린다)
+// 필터 주소는 루트의 인라인 스타일에 둔다 — 따로 떨어진 CSS 파일 안의 url(#…) 을 그 파일 기준으로 찾는 브라우저가 있다
+import MgFrame from '../../mg/MgFrame.astro';
+import MgFxFootage from '../../mg/MgFxFootage.astro';
+
+const grains = [
+  { id: 'mg-vhs-look-grain-light', cut: 10.4 },
+  { id: 'mg-vhs-look-grain-heavy', cut: 9.3 },
+];
+const filterVars = grains.map(({ id }) => `--${id}: url(#${id})`).join('; ');
+---
+<div class="mg-vhs-look" data-demo-root aria-hidden="true" style={filterVars}>
+  <MgFrame duration="4s">
+    <div class="mg-vhs-look-pic">
+      <MgFxFootage bleed />
+    </div>
+    <div class="mg-vhs-look-tear">
+      <div class="mg-vhs-look-shift">
+        <div class="mg-vhs-look-view">
+          <MgFxFootage bleed />
+        </div>
+      </div>
+    </div>
+    <span class="mg-vhs-look-grain mg-vhs-look-grain-a"></span>
+    <span class="mg-vhs-look-grain mg-vhs-look-grain-b"></span>
+    <span class="mg-vhs-look-lines"></span>
+  </MgFrame>
+  <svg class="mg-vhs-look-defs" width="0" height="0" focusable="false">
+    <defs>
+      <!-- 빨강이 짙은 곳만 불투명하게: 알파 = 14 × 빨강 − 문턱. 문턱이 높을수록 잡티가 드물다(light = 옅게 깔릴 때, heavy = tape-noise) -->
+      {grains.map(({ id, cut }) => (
+        <filter id={id} x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
+          <feTurbulence type="fractalNoise" baseFrequency="0.03 0.75" numOctaves="2" seed="5" result="noise"></feTurbulence>
+          <feColorMatrix in="noise" type="matrix" values={`0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  14 0 0 0 -${cut}`} result="mask"></feColorMatrix>
+          <feComposite in="SourceGraphic" in2="mask" operator="in"></feComposite>
+        </filter>
+      ))}
+    </defs>
+  </svg>
+</div>
+
+<style>
+  @property --mg-vhs-look-a {
+    syntax: '<number>';
+    inherits: false;
+    initial-value: 0;
+  }
+  @property --mg-vhs-look-b {
+    syntax: '<number>';
+    inherits: false;
+    initial-value: 0;
+  }
+  /* 재료의 세기 — 기본(scanlines)은 주사선이 짙고 나머지가 옅다 */
+  .mg-vhs-look {
+    --mg-vhs-look-lines: 0.3;
+    --mg-vhs-look-bleed: 0.7cqw;
+    --mg-vhs-look-tear: 2.4cqw;
+    --mg-vhs-look-band: 7%;
+    --mg-vhs-look-shake: 0.2cqw;
+    --mg-vhs-look-grain: 0.6;
+    --mg-vhs-look-grain-f: var(--mg-vhs-look-grain-light);
+    /* 색 번짐의 색 — 고정색이다(2026-10-02 사용자 결정): 테이프의 색 신호가 밀려 빨강이 오른쪽으로 길게, 파랑이 왼쪽으로 짧게 샌다 */
+    --mg-vhs-look-red: color-mix(in srgb, #ff2d55 62%, transparent);
+    --mg-vhs-look-blue: color-mix(in srgb, #2f7bff 42%, transparent);
+  }
+  .mg-vhs-look[data-variant='chromatic-bleed'] {
+    --mg-vhs-look-lines: 0.16;
+    --mg-vhs-look-bleed: 2.8cqw;
+  }
+  .mg-vhs-look[data-variant='tracking-jitter'] {
+    --mg-vhs-look-lines: 0.16;
+    --mg-vhs-look-tear: 8cqw;
+    --mg-vhs-look-band: 15%;
+    --mg-vhs-look-shake: 0.9cqw;
+  }
+  .mg-vhs-look[data-variant='tape-noise'] {
+    --mg-vhs-look-lines: 0.16;
+    --mg-vhs-look-grain: 0.9;
+    --mg-vhs-look-grain-f: var(--mg-vhs-look-grain-heavy);
+  }
+  .mg-vhs-look-defs {
+    position: absolute;
+  }
+  .mg-vhs-look-pic {
+    position: absolute;
+    inset: 0;
+  }
+  /* 색 번짐: 블록과 글자의 색이 오른쪽으로 흐리게 샌다 */
+  .mg-vhs-look :global(.mgs-c),
+  .mg-vhs-look :global(.mgs-b),
+  .mg-vhs-look :global(.mgs-a) {
+    text-shadow:
+      calc(var(--mg-vhs-look-bleed) * 0.6) 0 calc(var(--mg-vhs-look-bleed) * 0.3) var(--mg-vhs-look-red),
+      calc(var(--mg-vhs-look-bleed) * -0.3) 0 calc(var(--mg-vhs-look-bleed) * 0.3) var(--mg-vhs-look-blue);
+    box-shadow:
+      var(--mg-vhs-look-bleed) 0 calc(var(--mg-vhs-look-bleed) * 0.5) 0 var(--mg-vhs-look-red),
+      calc(var(--mg-vhs-look-bleed) * -0.5) 0 calc(var(--mg-vhs-look-bleed) * 0.5) 0 var(--mg-vhs-look-blue);
+  }
+  /* 밀린 띠: 재생 전에는 맨 아래에 걸려 있다 */
+  .mg-vhs-look-tear {
+    --mg-vhs-look-a: 100;
+    --mg-vhs-look-b: -1;
+    --mg-vhs-look-t: calc(var(--mg-vhs-look-a) * 1% + var(--mg-vhs-look-b) * var(--mg-vhs-look-band));
+    position: absolute;
+    inset: 0;
+    clip-path: inset(var(--mg-vhs-look-t) -1px calc(100% - var(--mg-vhs-look-t) - var(--mg-vhs-look-band)) -1px);
+  }
+  /* 민 띠의 빈 옆자리로 밑의 영상이 비치지 않게 좌우로 넓게 바탕색을 깐다. 그 안의 .mg-vhs-look-view 가 화면 틀과 같은 자리다 */
+  .mg-vhs-look-shift {
+    position: absolute;
+    inset: 0 -30cqw;
+    background: var(--surface);
+    translate: var(--mg-vhs-look-tear) 0;
+  }
+  .mg-vhs-look-view {
+    position: absolute;
+    inset: 0 30cqw;
+  }
+  .mg-vhs-look-lines {
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(to bottom, var(--ink) 0 0.5cqw, transparent 0.5cqw 1.5cqw);
+    opacity: var(--mg-vhs-look-lines);
+  }
+  /* 잡음 겹: 화면보다 넓다 — 자리를 옮겨도 화면을 덮는다. 재생 전에는 없다 */
+  .mg-vhs-look-grain {
+    position: absolute;
+    inset: -30cqw;
+    visibility: hidden;
+    opacity: var(--mg-vhs-look-grain);
+  }
+  .mg-vhs-look-grain-a {
+    background: var(--ink);
+  }
+  .mg-vhs-look-grain-b {
+    background: var(--surface);
+  }
+  .mg-vhs-look.is-playing .mg-vhs-look-grain {
+    visibility: visible;
+    filter: var(--mg-vhs-look-grain-f);
+    animation: mg-vhs-look-grain calc(var(--mg-duration) / 8) step-end 8 forwards;
+  }
+  .mg-vhs-look.is-playing .mg-vhs-look-grain-b {
+    animation-direction: reverse;
+  }
+  .mg-vhs-look.is-playing .mg-vhs-look-pic {
+    animation: mg-vhs-look-shake calc(var(--mg-duration) / 8) step-end 8 forwards;
+  }
+  .mg-vhs-look.is-playing .mg-vhs-look-tear {
+    animation: mg-vhs-look-roll var(--mg-duration) linear forwards;
+  }
+  .mg-vhs-look.is-playing .mg-vhs-look-shift {
+    animation: mg-vhs-look-wobble calc(var(--mg-duration) / 8) step-end 8 forwards;
+  }
+  /* 길이 조작으로 재생이 길어지거나 짧아져도 초당 프레임 수는 그대로여야 한다 — 바퀴 수를 길이 배수만큼 늘리거나 줄인다
+     횟수에 calc() 를 모르는 브라우저는 위의 고정 값으로 간다(길이를 바꾸면 초당 프레임 수가 달라진다) */
+  @supports (animation-iteration-count: calc(2 * 3)) {
+    .mg-vhs-look.is-playing :is(.mg-vhs-look-grain, .mg-vhs-look-pic, .mg-vhs-look-shift) {
+      animation-duration: calc(var(--mg-duration) / 8 / var(--mg-speed, 1));
+      animation-iteration-count: calc(8 * var(--mg-speed, 1));
+    }
+  }
+  /* 한 바퀴 = 다섯 프레임(초당 열 프레임). 마지막은 제자리 */
+  @keyframes mg-vhs-look-grain {
+    0% {
+      translate: -13cqw 7cqw;
+    }
+    20% {
+      translate: 11cqw -9cqw;
+    }
+    40% {
+      translate: -5cqw -14cqw;
+    }
+    60% {
+      translate: 16cqw 12cqw;
+    }
+    80%,
+    100% {
+      translate: 0 0;
+    }
+  }
+  @keyframes mg-vhs-look-shake {
+    0% {
+      translate: 0 var(--mg-vhs-look-shake);
+    }
+    20% {
+      translate: 0 0;
+    }
+    40% {
+      translate: 0 calc(var(--mg-vhs-look-shake) * -1);
+    }
+    60% {
+      translate: 0 calc(var(--mg-vhs-look-shake) * 0.5);
+    }
+    80%,
+    100% {
+      translate: 0 0;
+    }
+  }
+  @keyframes mg-vhs-look-wobble {
+    0% {
+      translate: calc(var(--mg-vhs-look-tear) * 1.3) 0;
+    }
+    20% {
+      translate: calc(var(--mg-vhs-look-tear) * 0.7) 0;
+    }
+    40% {
+      translate: calc(var(--mg-vhs-look-tear) * 1.15) 0;
+    }
+    60% {
+      translate: calc(var(--mg-vhs-look-tear) * 0.85) 0;
+    }
+    80%,
+    100% {
+      translate: var(--mg-vhs-look-tear) 0;
+    }
+  }
+  /* 띠가 맨 아래에서 밖으로 빠져나간 뒤 맨 위에서 다시 들어와 제자리(맨 아래)까지 내려온다 */
+  @keyframes mg-vhs-look-roll {
+    0% {
+      --mg-vhs-look-a: 100;
+      --mg-vhs-look-b: -1;
+    }
+    10% {
+      --mg-vhs-look-a: 100;
+      --mg-vhs-look-b: 0;
+    }
+    10.01% {
+      --mg-vhs-look-a: 0;
+      --mg-vhs-look-b: -1;
+    }
+    100% {
+      --mg-vhs-look-a: 100;
+      --mg-vhs-look-b: -1;
+    }
+  }
+</style>

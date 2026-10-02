@@ -1,0 +1,47 @@
+---
+// Pedestal 데모 — 카메라 몸이 수평을 유지한 채 오르내린다. 가까운 레이어일수록 더 많이 밀린다(뒤 3.5 · 가운데 7 · 앞 14 — 거리에 반비례)
+// Tilt 와 나란히 보면 차이가 보인다: 가운데 레이어(B)의 이동량은 두 데모가 같다. Pan ↔ Truck 의 세로판이다
+// 바닥선은 뒤 레이어의 밑변이라 뒤 레이어와 같이 움직인다 — 카메라가 오르면 바닥이 더 넓게 보인다
+// 변형: up(기본 — 카메라가 올라가 화면이 아래로 밀린다) · down. --mg-dir 이 방향이다(위 -1, 아래 1)
+// 깊이: 레이어 사이가 멀수록 앞·뒤의 이동량 차이가 커진다. 가운데(B)는 그대로다
+import MgFrame from '../../mg/MgFrame.astro';
+import MgScene from '../../mg/MgScene.astro';
+---
+<div class="mg-pedestal" data-demo-root aria-hidden="true">
+  <MgFrame duration="3s">
+    <MgScene bleed />
+  </MgFrame>
+</div>
+
+<style>
+  .mg-pedestal {
+    --mg-dir: -1;
+  }
+  .mg-pedestal[data-variant='down'] {
+    --mg-dir: 1;
+  }
+  /* 이동량 = 가운데 레이어의 이동량(7cqw) ÷ 레이어까지의 거리 */
+  .mg-pedestal :global(.mgs-far),
+  .mg-pedestal :global(.mgs-ground) {
+    --mg-pedestal-shift: calc(7cqw / var(--mg-z-far));
+  }
+  .mg-pedestal :global(.mgs-mid) {
+    --mg-pedestal-shift: 7cqw;
+  }
+  .mg-pedestal :global(.mgs-near) {
+    --mg-pedestal-shift: calc(7cqw / var(--mg-z-near));
+  }
+  .mg-pedestal :global(.mgs-layer),
+  .mg-pedestal :global(.mgs-ground) {
+    translate: 0 calc(var(--mg-pedestal-shift) * var(--mg-dir));
+  }
+  .mg-pedestal.is-playing :global(.mgs-layer),
+  .mg-pedestal.is-playing :global(.mgs-ground) {
+    animation: mg-pedestal-move var(--mg-duration) ease-in-out forwards;
+  }
+  @keyframes mg-pedestal-move {
+    to {
+      translate: 0 calc(var(--mg-pedestal-shift) * var(--mg-dir) * -1);
+    }
+  }
+</style>

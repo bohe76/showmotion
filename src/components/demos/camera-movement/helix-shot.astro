@@ -1,0 +1,64 @@
+---
+// Helix Shot 데모 — 카메라가 B 를 바라본 채 그 둘레를 돌면서 동시에 오른다(또는 내린다). B 는 화면 한가운데에 그대로 있고, 뒤 레이어와 앞 레이어가 비스듬히 엇갈린다
+// Orbit 과 나란히 보면 차이가 보인다: 가로로 엇갈리는 것은 같고(뒤는 왼쪽, 앞은 오른쪽 — 위에서 볼 때 시계 방향), 여기에 세로가 더해진다 — 오르면 내려다보게 돼 뒤 레이어와 바닥선은 올라가고 앞 기둥은 내려간다
+// 이동량 = 기준량 × (레이어까지의 거리 − 1) ÷ 거리 — B(거리 1)는 0, 뒤는 +, 앞은 − 라서 방향이 갈린다. 가로 기준량은 Orbit 과 같은 12cqw(+에서 −로), 세로는 14cqw(눈높이 0 에서 올라간 자리까지)
+// 변형: climbing(기본 — 기본 높이에서 올라간다) · descending(올라간 자리에서 내려온다). --mg-helix-shot-from · -to 가 높이다(0 = 눈높이, 1 = 올라간 자리)
+// 깊이: 레이어 사이가 멀수록 뒤·앞이 더 많이 엇갈린다
+import MgFrame from '../../mg/MgFrame.astro';
+// 위에서 보기: Orbit 과 같은 호다 — 오르내리는 것은 위에서 보이지 않는다
+import MgScene from '../../mg/MgScene.astro';
+import MgTopView from '../../mg/MgTopView.astro';
+---
+<div class="mg-helix-shot" data-demo-root aria-hidden="true">
+  <MgFrame duration="3.5s">
+    <MgScene bleed />
+    <MgTopView />
+  </MgFrame>
+</div>
+
+<style>
+  .mg-helix-shot {
+    --mg-helix-shot-from: 0;
+    --mg-helix-shot-to: 1;
+  }
+  .mg-helix-shot[data-variant='descending'] {
+    --mg-helix-shot-from: 1;
+    --mg-helix-shot-to: 0;
+  }
+  .mg-helix-shot :global(.mgs-far),
+  .mg-helix-shot :global(.mgs-ground) {
+    --mg-helix-shot-k: calc((var(--mg-z-far) - 1) / var(--mg-z-far));
+  }
+  .mg-helix-shot :global(.mgs-near) {
+    --mg-helix-shot-k: calc((var(--mg-z-near) - 1) / var(--mg-z-near));
+  }
+  /* 바닥선은 뒤 레이어의 밑변이라 뒤 레이어와 같이 움직인다 */
+  .mg-helix-shot :global(.mgs-far),
+  .mg-helix-shot :global(.mgs-near),
+  .mg-helix-shot :global(.mgs-ground) {
+    translate: calc(12cqw * var(--mg-helix-shot-k)) calc(-14cqw * var(--mg-helix-shot-k) * var(--mg-helix-shot-from));
+  }
+  .mg-helix-shot.is-playing :global(.mgs-far),
+  .mg-helix-shot.is-playing :global(.mgs-near),
+  .mg-helix-shot.is-playing :global(.mgs-ground) {
+    animation: mg-helix-shot-move var(--mg-duration) ease-in-out forwards;
+  }
+  @keyframes mg-helix-shot-move {
+    to {
+      translate: calc(-12cqw * var(--mg-helix-shot-k)) calc(-14cqw * var(--mg-helix-shot-k) * var(--mg-helix-shot-to));
+    }
+  }
+  /* 위에서 보기: 가운데 줄의 한가운데(B)를 축으로 시계 방향으로 돈다. 각은 Orbit 과 같다(±15.7°) */
+  .mg-helix-shot :global(.mgt-cam) {
+    transform-origin: 0 calc(var(--mgt-unit) * -1);
+    rotate: -15.7deg;
+  }
+  .mg-helix-shot.is-playing :global(.mgt-cam) {
+    animation: mg-helix-shot-arc var(--mg-duration) ease-in-out forwards;
+  }
+  @keyframes mg-helix-shot-arc {
+    to {
+      rotate: 15.7deg;
+    }
+  }
+</style>

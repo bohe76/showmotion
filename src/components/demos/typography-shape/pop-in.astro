@@ -1,0 +1,126 @@
+---
+// Pop-In 데모 — 요소가 0 에서 커지며 살짝 지나쳤다가 제 크기로 자리 잡는다. 영상에서 낱말·도형이 등장하는 가장 흔한 방식이다
+// 첫 요소는 처음부터 있고(빈 화면으로 시작하지 않는다) 둘째·셋째가 차례로 튀어나온다 — 제자리에서 커질 뿐, 날아오거나 미끄러져 오지 않는다
+// 시간 막대의 띠가 튀어나오는 구간이다(10~35%, 50~75%). 지연·길이의 비율과 같은 값이어야 한다
+// 변형: text(기본 — 낱말) · shape(도형 — 동그라미·네모·마름모) · line(선 — 길이 방향으로만 늘어났다 자리 잡는다)
+import MgFrame from '../../mg/MgFrame.astro';
+import MgWords from '../../mg/MgWords.astro';
+
+const items = [0, 1, 2];
+---
+<div class="mg-pop-in" data-demo-root aria-hidden="true">
+  <MgFrame duration="3s" ranges={[[10, 35], [50, 75]]}>
+    <div class="mg-pop-in-set mg-pop-in-text"><MgWords words={['ABC', 'DEF', 'GHI']} /></div>
+    <div class="mg-pop-in-set mg-pop-in-shape">
+      {items.map((i) => <span class="mg-pop-in-item" style={`--i: ${i}`}></span>)}
+    </div>
+    <div class="mg-pop-in-set mg-pop-in-line">
+      {items.map((i) => <span class="mg-pop-in-item" style={`--i: ${i}`}></span>)}
+    </div>
+  </MgFrame>
+</div>
+
+<style>
+  .mg-pop-in-set {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .mg-pop-in-shape,
+  .mg-pop-in-line,
+  .mg-pop-in[data-variant='shape'] .mg-pop-in-text,
+  .mg-pop-in[data-variant='line'] .mg-pop-in-text {
+    display: none;
+  }
+  .mg-pop-in[data-variant='shape'] .mg-pop-in-shape,
+  .mg-pop-in[data-variant='line'] .mg-pop-in-line {
+    display: flex;
+  }
+  .mg-pop-in :global(.mgw) {
+    font-size: 9cqw;
+  }
+  /* 도형: 동그라미 · 네모 · 마름모 */
+  .mg-pop-in-shape {
+    gap: 10cqw;
+  }
+  .mg-pop-in-shape .mg-pop-in-item {
+    width: 14cqw;
+    aspect-ratio: 1;
+    background: var(--accent);
+    border-radius: 50%;
+  }
+  .mg-pop-in-shape .mg-pop-in-item:nth-child(2) {
+    background: var(--ink);
+    border-radius: 3px;
+  }
+  .mg-pop-in-shape .mg-pop-in-item:nth-child(3) {
+    width: 11cqw;
+    margin: 0 1.5cqw;
+    border-radius: 3px;
+    rotate: 45deg;
+  }
+  /* 선: 길이가 다른 굵은 선 셋 */
+  .mg-pop-in-line {
+    flex-direction: column;
+    gap: 4.5cqw;
+  }
+  .mg-pop-in-line .mg-pop-in-item {
+    width: 48cqw;
+    height: 2.6cqw;
+    background: var(--ink);
+    border-radius: 1.3cqw;
+  }
+  .mg-pop-in-line .mg-pop-in-item:nth-child(2) {
+    width: 30cqw;
+    background: var(--accent);
+  }
+  .mg-pop-in-line .mg-pop-in-item:nth-child(3) {
+    width: 40cqw;
+  }
+  /* 둘째·셋째는 0 에서 시작한다. 등장 시각: 둘째 10%, 셋째 50% */
+  .mg-pop-in :global(.mgw-word:not(:first-child)),
+  .mg-pop-in-item:not(:first-child) {
+    --mg-pop-in-at: calc(var(--mg-duration) * (0.1 + (var(--i) - 1) * 0.4));
+    scale: 0;
+  }
+  .mg-pop-in-line .mg-pop-in-item:not(:first-child) {
+    scale: 0 1;
+  }
+  .mg-pop-in.is-playing :global(.mgw-word:not(:first-child)),
+  .mg-pop-in.is-playing .mg-pop-in-item:not(:first-child) {
+    animation: mg-pop-in-pop calc(var(--mg-duration) * 0.25) ease-out var(--mg-pop-in-at) forwards;
+  }
+  .mg-pop-in.is-playing .mg-pop-in-line .mg-pop-in-item:not(:first-child) {
+    animation-name: mg-pop-in-stretch;
+  }
+  @keyframes mg-pop-in-pop {
+    0% {
+      scale: 0;
+    }
+    50% {
+      scale: 1.18;
+    }
+    76% {
+      scale: 0.96;
+    }
+    100% {
+      scale: 1;
+    }
+  }
+  @keyframes mg-pop-in-stretch {
+    0% {
+      scale: 0 1;
+    }
+    50% {
+      scale: 1.16 1;
+    }
+    76% {
+      scale: 0.97 1;
+    }
+    100% {
+      scale: 1 1;
+    }
+  }
+</style>

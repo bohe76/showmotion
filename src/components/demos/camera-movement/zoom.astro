@@ -1,0 +1,52 @@
+---
+// Zoom 데모 — 렌즈의 초점 거리만 바뀐다. 장면 전체가 한 덩어리로 같은 비율만큼 커진다(레이어 사이의 간격은 그대로 — 깊이 차이 없음)
+// Dolly 와 나란히 보면 차이가 보인다: 가운데 B 가 커지는 정도는 두 데모가 같다(0.8 → 1.25 배)
+// 배율의 중심은 B 의 한가운데 = 장면의 지평선(화면 위에서 68%). Dolly · Crash Zoom · Dolly Zoom 도 같은 중심을 쓴다
+// 변형: in(기본 — 넓은 화면에서 좁혀 들어간다) · out. 처음 장면이 1 배보다 작아서 바닥과 기둥을 화면 밖까지 잇는다(bleed)
+import MgFrame from '../../mg/MgFrame.astro';
+// 위에서 보기: 카메라는 제자리이고 시야만 좁아진다
+import MgScene from '../../mg/MgScene.astro';
+import MgTopView from '../../mg/MgTopView.astro';
+---
+<div class="mg-zoom" data-demo-root aria-hidden="true">
+  <MgFrame duration="3s">
+    <MgScene bleed />
+    <MgTopView />
+  </MgFrame>
+</div>
+
+<style>
+  .mg-zoom {
+    --mg-zoom-from: 0.8;
+    --mg-zoom-to: 1.25;
+  }
+  .mg-zoom[data-variant='out'] {
+    --mg-zoom-from: 1.25;
+    --mg-zoom-to: 0.8;
+  }
+  .mg-zoom :global(.mgs) {
+    transform-origin: 50% 68%;
+    scale: var(--mg-zoom-from);
+  }
+  .mg-zoom.is-playing :global(.mgs) {
+    animation: mg-zoom-scale var(--mg-duration) ease-in-out forwards;
+  }
+  @keyframes mg-zoom-scale {
+    to {
+      scale: var(--mg-zoom-to);
+    }
+  }
+  /* 위에서 보기: 시야(부채꼴)의 폭이 배율에 반비례한다. 꼭짓점(카메라)이 축이다 */
+  .mg-zoom :global(.mgt-view) {
+    transform-origin: 50% 100%;
+    scale: calc(1 / var(--mg-zoom-from)) 1;
+  }
+  .mg-zoom.is-playing :global(.mgt-view) {
+    animation: mg-zoom-narrow var(--mg-duration) ease-in-out forwards;
+  }
+  @keyframes mg-zoom-narrow {
+    to {
+      scale: calc(1 / var(--mg-zoom-to)) 1;
+    }
+  }
+</style>

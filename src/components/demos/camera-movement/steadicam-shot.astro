@@ -1,0 +1,88 @@
+---
+// Steadicam Shot 데모 — 사람이 카메라를 들고 걸어 들어가는데, 흔들림이 하나도 없이 미끄러지듯 떠서 간다
+// 길은 Handheld 데모와 똑같다: 앞으로 걸어 들어가며(가까운 레이어일수록 더 커진다) 오른쪽으로 휘었다가 왼쪽으로 돌아온다. 그 사이 아주 느리게 떠오르고 가라앉는다
+// Handheld 와 나란히 보면 차이가 보인다: 같은 길인데 화면이 떨리지도 기울지도 않는다. Dolly 와는 길이 다르다 — 레일 위의 곧은 길이 아니라 공간을 휘어 다닌다
+// 배율은 Dolly 와 같은 식(거리 ÷ (거리 − 카메라가 나아간 거리 0.24)), 옆·세로 이동량은 가운데 레이어의 이동량 ÷ 거리
+// 깊이: 레이어 사이가 멀수록 앞·뒤가 커지고 밀리는 정도의 차이가 벌어진다
+// 이 파일의 길(키프레임 -weave · -push 와 그 값)을 고치면 handheld.astro 도 같이 고친다
+import MgFrame from '../../mg/MgFrame.astro';
+// 위에서 보기: 카메라가 같은 방향을 본 채 휘는 길을 따라 들어간다
+import MgScene from '../../mg/MgScene.astro';
+import MgTopView from '../../mg/MgTopView.astro';
+---
+<div class="mg-steadicam-shot" data-demo-root aria-hidden="true">
+  <MgFrame duration="4s">
+    <MgScene bleed />
+    <MgTopView />
+  </MgFrame>
+</div>
+
+<style>
+  .mg-steadicam-shot :global(.mgs-far),
+  .mg-steadicam-shot :global(.mgs-ground) {
+    --mg-steadicam-shot-z: var(--mg-z-far);
+  }
+  .mg-steadicam-shot :global(.mgs-mid) {
+    --mg-steadicam-shot-z: 1;
+  }
+  .mg-steadicam-shot :global(.mgs-near) {
+    --mg-steadicam-shot-z: var(--mg-z-near);
+  }
+  /* 배율의 중심은 지평선(화면 위에서 68% = B 의 한가운데). 바닥선은 뒤 레이어의 밑변이라 뒤 레이어와 같이 움직인다 */
+  .mg-steadicam-shot :global(.mgs-layer),
+  .mg-steadicam-shot :global(.mgs-ground) {
+    transform-origin: 50% 68%;
+  }
+  .mg-steadicam-shot :global(.mgs-ground) {
+    transform-origin: 50% -4.5cqw;
+  }
+  .mg-steadicam-shot.is-playing :global(.mgs-layer),
+  .mg-steadicam-shot.is-playing :global(.mgs-ground) {
+    animation:
+      mg-steadicam-shot-push var(--mg-duration) ease-in-out forwards,
+      mg-steadicam-shot-weave var(--mg-duration) ease-in-out forwards;
+  }
+  @keyframes mg-steadicam-shot-push {
+    to {
+      scale: calc(var(--mg-steadicam-shot-z) / (var(--mg-steadicam-shot-z) - 0.24));
+    }
+  }
+  /* 구간마다 ease-in-out 이라 방향을 바꾸는 곳에서 부드럽게 꺾인다 */
+  @keyframes mg-steadicam-shot-weave {
+    38% {
+      translate: calc(-7cqw / var(--mg-steadicam-shot-z)) calc(0.9cqw / var(--mg-steadicam-shot-z));
+      animation-timing-function: ease-in-out;
+    }
+    74% {
+      translate: calc(4cqw / var(--mg-steadicam-shot-z)) calc(-0.7cqw / var(--mg-steadicam-shot-z));
+      animation-timing-function: ease-in-out;
+    }
+    100% {
+      translate: 0 0;
+    }
+  }
+  /* 위에서 보기: 앞으로는 가운데 줄까지 거리의 0.24, 옆으로는 가운데 줄이 화면 폭의 7% · 4% 밀리는 만큼. 앞(transform)과 옆(translate)을 따로 움직인다 */
+  .mg-steadicam-shot.is-playing :global(.mgt-cam) {
+    animation:
+      mg-steadicam-shot-walk var(--mg-duration) ease-in-out forwards,
+      mg-steadicam-shot-sway var(--mg-duration) ease-in-out forwards;
+  }
+  @keyframes mg-steadicam-shot-walk {
+    to {
+      transform: translateY(calc(var(--mgt-unit) * -0.24));
+    }
+  }
+  @keyframes mg-steadicam-shot-sway {
+    38% {
+      translate: calc(var(--mgt-mid-width) * 0.07) 0;
+      animation-timing-function: ease-in-out;
+    }
+    74% {
+      translate: calc(var(--mgt-mid-width) * -0.04) 0;
+      animation-timing-function: ease-in-out;
+    }
+    100% {
+      translate: 0 0;
+    }
+  }
+</style>

@@ -1,0 +1,71 @@
+---
+// Bloom / Glow 데모 — 밝은 부분(B)의 빛이 둘레로 부드럽게 번진다. B 가 스스로 빛을 내는 것처럼 보이고, 빛무리는 맥박처럼 숨 쉰다
+// 처음에는 빛무리가 없다(영상만 흐른다). 시간 막대의 띠가 빛이 번져 있는 구간이다(28~100%): 차오른 뒤(28~40%) 두 번 숨 쉬고 켜진 채 끝난다
+// 빛무리는 B 를 따라간다 — 장면 속 밝은 물체에서 나오는 빛이다. 화면 가장자리에서 들어오는 Light Leak, 고리·줄기가 미끄러지는 Lens Flare 와 다르다
+// 빛무리는 B 의 의사 요소 둘이다(B 와 같은 모양을 흐린 것): 바짝 붙은 흰빛에 가까운 겹 + 멀리 퍼지는 밝은 민트색 겹
+//   색은 토큰이 아니라 고정색이다(2026-10-02 사용자 결정) — 빛은 물체의 색보다 밝아야 빛으로 읽힌다. 강조색 그대로 번지게 했을 때는 색 안개로 보였다. 라이트·다크에서 같은 색을 쓴다
+//   B 자체의 animation 은 영상(MgFxFootage)이 쓰고 있어 의사 요소를 움직인다. 숨 쉴 때 세기(투명도)와 퍼진 크기가 같이 변한다
+import MgFrame from '../../mg/MgFrame.astro';
+import MgFxFootage from '../../mg/MgFxFootage.astro';
+---
+<div class="mg-bloom-glow" data-demo-root aria-hidden="true">
+  <MgFrame duration="4s" ranges={[[28, 100]]}>
+    <MgFxFootage />
+  </MgFrame>
+</div>
+
+<style>
+  .mg-bloom-glow :global(.mgs-b)::before,
+  .mg-bloom-glow :global(.mgs-b)::after {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    content: '';
+    background: #35f5d0;
+    border-radius: inherit;
+    opacity: 0;
+  }
+  .mg-bloom-glow :global(.mgs-b)::before {
+    background: #d4fff6;
+    --mg-bloom-glow-peak: 0.95;
+    --mg-bloom-glow-rest: 0.7;
+    filter: blur(1.6cqw);
+  }
+  .mg-bloom-glow :global(.mgs-b)::after {
+    --mg-bloom-glow-peak: 0.6;
+    --mg-bloom-glow-rest: 0.35;
+    --mg-bloom-glow-size: 1.7;
+    filter: blur(4.5cqw);
+  }
+  .mg-bloom-glow.is-playing :global(.mgs-b)::before,
+  .mg-bloom-glow.is-playing :global(.mgs-b)::after {
+    animation: mg-bloom-glow-breathe var(--mg-duration) ease-in-out forwards;
+  }
+  @keyframes mg-bloom-glow-breathe {
+    0%,
+    28% {
+      opacity: 0;
+      scale: 1;
+    }
+    40% {
+      opacity: var(--mg-bloom-glow-peak);
+      scale: var(--mg-bloom-glow-size, 1.15);
+    }
+    55% {
+      opacity: var(--mg-bloom-glow-rest);
+      scale: 1;
+    }
+    70% {
+      opacity: var(--mg-bloom-glow-peak);
+      scale: var(--mg-bloom-glow-size, 1.15);
+    }
+    85% {
+      opacity: var(--mg-bloom-glow-rest);
+      scale: 1;
+    }
+    100% {
+      opacity: var(--mg-bloom-glow-peak);
+      scale: var(--mg-bloom-glow-size, 1.15);
+    }
+  }
+</style>

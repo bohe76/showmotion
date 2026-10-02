@@ -1,0 +1,30 @@
+---
+// Stop Motion Look 데모 — 같은 영상(B 가 뛰어올라 튀며 간다)이 낮은 프레임률로 뚝뚝 끊기며 나아간다. 한 장씩 찍은 듯 자세마다 잠깐 머문다
+// 빠르기는 원래 속도 그대로다(한 번 건너는 데 2.4초). 달라진 것은 자세가 바뀌는 횟수뿐이다 — 초당 약 8번
+// 화면은 내내 켜져 있다 — 켜졌다 꺼지며 띄엄띄엄한 자세만 보이는 것은 Strobe Effect 다
+// Animating on Twos(타이밍 카테고리)와 원리는 같다(steps()). 저쪽은 트랙 위 블록 하나의 타이밍 원칙이고, 여기는 영상에 입힌 모습이다
+import MgFrame from '../../mg/MgFrame.astro';
+import MgClip from '../../mg/MgClip.astro';
+---
+<div class="mg-stop-motion-look" data-demo-root aria-hidden="true">
+  <MgFrame duration="2.4s">
+    <MgClip />
+  </MgFrame>
+</div>
+
+<style>
+  /* 자세 수 = 보통 길이(2.4s) 동안 바뀌는 횟수 */
+  .mg-stop-motion-look {
+    --mg-stop-motion-look-curve: steps(20);
+  }
+  /* 길이 조작으로 재생이 길어지거나 짧아져도 초당 횟수는 그대로여야 한다 — 자세 수를 길이 배수만큼 늘리거나 줄인다
+     steps() 안의 calc() 를 모르는 브라우저는 위의 고정 값으로 간다(길이를 바꾸면 초당 횟수가 달라진다) */
+  @supports (animation-timing-function: steps(calc(2 * 3))) {
+    .mg-stop-motion-look {
+      --mg-stop-motion-look-curve: steps(calc(20 * var(--mg-speed, 1)));
+    }
+  }
+  .mg-stop-motion-look.is-playing :global(.mgs-b) {
+    animation: mg-clip-run var(--mg-duration) var(--mg-stop-motion-look-curve) forwards;
+  }
+</style>

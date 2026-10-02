@@ -9,6 +9,8 @@ import { splitPlaceholders } from '../i18n/placeholder';
 // - cursor: 포인터가 위에 있으면 .is-active, 위치는 --mx·--my(0~1)와 --px·--py(px)
 // - drag: 누르고 끄는 동안 .is-dragging, 누른 곳부터 이동량 --dx·--dy(px), 위치 --mx·--my·--px·--py
 // - scroll: 루트 안의 [data-scroller] 스크롤 진행도 --scroll(0~1)
+// - play: 저절로 움직이지 않는다. 재생 버튼을 누르면 .is-playing 을 처음부터 다시 붙인다
+//   상세 페이지에서는 조작 줄이 data-variant·data-depth·data-view·--mg-speed 를 바꾼다 (setupControls)
 // - prefers-reduced-motion: once 는 자동 재생하지 않고 버튼을 누를 때만, loop 는 CSS 가 멈춘 채로 시작 (global.css)
 
 function restart(root: HTMLElement) {
@@ -136,10 +138,103 @@ function setupScroll(root: HTMLElement) {
   scroller.addEventListener('scroll', update, { passive: true });
 }
 
+// 모션 그래픽 상세 페이지의 조작 줄(MgControls) — 스테이지 바로 다음 형제. 카드에는 없다
+// 칩을 누르면 데모 루트의 값을 바꾸고 처음부터 재생한다: variant·depth·view 는 data-*, speed 는 --mg-speed(길이 배수)
+// 값만 바꾸면 화면의 애니메이션과 시간 막대가 어긋나므로 처음부터 다시 재생한다(시점만 예외 — 아래)
+function setupControls(stage: HTMLElement, root: HTMLElement) {
+  const controls = stage.nextElementSibling;
+  if (!(controls instanceof HTMLElement) || !controls.matches('[data-demo-controls]')) return;
+  controls.hidden = false;
+  controls.addEventListener('click', (event) => {
+    const chip = (event.target as HTMLElement).closest<HTMLButtonElement>('[data-set]');
+    if (!chip) return;
+    const { set, value } = chip.dataset;
+    if (set === 'speed') root.style.setProperty('--mg-speed', value!);
+    else root.dataset[set!] = value!;
+    // 시간 막대의 표시(컷·구간)가 변형마다 다른 데모는 고른 변형의 것만 보인다 (MgFrame 의 data-for)
+    if (set === 'variant') {
+      root.querySelectorAll<HTMLElement>('[data-for]').forEach((mark) => (mark.hidden = mark.dataset.for !== value));
+    }
+    chip.parentElement!
+      .querySelectorAll('[data-set]')
+      .forEach((other) => other.setAttribute('aria-pressed', String(other === chip)));
+    // 시점은 다시 재생하지 않는다 — 보는 자리만 옮긴다(3D 장면은 그 자체가 카메라가 빠져나오는 움직임이고, 재생 중이면 이어서 흐른다)
+    if (set !== 'view') restart(root);
+  });
+}
+
 // 반복 데모는 화면 밖에서 멈춘다 — 전체 페이지에는 카드가 수백 장이다
 const offscreen = new IntersectionObserver((entries) => {
   for (const entry of entries) entry.target.classList.toggle('is-offscreen', !entry.isIntersecting);
 });
+
+// 3D 무대가 있는 용어(모션 그래픽 구역): 목록은 2D 로 다 만들어 두고, 화면에 들어왔거나 곧 들어올 스테이지만 3D 로 바꿔 끼운다(2026-10-02 사용자 결정)
+//   올리기 = three.js 캔버스를 2D 화면 위에 덮는다(mg3d/stage.ts). 멀어지면 내린다 — 스테이지마다 WebGL 캔버스를 하나씩 쓰고, 브라우저는 그것을 16개쯤(모바일은 더 적게)만 살려 둔다
+//   내렸다 다시 올려도 이어진다: 변형·깊이·시점은 데모 루트에, 재생 진행도는 시간 막대의 애니메이션에 남아 있다
+//   스테이지의 상태는 셋이고 DemoStage 의 스타일이 그대로 그린다:
+//     표시 없음 = 3D 를 기다린다 — 2D 장면은 숨겨져 있고 도는 표시가 보인다(2D 가 잠깐 보였다가 3D 로 바뀌지 않게). 내려 둔 스테이지도 이 상태다
+//     data-mg3d-on = 3D 가 올라와 있다 · data-mg3d-off = 2D 데모를 보여 준다
+//   three.js 는 처음 올릴 때 불러온다. 못 불러오거나 WebGL 이 안 되면 2D 로 두고 더 시도하지 않는다. 응답이 오지 않는 때를 위해 4초 뒤에도 2D 로 둔다
+const MG3D_MARGIN = '240px 0px'; // 화면에 들어오기 조금 전에 올린다 — 도는 표시가 보이는 때를 줄인다
+const MG3D_LIMIT = 12; // 한 번에 올려 두는 수. 3열 목록에서 화면에 걸리는 것은 많아야 9개쯤이다. 세로로 긴 화면에서 넘치면 자리가 날 때까지 2D 로 보인다
+let mg3dLive = 0;
+const mg3dWaiting = new Set<() => void>(); // 자리가 나기를 기다리는 스테이지
+let mg3dModule: Promise<typeof import('./mg3d/stage')> | undefined;
+
+function setupStage3d(stage: HTMLElement, root: HTMLElement) {
+  let near = false;
+  let lower: (() => void) | undefined;
+  const show2d = () => stage.setAttribute('data-mg3d-off', '');
+  const drop = () => {
+    if (!lower) return;
+    lower();
+    lower = undefined;
+    stage.removeAttribute('data-mg3d-on');
+    mg3dLive--;
+    for (const retry of [...mg3dWaiting]) retry();
+  };
+  const raise = async () => {
+    const timer = window.setTimeout(show2d, 4000);
+    try {
+      const module = await (mg3dModule ??= import('./mg3d/stage'));
+      window.clearTimeout(timer);
+      if (!near || lower) return;
+      if (mg3dLive >= MG3D_LIMIT) {
+        mg3dWaiting.add(raise);
+        show2d();
+        return;
+      }
+      mg3dWaiting.delete(raise);
+      // 컨텍스트를 잃으면 내리고 2D 로 둔다 — 화면에서 멀어졌다가 다시 올 때 새로 올린다
+      lower = module.mount(stage, root, () => {
+        drop();
+        show2d();
+      });
+      mg3dLive++;
+      stage.removeAttribute('data-mg3d-off');
+      stage.setAttribute('data-mg3d-on', '');
+    } catch {
+      window.clearTimeout(timer);
+      watch.disconnect();
+      show2d();
+    }
+  };
+  const watch = new IntersectionObserver(
+    (entries) => {
+      near = entries[entries.length - 1].isIntersecting;
+      if (near) {
+        raise();
+        return;
+      }
+      mg3dWaiting.delete(raise);
+      drop();
+      // 자리가 없거나 컨텍스트를 잃어서 2D 로 두었던 스테이지는 다음에 다시 3D 로 시도한다
+      stage.removeAttribute('data-mg3d-off');
+    },
+    { rootMargin: MG3D_MARGIN },
+  );
+  watch.observe(stage);
+}
 
 function setupStage(stage: HTMLElement, reduceMotion: boolean) {
   const root = stage.querySelector<HTMLElement>('[data-demo-root]');
@@ -181,6 +276,12 @@ function setupStage(stage: HTMLElement, reduceMotion: boolean) {
       return;
     case 'scroll':
       setupScroll(root);
+      return;
+    case 'play':
+      // 저절로 재생하지 않는다 — 버튼을 누를 때마다 처음부터 1회 (모션 그래픽 구역)
+      control?.addEventListener('click', () => restart(root));
+      setupControls(stage, root);
+      if (stage.dataset.mg3d) setupStage3d(stage, root);
       return;
   }
 

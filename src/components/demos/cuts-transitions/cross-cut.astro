@@ -1,0 +1,60 @@
+---
+// Cross-Cut 데모 — 같은 때에 다른 곳에서 벌어지는 두 행동을 번갈아 오간다. 시간 막대의 눈금이 컷 지점이다(25%, 50%, 75%)
+// 두 행동은 화면에 안 보이는 동안에도 계속 나아간다: B 는 처음부터 끝까지 오른쪽으로 걷고, D 는 처음부터 끝까지 왼쪽으로 온다
+// — 그래서 돌아올 때마다 앞서 본 자리보다 더 가 있다. Cutaway 는 본 장면을 한 번 떠났다 돌아올 뿐이다
+import MgFrame from '../../mg/MgFrame.astro';
+import MgScene from '../../mg/MgScene.astro';
+import MgShot from '../../mg/MgShot.astro';
+---
+<div class="mg-cross-cut" data-demo-root aria-hidden="true">
+  <MgFrame duration="5s" cuts={[25, 50, 75]}>
+    <MgScene />
+    <MgShot shot="d" />
+  </MgFrame>
+</div>
+
+<style>
+  .mg-cross-cut :global(.mgs-b) {
+    translate: -20cqw 0;
+  }
+  .mg-cross-cut :global(.mgsh) {
+    visibility: hidden;
+  }
+  .mg-cross-cut.is-playing :global(.mgs-b) {
+    animation: mg-cross-cut-walk var(--mg-duration) linear forwards;
+  }
+  .mg-cross-cut.is-playing :global(.mgsh-subject) {
+    animation: mg-cross-cut-come var(--mg-duration) linear forwards;
+  }
+  .mg-cross-cut.is-playing :global(.mgsh) {
+    animation: mg-cross-cut-cut var(--mg-duration) step-end forwards;
+  }
+  @keyframes mg-cross-cut-walk {
+    to {
+      translate: 20cqw 0;
+    }
+  }
+  @keyframes mg-cross-cut-come {
+    from {
+      translate: 44cqw 0;
+    }
+    to {
+      translate: 0 0;
+    }
+  }
+  @keyframes mg-cross-cut-cut {
+    0% {
+      visibility: hidden;
+    }
+    25% {
+      visibility: visible;
+    }
+    50% {
+      visibility: hidden;
+    }
+    75%,
+    100% {
+      visibility: visible;
+    }
+  }
+</style>

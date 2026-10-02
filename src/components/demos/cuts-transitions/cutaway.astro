@@ -1,0 +1,57 @@
+---
+// Cutaway 데모 — 본 장면을 잠깐 떠나 다른 것(F)을 보여 주고 본 장면으로 돌아온다. 시간 막대의 눈금이 컷 지점이다(40%, 64%)
+// B 는 화면에 안 보이는 동안에도 계속 걷는다 — 돌아왔을 때 그만큼 더 가 있다. 끼어든 샷은 앞뒤의 본 장면보다 짧다
+// Cross-Cut 은 두 행동을 여러 번 번갈아 오가고, Flash Cut 은 읽을 틈도 없이 스친다
+import MgFrame from '../../mg/MgFrame.astro';
+import MgScene from '../../mg/MgScene.astro';
+import MgShot from '../../mg/MgShot.astro';
+---
+<div class="mg-cutaway" data-demo-root aria-hidden="true">
+  <MgFrame duration="4s" cuts={[40, 64]}>
+    <MgScene />
+    <MgShot shot="f" />
+  </MgFrame>
+</div>
+
+<style>
+  .mg-cutaway :global(.mgs-b) {
+    translate: -20cqw 0;
+  }
+  .mg-cutaway :global(.mgsh) {
+    visibility: hidden;
+  }
+  .mg-cutaway.is-playing :global(.mgs-b) {
+    animation: mg-cutaway-walk var(--mg-duration) linear forwards;
+  }
+  .mg-cutaway.is-playing :global(.mgsh-subject) {
+    animation: mg-cutaway-drift var(--mg-duration) linear forwards;
+  }
+  .mg-cutaway.is-playing :global(.mgsh) {
+    animation: mg-cutaway-cut var(--mg-duration) step-end forwards;
+  }
+  @keyframes mg-cutaway-walk {
+    to {
+      translate: 20cqw 0;
+    }
+  }
+  @keyframes mg-cutaway-drift {
+    from {
+      translate: 10cqw 0;
+    }
+    to {
+      translate: -10cqw 0;
+    }
+  }
+  @keyframes mg-cutaway-cut {
+    0% {
+      visibility: hidden;
+    }
+    40% {
+      visibility: visible;
+    }
+    64%,
+    100% {
+      visibility: hidden;
+    }
+  }
+</style>

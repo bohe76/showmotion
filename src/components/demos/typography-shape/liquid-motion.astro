@@ -1,0 +1,162 @@
+---
+// Liquid Motion 데모 — 완성된 그림(표식 + 낱말)이 물처럼 출렁인다: 조각마다 차례로 눌렸다가 위로 길게 솟고, 방울이 튀어 올랐다 떨어져 다시 합쳐지고, 출렁이다 가라앉는다
+// Blob Morph 는 혼자 있는 덩어리 하나가 꿈틀대지만, 여기는 실제 그림(도형과 글자)이 물처럼 휜다 — 그래서 로고 자리 채움을 그대로 쓴다
+// 물결은 왼쪽 조각에서 오른쪽 조각으로 지나간다(네모 → 동그라미 → 막대 → A → B → C). 재생 전과 끝 장면은 가만히 있는 같은 그림이다
+// 물 같은 가장자리: 그림 묶음에 흐림(CSS blur)을 얹고, 그 바깥에서 알파 문턱 필터로 경계를 다시 세운다 — 모서리가 둥글어지고, 가까워진 조각끼리 끈끈하게 붙었다 끊어진다
+//   흐림은 cqw 라 카드와 상세에서 같은 비율이다. 필터는 재생 중에만 걸린다(처음과 끝의 그림은 또렷하다)
+//   필터 주소는 루트의 인라인 스타일에 둔다(따로 떨어진 CSS 파일 안의 url(#…) 을 그 파일 기준으로 찾는 브라우저가 있다)
+// 방울은 조각의 ::before 다 — 조각 속에 숨어 있다가(크기 0) 솟는 순간 위로 튀어 나갔다 돌아온다
+import MgFrame from '../../mg/MgFrame.astro';
+import MgMark from '../../mg/MgMark.astro';
+---
+<div class="mg-liquid-motion" data-demo-root aria-hidden="true" style="--mg-liquid-motion-goo: url(#mg-liquid-motion-goo)">
+  <MgFrame duration="4s">
+    <div class="mg-liquid-motion-set">
+      <div class="mg-liquid-motion-art"><MgMark /></div>
+    </div>
+  </MgFrame>
+  <svg class="mg-liquid-motion-defs" width="0" height="0" focusable="false">
+    <defs>
+      <filter id="mg-liquid-motion-goo" color-interpolation-filters="sRGB">
+        <feColorMatrix type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -8"></feColorMatrix>
+      </filter>
+    </defs>
+  </svg>
+</div>
+
+<style>
+  .mg-liquid-motion-defs {
+    position: absolute;
+  }
+  .mg-liquid-motion-set,
+  .mg-liquid-motion-art {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+  }
+  .mg-liquid-motion :global(.mgm) {
+    translate: 0 3cqw;
+  }
+  /* 조각마다 길이의 46% 동안 출렁인다. 차례(--i)마다 7% 씩 늦게 시작한다 — 마지막 조각이 87% 에 가라앉는다 */
+  .mg-liquid-motion :global(.mgm-piece) {
+    --mg-liquid-motion-at: calc(var(--mg-duration) * (0.06 + var(--i) * 0.07));
+    transform-origin: 50% 100%;
+  }
+  .mg-liquid-motion :global(.mgm-letter) {
+    position: relative;
+  }
+  .mg-liquid-motion :global(.mgm-piece)::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 2.8cqw;
+    height: 2.8cqw;
+    margin-left: -1.4cqw;
+    background: var(--ink);
+    border-radius: 50%;
+    scale: 0;
+  }
+  .mg-liquid-motion :global(.mgm-square)::before {
+    background: var(--accent);
+  }
+  .mg-liquid-motion.is-playing .mg-liquid-motion-set {
+    animation: mg-liquid-motion-goo var(--mg-duration) linear forwards;
+  }
+  .mg-liquid-motion.is-playing .mg-liquid-motion-art {
+    animation: mg-liquid-motion-soft var(--mg-duration) linear forwards;
+  }
+  .mg-liquid-motion.is-playing :global(.mgm-piece) {
+    animation: mg-liquid-motion-surge calc(var(--mg-duration) * 0.46) linear var(--mg-liquid-motion-at) forwards;
+  }
+  .mg-liquid-motion.is-playing :global(.mgm-piece)::before {
+    animation: mg-liquid-motion-drop calc(var(--mg-duration) * 0.46) linear var(--mg-liquid-motion-at) forwards;
+  }
+  @keyframes mg-liquid-motion-goo {
+    0%,
+    100% {
+      filter: none;
+    }
+    0.01%,
+    99.99% {
+      filter: var(--mg-liquid-motion-goo);
+    }
+  }
+  @keyframes mg-liquid-motion-soft {
+    0%,
+    100% {
+      filter: blur(0);
+    }
+    5%,
+    95% {
+      filter: blur(0.75cqw);
+    }
+  }
+  /* 눌림 → 위로 솟음 → 떨어져 납작해짐 → 출렁이며 가라앉음. 폭과 높이가 서로 반대로 변한다(부피가 그대로인 물처럼) */
+  @keyframes mg-liquid-motion-surge {
+    0% {
+      scale: 1 1;
+      translate: 0 0;
+      animation-timing-function: ease-in-out;
+    }
+    12% {
+      scale: 1.2 0.78;
+      translate: 0 0;
+      animation-timing-function: ease-out;
+    }
+    30% {
+      scale: 0.76 1.55;
+      translate: 0 -2.4cqw;
+      animation-timing-function: ease-in;
+    }
+    48% {
+      scale: 1.26 0.72;
+      translate: 0 0;
+      animation-timing-function: ease-in-out;
+    }
+    62% {
+      scale: 0.9 1.16;
+      animation-timing-function: ease-in-out;
+    }
+    76% {
+      scale: 1.07 0.94;
+      animation-timing-function: ease-in-out;
+    }
+    88% {
+      scale: 0.98 1.03;
+      animation-timing-function: ease-in-out;
+    }
+    100% {
+      scale: 1 1;
+      translate: 0 0;
+    }
+  }
+  @keyframes mg-liquid-motion-drop {
+    0%,
+    20% {
+      scale: 0;
+      translate: 0 1cqw;
+      animation-timing-function: ease-out;
+    }
+    30% {
+      scale: 1;
+      translate: 0 -1cqw;
+      animation-timing-function: ease-out;
+    }
+    44% {
+      scale: 1;
+      translate: 0 -7cqw;
+      animation-timing-function: ease-in;
+    }
+    58% {
+      scale: 0.9;
+      translate: 0 0;
+    }
+    66%,
+    100% {
+      scale: 0;
+      translate: 0 1cqw;
+    }
+  }
+</style>

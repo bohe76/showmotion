@@ -1,0 +1,143 @@
+---
+// Smear Frame 데모 — B 가 출발선에 멈춰 있다가 단 두 프레임 만에 도착선으로 건너간다. 그 두 프레임에서 B 의 모양이 길 따라 일그러진다
+// 아래 옅은 블록은 같은 순간에 같은 프레임 수로 건너가되 모양이 그대로다 — 사이 자리에 한 번씩 찍힐 뿐이라 뚝뚝 끊겨 보인다
+// 시간 막대의 띠(40~50%)가 스미어 프레임 두 장이 지나가는 구간이다(한 장이 40~45%, 다음 장이 45~50%). 키프레임의 %와 같은 값이어야 한다
+// 프레임은 흐르지 않고 한 장씩 바뀐다(step-end) — 그린 그림이 갈아 끼워지는 것이라서 그렇다. 앞뒤의 멈춘 프레임은 또렷하다
+// 카메라 구역의 Whip Pan 은 화면 전체가 흐려지고, Motion Blur 는 찍힌 번짐이다. 이쪽은 흐려지지 않는다 — 대상 하나의 모양을 그렇게 그린 것이다
+// 변형(사이 프레임을 어떻게 그리나):
+//   elongated(기본 — 한 장에 길게 늘인다. 첫 장은 꼬리가 출발 자리에 남고 머리가 멀리 나가 있고, 둘째 장은 머리가 도착선에 닿고 꼬리가 따라오는 중이다. 글자도 같이 늘어난다)
+//   · multiples(늘이지 않고 지나온 자리에 옅은 복제를 여러 개 겹친다) · motion-lines(모양은 그대로 두고 뒤에 속도선을 긋는다)
+// 복제와 속도선은 블록의 의사 요소다(MgTrack 의 블록에는 자식이 없다). 눈금은 감춘다 — 자기 키프레임으로 가는 길이라 맞지 않는다
+import MgFrame from '../../mg/MgFrame.astro';
+import MgTrack from '../../mg/MgTrack.astro';
+---
+<div class="mg-smear-frame" data-demo-root aria-hidden="true">
+  <MgFrame duration="3s" ranges={[[40, 50]]}>
+    <MgTrack />
+  </MgFrame>
+</div>
+
+<style>
+  .mg-smear-frame :global(.mgtr-tick) {
+    display: none;
+  }
+  /* 사이 프레임 두 장의 자리: 모양이 그대로면 거리의 1/3 · 2/3 */
+  .mg-smear-frame :global(.mgtr-block) {
+    --mg-smear-frame-x1: calc(var(--mgtr-distance) / 3);
+    --mg-smear-frame-x2: calc(var(--mgtr-distance) * 2 / 3);
+  }
+  /* 늘인 그림은 자리가 양 끝이다 — 첫 장은 출발 자리에서 앞으로, 둘째 장은 도착 자리에서 뒤로 늘어난다 */
+  .mg-smear-frame :global(.mgtr-hero) {
+    --mg-smear-frame-x1: 0px;
+    --mg-smear-frame-x2: var(--mgtr-distance);
+  }
+  .mg-smear-frame[data-variant='multiples'] :global(.mgtr-hero),
+  .mg-smear-frame[data-variant='motion-lines'] :global(.mgtr-hero) {
+    --mg-smear-frame-x1: calc(var(--mgtr-distance) / 3);
+    --mg-smear-frame-x2: calc(var(--mgtr-distance) * 2 / 3);
+    isolation: isolate;
+  }
+  .mg-smear-frame.is-playing :global(.mgtr-block) {
+    animation: mg-smear-frame-move var(--mg-duration) step-end forwards;
+  }
+  .mg-smear-frame.is-playing :global(.mgtr-hero) {
+    animation:
+      mg-smear-frame-move var(--mg-duration) step-end forwards,
+      mg-smear-frame-stretch var(--mg-duration) step-end forwards;
+  }
+  .mg-smear-frame[data-variant='multiples'].is-playing :global(.mgtr-hero),
+  .mg-smear-frame[data-variant='motion-lines'].is-playing :global(.mgtr-hero) {
+    animation: mg-smear-frame-move var(--mg-duration) step-end forwards;
+  }
+  @keyframes mg-smear-frame-move {
+    0% {
+      translate: 0 0;
+    }
+    40% {
+      translate: var(--mg-smear-frame-x1) 0;
+    }
+    45% {
+      translate: var(--mg-smear-frame-x2) 0;
+    }
+    50%,
+    100% {
+      translate: var(--mgtr-distance) 0;
+    }
+  }
+  /* 길게 늘고 그만큼 얇아진다. 늘어나는 기준이 첫 장은 뒤쪽 끝(왼쪽), 둘째 장은 앞쪽 끝(오른쪽)이다 */
+  @keyframes mg-smear-frame-stretch {
+    0% {
+      scale: 1 1;
+      transform-origin: 0% 100%;
+    }
+    40% {
+      scale: 2.7 0.8;
+      transform-origin: 0% 100%;
+    }
+    45% {
+      scale: 2.7 0.8;
+      transform-origin: 100% 100%;
+    }
+    50%,
+    100% {
+      scale: 1 1;
+      transform-origin: 100% 100%;
+    }
+  }
+  /* multiples: 지나온 자리에 옅은 복제 둘(거리의 1/6 간격). 글자 밑에 깔린다 */
+  .mg-smear-frame[data-variant='multiples'] :global(.mgtr-hero)::before,
+  .mg-smear-frame[data-variant='multiples'] :global(.mgtr-hero)::after {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    content: '';
+    background: inherit;
+    border-radius: inherit;
+    opacity: 0;
+  }
+  .mg-smear-frame[data-variant='multiples'] :global(.mgtr-hero)::before {
+    --mg-smear-frame-opacity: 0.55;
+    translate: calc(var(--mgtr-distance) / -6) 0;
+  }
+  .mg-smear-frame[data-variant='multiples'] :global(.mgtr-hero)::after {
+    --mg-smear-frame-opacity: 0.28;
+    translate: calc(var(--mgtr-distance) / -3) 0;
+  }
+  /* motion-lines: 블록 뒤에 길이가 다른 가로선 셋(가운데 선은 윗선의 그림자로 낸다) */
+  .mg-smear-frame[data-variant='motion-lines'] :global(.mgtr-hero)::before,
+  .mg-smear-frame[data-variant='motion-lines'] :global(.mgtr-hero)::after {
+    --mg-smear-frame-opacity: 1;
+    position: absolute;
+    right: calc(100% + 1.5cqw);
+    height: 0.8cqw;
+    content: '';
+    background: var(--accent);
+    border-radius: 0.4cqw;
+    opacity: 0;
+  }
+  .mg-smear-frame[data-variant='motion-lines'] :global(.mgtr-hero)::before {
+    top: 18%;
+    width: 12cqw;
+    box-shadow: -3cqw 4.2cqw 0 0 var(--accent);
+  }
+  .mg-smear-frame[data-variant='motion-lines'] :global(.mgtr-hero)::after {
+    top: 78%;
+    width: 9cqw;
+  }
+  .mg-smear-frame.is-playing :global(.mgtr-hero)::before,
+  .mg-smear-frame.is-playing :global(.mgtr-hero)::after {
+    animation: mg-smear-frame-flash var(--mg-duration) step-end forwards;
+  }
+  @keyframes mg-smear-frame-flash {
+    0% {
+      opacity: 0;
+    }
+    40% {
+      opacity: var(--mg-smear-frame-opacity);
+    }
+    50%,
+    100% {
+      opacity: 0;
+    }
+  }
+</style>

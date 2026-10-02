@@ -1,0 +1,29 @@
+---
+// Ping-Pong Loop 데모 — B 가 도착선까지 갔다가 같은 길을 거꾸로 되돌아오고, 다시 간다. 건너뛰지 않는다 — 온 길을 그대로 되짚는다
+// 아래 옅은 블록은 같은 움직임을 한 번만 하고 도착선에 서 있다(되풀이하지 않은 것)
+// Cycle Loop 데모와 움직임·횟수(세 번)·길이가 같다. 다른 것은 방향뿐이다(alternate) — Cycle 은 끝나면 출발선으로 건너뛰어 다시 가고, 이쪽은 되돌아온다
+// 시간 막대의 눈금(33.3·66.7%)이 방향이 바뀌는 순간이다. 세 번째에 가서 도착선에 멈춘다(짝수 번이면 출발선에서 끝난다)
+// 눈금은 감춘다 — 한 번의 길이만 아는 표시라 되풀이를 나타내지 못한다
+import MgFrame from '../../mg/MgFrame.astro';
+import MgTrack from '../../mg/MgTrack.astro';
+---
+<div class="mg-ping-pong-loop" data-demo-root aria-hidden="true">
+  <MgFrame duration="3s" cuts={[33.3, 66.7]}>
+    <MgTrack />
+  </MgFrame>
+</div>
+
+<style>
+  .mg-ping-pong-loop {
+    --mgtr-curve: cubic-bezier(0.65, 0, 0.35, 1);
+  }
+  .mg-ping-pong-loop :global(.mgtr-tick) {
+    display: none;
+  }
+  .mg-ping-pong-loop.is-playing :global(.mgtr-hero) {
+    animation: mg-track-run calc(var(--mg-duration) / 3) var(--mgtr-curve) 3 alternate forwards;
+  }
+  .mg-ping-pong-loop.is-playing :global(.mgtr-ghost) {
+    animation: mg-track-run calc(var(--mg-duration) / 3) var(--mgtr-curve) forwards;
+  }
+</style>

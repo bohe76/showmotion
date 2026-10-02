@@ -1,0 +1,50 @@
+---
+// Credit Roll 데모 — 납작한 글줄 기둥이 처음부터 끝까지 같은 빠르기로 올라간다. 글자 크기도 기울기도 바뀌지 않는다
+// Title Crawl 과 같은 글줄 묶음이다: 저쪽은 글줄이 뒤로 누워 소실점으로 작아지고, 여기는 납작한 채 그대로 지나간다
+// 첫 장면에 첫 묶음이 이미 화면에 있다(빈 화면으로 시작하지 않는다). 끝 장면에는 마지막 묶음이 위쪽에 남는다
+// 변형: vertical(기본 — 아래에서 위로) · horizontal(스태프 롤 — 묶음이 옆으로 늘어서 오른쪽에서 왼쪽으로 지나간다)
+//       --mg-credit-roll-from / -to 가 기둥의 처음·끝 자리다(% 는 기둥 자기 크기)
+import MgFrame from '../../mg/MgFrame.astro';
+import MgLines from '../../mg/MgLines.astro';
+---
+<div class="mg-credit-roll" data-demo-root aria-hidden="true">
+  <MgFrame duration="6s">
+    <div class="mg-credit-roll-col"><MgLines blocks={5} /></div>
+  </MgFrame>
+</div>
+
+<style>
+  .mg-credit-roll {
+    --mg-credit-roll-from: -50% 14cqw;
+    --mg-credit-roll-to: -50% calc(-100% + 34cqw);
+  }
+  .mg-credit-roll[data-variant='horizontal'] {
+    --mg-credit-roll-from: 22cqw -50%;
+    --mg-credit-roll-to: calc(-100% + 78cqw) -50%;
+  }
+  .mg-credit-roll-col {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    translate: var(--mg-credit-roll-from);
+  }
+  .mg-credit-roll[data-variant='horizontal'] .mg-credit-roll-col {
+    top: 50%;
+    left: 0;
+  }
+  .mg-credit-roll[data-variant='horizontal'] :global(.mgl) {
+    flex-direction: row;
+    gap: 9cqw;
+  }
+  .mg-credit-roll.is-playing .mg-credit-roll-col {
+    animation: mg-credit-roll-move var(--mg-duration) linear forwards;
+  }
+  @keyframes mg-credit-roll-move {
+    from {
+      translate: var(--mg-credit-roll-from);
+    }
+    to {
+      translate: var(--mg-credit-roll-to);
+    }
+  }
+</style>

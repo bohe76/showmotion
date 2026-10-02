@@ -1,0 +1,100 @@
+---
+// Crane Shot 데모 — 카메라가 팔 끝에서 호를 그리며 오르고, 대상을 붙잡으려고 내려다본다. B 는 화면 한가운데에 그대로 있고 뒤 레이어와 바닥선은 올라가며 앞 기둥은 내려간다
+// Pedestal 과 나란히 보면 차이가 보인다: Pedestal 은 수평을 유지한 채 곧게 올라 B 까지 같이 밀린다. 여기서는 B 가 붙잡혀 있고, 오르면서 조금 물러난다
+// 호: 오르는 것은 앞쪽에 빠르고(팔이 눕혀 있을 때) 물러나는 것은 뒤쪽에 빠르다(팔이 설 때) — 높이와 앞뒤 자리를 따로 움직여 만든다
+// 높이 h(가운데 레이어가 밀리는 cqw)와 앞뒤 자리 d(B 까지의 거리를 1 로 본 값)를 숫자 변수로 등록해 움직이고, 레이어가 그 값에서 배율과 이동량을 계산한다
+//   배율 = 거리 ÷ (거리 − d) · 세로 이동 = h × (배율 ÷ 거리 − 1 ÷ (1 − d)) — 뒤 항이 B 를 붙잡는 기울임이다(B 는 늘 0)
+// 변형: up(기본 — 기본 장면에서 오른다) · down(오른 자리에서 내려온다 — 같은 움직임을 거꾸로 돌린다)
+// 깊이: 레이어 사이가 멀수록 뒤·앞이 더 많이 엇갈린다
+import MgFrame from '../../mg/MgFrame.astro';
+// 위에서 보기: 오르면서 조금 물러나는 것만 보인다 — 오르는 것과 내려다보는 것은 위에서 보이지 않는다
+import MgScene from '../../mg/MgScene.astro';
+import MgTopView from '../../mg/MgTopView.astro';
+---
+<div class="mg-crane-shot" data-demo-root aria-hidden="true">
+  <MgFrame duration="3.5s">
+    <MgScene bleed />
+    <MgTopView />
+  </MgFrame>
+</div>
+
+<style>
+  @property --mg-crane-shot-h {
+    syntax: '<number>';
+    inherits: true;
+    initial-value: 0;
+  }
+  @property --mg-crane-shot-d {
+    syntax: '<number>';
+    inherits: true;
+    initial-value: 0;
+  }
+  .mg-crane-shot[data-variant='down'] {
+    --mg-crane-shot-h: 20;
+    --mg-crane-shot-d: -0.2;
+  }
+  .mg-crane-shot :global(.mgs-far),
+  .mg-crane-shot :global(.mgs-ground) {
+    --mg-crane-shot-z: var(--mg-z-far);
+  }
+  .mg-crane-shot :global(.mgs-mid) {
+    --mg-crane-shot-z: 1;
+  }
+  .mg-crane-shot :global(.mgs-near) {
+    --mg-crane-shot-z: var(--mg-z-near);
+  }
+  /* 배율의 중심은 지평선(화면 위에서 68% = B 의 한가운데). 바닥선은 뒤 레이어의 밑변이라 뒤 레이어와 같이 움직인다 */
+  .mg-crane-shot :global(.mgs-layer),
+  .mg-crane-shot :global(.mgs-ground) {
+    --mg-crane-shot-s: calc(var(--mg-crane-shot-z) / (var(--mg-crane-shot-z) - var(--mg-crane-shot-d)));
+    transform-origin: 50% 68%;
+    translate: 0 calc(var(--mg-crane-shot-h) * 1cqw * (var(--mg-crane-shot-s) / var(--mg-crane-shot-z) - 1 / (1 - var(--mg-crane-shot-d))));
+    scale: var(--mg-crane-shot-s);
+  }
+  .mg-crane-shot :global(.mgs-ground) {
+    transform-origin: 50% -4.5cqw;
+  }
+  /* 변수는 장면(.mgs)에서 움직인다 — 길이(--mg-duration)가 화면 틀 안에서만 잡힌다 */
+  .mg-crane-shot.is-playing :global(.mgs) {
+    animation:
+      mg-crane-shot-rise var(--mg-duration) cubic-bezier(0.3, 0, 0.4, 1) forwards,
+      mg-crane-shot-recede var(--mg-duration) cubic-bezier(0.6, 0, 0.7, 1) forwards;
+  }
+  .mg-crane-shot[data-variant='down'].is-playing :global(.mgs) {
+    animation-direction: reverse;
+  }
+  @keyframes mg-crane-shot-rise {
+    from {
+      --mg-crane-shot-h: 0;
+    }
+    to {
+      --mg-crane-shot-h: 20;
+    }
+  }
+  @keyframes mg-crane-shot-recede {
+    from {
+      --mg-crane-shot-d: 0;
+    }
+    to {
+      --mg-crane-shot-d: -0.2;
+    }
+  }
+  /* 위에서 보기: 가운데 줄까지 거리의 0.2 만큼 물러난다(아래로). down 은 물러난 자리에서 거꾸로 돌린다 */
+  .mg-crane-shot[data-variant='down'] :global(.mgt-cam) {
+    translate: 0 calc(var(--mgt-unit) * 0.2);
+  }
+  .mg-crane-shot.is-playing :global(.mgt-cam) {
+    animation: mg-crane-shot-back var(--mg-duration) cubic-bezier(0.6, 0, 0.7, 1) forwards;
+  }
+  .mg-crane-shot[data-variant='down'].is-playing :global(.mgt-cam) {
+    animation-direction: reverse;
+  }
+  @keyframes mg-crane-shot-back {
+    from {
+      translate: 0 0;
+    }
+    to {
+      translate: 0 calc(var(--mgt-unit) * 0.2);
+    }
+  }
+</style>

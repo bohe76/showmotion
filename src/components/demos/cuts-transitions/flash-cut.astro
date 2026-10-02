@@ -1,0 +1,52 @@
+---
+// Flash Cut 데모 — 몇 프레임짜리 아주 짧은 샷(D)이 끼어들었다가 바로 사라진다. B 가 걷는 장면에 두 번 스친다
+// 시간 막대의 눈금이 컷 지점이다(30%·33%, 62%·65%) — 바짝 붙은 두 눈금 사이가 끼어든 샷의 길이다
+// 그림을 읽을 틈이 없고 번쩍임만 남는다. Cutaway 는 끼어든 샷을 읽을 만큼 머문다
+import MgFrame from '../../mg/MgFrame.astro';
+import MgScene from '../../mg/MgScene.astro';
+import MgShot from '../../mg/MgShot.astro';
+---
+<div class="mg-flash-cut" data-demo-root aria-hidden="true">
+  <MgFrame duration="4s" cuts={[30, 33, 62, 65]}>
+    <MgScene />
+    <MgShot shot="d" />
+  </MgFrame>
+</div>
+
+<style>
+  .mg-flash-cut :global(.mgs-b) {
+    translate: -20cqw 0;
+  }
+  .mg-flash-cut :global(.mgsh) {
+    visibility: hidden;
+  }
+  .mg-flash-cut.is-playing :global(.mgs-b) {
+    animation: mg-flash-cut-walk var(--mg-duration) linear forwards;
+  }
+  .mg-flash-cut.is-playing :global(.mgsh) {
+    animation: mg-flash-cut-cut var(--mg-duration) step-end forwards;
+  }
+  @keyframes mg-flash-cut-walk {
+    to {
+      translate: 20cqw 0;
+    }
+  }
+  @keyframes mg-flash-cut-cut {
+    0% {
+      visibility: hidden;
+    }
+    30% {
+      visibility: visible;
+    }
+    33% {
+      visibility: hidden;
+    }
+    62% {
+      visibility: visible;
+    }
+    65%,
+    100% {
+      visibility: hidden;
+    }
+  }
+</style>

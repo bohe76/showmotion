@@ -1,0 +1,115 @@
+---
+// 모션 그래픽 데모의 공통 틀 — 16:9 화면 + 그 아래 시간 막대 (규약: docs/content/prompt_writing_guide.md §모션 그래픽 데모)
+// 화면 밖으로 나간 것은 잘린다: 요소가 움직이는 웹 데모와 달리 "화면이 움직인다"는 것이 보인다
+// 시간 막대는 재생 버튼(스테이지 오른쪽 아래)과 같은 줄에 선다. 데모 루트에 .is-playing 이 붙으면 재생 길이만큼 찬다
+// 이 파일은 demos/ 밖에 둔다 — demos/registry.ts 가 demos/*/ 의 파일을 모두 데모로 본다
+
+// 표시는 배열(모든 변형에 공통) 또는 변형 이름으로 가른 객체. 객체면 첫 변형의 것만 보이고,
+// 상세 페이지의 조작 줄이 변형을 바꾸면 gallery.ts 가 맞는 것만 보이게 한다([data-for])
+type Marks<T> = T[] | Record<string, T[]>;
+
+interface Props {
+  // 기본 재생 길이(CSS 시간 값, 예: '3s'). 상세 페이지의 길이 조작이 데모 루트에 --mg-speed(배수)를 걸면 그만큼 늘거나 준다
+  // 데모의 애니메이션은 길이를 직접 쓰지 않고 var(--mg-duration) 을 써서 막대와 길이를 맞춘다
+  duration: string;
+  // 컷 지점 — 시간의 %(0~100). 막대 위에 눈금으로 표시한다
+  cuts?: Marks<number>;
+  // 속도가 달라지는 구간 [시작, 끝] — 시간의 %. 막대 위에 띠로 표시한다
+  ranges?: Marks<[number, number]>;
+}
+
+const { duration, cuts = [], ranges = [] } = Astro.props;
+
+// [표시, 해당 변형(공통이면 없음), 처음에 숨길지] 로 편다
+function spread<T>(marks: Marks<T>): { mark: T; variant?: string; hidden: boolean }[] {
+  if (Array.isArray(marks)) return marks.map((mark) => ({ mark, hidden: false }));
+  return Object.entries(marks).flatMap(([variant, list], i) => list.map((mark) => ({ mark, variant, hidden: i > 0 })));
+}
+---
+<div class="mgf" style={`--mg-base-duration: ${duration}`}>
+  <div class="mgf-screen"><slot /></div>
+  <div class="mgf-time">
+    <div class="mgf-track">
+      {spread(ranges).map(({ mark: [from, to], variant, hidden }) => (
+        <span class="mgf-range" style={`left: ${from}%; width: ${to - from}%`} data-for={variant} hidden={hidden} />
+      ))}
+      <span class="mgf-fill"></span>
+      {spread(cuts).map(({ mark, variant, hidden }) => (
+        <span class="mgf-cut" style={`left: ${mark}%`} data-for={variant} hidden={hidden} />
+      ))}
+    </div>
+  </div>
+</div>
+
+<style>
+  .mgf {
+    /* 재생 길이 = 기본 길이 × 길이 조작의 배수(없으면 1) */
+    --mg-duration: calc(var(--mg-base-duration) * var(--mg-speed, 1));
+    display: grid;
+    grid-template-rows: minmax(0, 1fr) auto;
+    width: 100%;
+    height: 100%;
+  }
+  /* 화면: 안쪽 크기 단위(cqw)의 기준 — 장면과 데모가 화면 폭에 대한 비율로 움직인다
+     폭·비율이나 아래 시간 막대 줄의 높이를 바꾸면 DemoStage 의 3D 표시(.stage-3d) 자리 계산도 고친다 */
+  .mgf-screen {
+    position: relative;
+    place-self: center;
+    width: 84%;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    container-type: inline-size;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+  }
+  /* 왼쪽은 화면 왼쪽 끝(8%)에 맞추고, 오른쪽은 재생 버튼(34px + 여백) 자리를 비운다. 높이·아래 여백도 버튼과 같다 */
+  .mgf-time {
+    display: flex;
+    align-items: center;
+    height: 34px;
+    margin: 0 54px 10px 8%;
+  }
+  .mgf-track {
+    position: relative;
+    width: 100%;
+    height: 4px;
+    background: var(--demo-muted);
+    border-radius: 2px;
+  }
+  .mgf-range {
+    position: absolute;
+    top: -4px;
+    bottom: -4px;
+    background: var(--highlight);
+    border-radius: 2px;
+  }
+  .mgf-fill {
+    position: absolute;
+    inset: 0;
+    background: var(--accent);
+    border-radius: 2px;
+    transform: scaleX(0);
+    transform-origin: left center;
+  }
+  .mgf-cut {
+    position: absolute;
+    top: -5px;
+    bottom: -5px;
+    width: 2px;
+    margin-left: -1px;
+    background: var(--ink);
+  }
+  .mgf-range[hidden],
+  .mgf-cut[hidden] {
+    display: none;
+  }
+  :global([data-demo-root].is-playing) .mgf-fill {
+    animation: mg-frame-progress var(--mg-duration) linear forwards;
+  }
+  @keyframes mg-frame-progress {
+    to {
+      transform: scaleX(1);
+    }
+  }
+</style>

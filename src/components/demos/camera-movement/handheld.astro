@@ -1,0 +1,169 @@
+---
+// Handheld 데모 — 사람이 카메라를 손에 들고 걸어 들어간다. 화면 전체가 작고 불규칙하게 떨리고 떠밀리고 조금씩 기운다
+// 길은 Steadicam Shot 데모와 똑같다(앞으로 걸어 들어가며 오른쪽으로 휘었다가 왼쪽으로 돌아온다). 다른 것은 떨림뿐이다 — 나란히 보면 그 차이만 남는다
+// 떨림은 카메라가 손 안에서 도는 것이라 깊이와 무관하다: 장면 전체(.mgs)가 한 덩어리로 밀리고 기운다. 길은 레이어마다 다르게 움직인다(가까울수록 많이)
+// 규칙적으로 보이면 안 된다(좌우로 오가면 웹 구역의 Shake 다): 밀림은 간격도 크기도 고르지 않은 16 개 지점을 한 번 지나고, 기울기는 다른 박자로 세 번 돈다 — 둘이 겹쳐 되풀이가 보이지 않는다
+// 변형: subtle(기본) · shaky-cam(떨림이 두 배 넘게 크고 두 배 잦다). --mg-handheld-amp 가 크기, --mg-handheld-rate 가 잦기다
+// 깊이: 레이어 사이가 멀수록 앞·뒤가 커지고 밀리는 정도의 차이가 벌어진다(떨림은 그대로다)
+// 길(키프레임 -weave · -push 와 그 값)은 steadicam-shot.astro 와 같아야 한다
+import MgFrame from '../../mg/MgFrame.astro';
+// 위에서 보기: Steadicam Shot 과 같은 길이다 — 떨림은 화면에서만 보인다
+import MgScene from '../../mg/MgScene.astro';
+import MgTopView from '../../mg/MgTopView.astro';
+---
+<div class="mg-handheld" data-demo-root aria-hidden="true">
+  <MgFrame duration="4s">
+    <MgScene bleed />
+    <MgTopView />
+  </MgFrame>
+</div>
+
+<style>
+  .mg-handheld {
+    --mg-handheld-amp: 1.3;
+    --mg-handheld-rate: 1;
+  }
+  .mg-handheld[data-variant='shaky-cam'] {
+    --mg-handheld-amp: 3;
+    --mg-handheld-rate: 2;
+  }
+  .mg-handheld :global(.mgs-far),
+  .mg-handheld :global(.mgs-ground) {
+    --mg-handheld-z: var(--mg-z-far);
+  }
+  .mg-handheld :global(.mgs-mid) {
+    --mg-handheld-z: 1;
+  }
+  .mg-handheld :global(.mgs-near) {
+    --mg-handheld-z: var(--mg-z-near);
+  }
+  /* 배율의 중심은 지평선(화면 위에서 68% = B 의 한가운데). 바닥선은 뒤 레이어의 밑변이라 뒤 레이어와 같이 움직인다 */
+  .mg-handheld :global(.mgs-layer),
+  .mg-handheld :global(.mgs-ground) {
+    transform-origin: 50% 68%;
+  }
+  .mg-handheld :global(.mgs-ground) {
+    transform-origin: 50% -4.5cqw;
+  }
+  .mg-handheld.is-playing :global(.mgs-layer),
+  .mg-handheld.is-playing :global(.mgs-ground) {
+    animation:
+      mg-handheld-push var(--mg-duration) ease-in-out forwards,
+      mg-handheld-weave var(--mg-duration) ease-in-out forwards;
+  }
+  @keyframes mg-handheld-push {
+    to {
+      scale: calc(var(--mg-handheld-z) / (var(--mg-handheld-z) - 0.24));
+    }
+  }
+  @keyframes mg-handheld-weave {
+    38% {
+      translate: calc(-7cqw / var(--mg-handheld-z)) calc(0.9cqw / var(--mg-handheld-z));
+      animation-timing-function: ease-in-out;
+    }
+    74% {
+      translate: calc(4cqw / var(--mg-handheld-z)) calc(-0.7cqw / var(--mg-handheld-z));
+      animation-timing-function: ease-in-out;
+    }
+    100% {
+      translate: 0 0;
+    }
+  }
+  /* 떨림: 밀림은 전체 길이를 rate 번에, 기울기는 그 세 배 잦게 */
+  .mg-handheld.is-playing :global(.mgs) {
+    animation:
+      mg-handheld-shake calc(var(--mg-duration) / var(--mg-handheld-rate)) ease-in-out var(--mg-handheld-rate) forwards,
+      mg-handheld-lean calc(var(--mg-duration) / var(--mg-handheld-rate) / 3) ease-in-out calc(var(--mg-handheld-rate) * 3) forwards;
+  }
+  @keyframes mg-handheld-shake {
+    6% {
+      translate: calc(0.9cqw * var(--mg-handheld-amp)) calc(-0.5cqw * var(--mg-handheld-amp));
+    }
+    11% {
+      translate: calc(0.3cqw * var(--mg-handheld-amp)) calc(0.7cqw * var(--mg-handheld-amp));
+    }
+    19% {
+      translate: calc(-1.1cqw * var(--mg-handheld-amp)) calc(0.2cqw * var(--mg-handheld-amp));
+    }
+    24% {
+      translate: calc(-0.4cqw * var(--mg-handheld-amp)) calc(-0.9cqw * var(--mg-handheld-amp));
+    }
+    33% {
+      translate: calc(1.2cqw * var(--mg-handheld-amp)) calc(0.4cqw * var(--mg-handheld-amp));
+    }
+    38% {
+      translate: calc(0.6cqw * var(--mg-handheld-amp)) calc(1cqw * var(--mg-handheld-amp));
+    }
+    47% {
+      translate: calc(-0.7cqw * var(--mg-handheld-amp)) calc(-0.3cqw * var(--mg-handheld-amp));
+    }
+    52% {
+      translate: calc(-1.4cqw * var(--mg-handheld-amp)) calc(0.8cqw * var(--mg-handheld-amp));
+    }
+    61% {
+      translate: calc(0.2cqw * var(--mg-handheld-amp)) calc(-1.1cqw * var(--mg-handheld-amp));
+    }
+    67% {
+      translate: calc(1cqw * var(--mg-handheld-amp)) calc(0.1cqw * var(--mg-handheld-amp));
+    }
+    74% {
+      translate: calc(-0.3cqw * var(--mg-handheld-amp)) calc(0.9cqw * var(--mg-handheld-amp));
+    }
+    81% {
+      translate: calc(-1.2cqw * var(--mg-handheld-amp)) calc(-0.6cqw * var(--mg-handheld-amp));
+    }
+    88% {
+      translate: calc(0.7cqw * var(--mg-handheld-amp)) calc(-0.2cqw * var(--mg-handheld-amp));
+    }
+    94% {
+      translate: calc(0.1cqw * var(--mg-handheld-amp)) calc(0.8cqw * var(--mg-handheld-amp));
+    }
+    100% {
+      translate: calc(-0.4cqw * var(--mg-handheld-amp)) calc(0.2cqw * var(--mg-handheld-amp));
+    }
+  }
+  @keyframes mg-handheld-lean {
+    17% {
+      rotate: calc(0.7deg * var(--mg-handheld-amp));
+    }
+    31% {
+      rotate: calc(-0.4deg * var(--mg-handheld-amp));
+    }
+    52% {
+      rotate: calc(0.9deg * var(--mg-handheld-amp));
+    }
+    68% {
+      rotate: calc(-0.8deg * var(--mg-handheld-amp));
+    }
+    85% {
+      rotate: calc(0.3deg * var(--mg-handheld-amp));
+    }
+    100% {
+      rotate: calc(-0.2deg * var(--mg-handheld-amp));
+    }
+  }
+  /* 위에서 보기: 앞으로는 가운데 줄까지 거리의 0.24, 옆으로는 가운데 줄이 화면 폭의 7% · 4% 밀리는 만큼(steadicam-shot.astro 와 같다) */
+  .mg-handheld.is-playing :global(.mgt-cam) {
+    animation:
+      mg-handheld-walk var(--mg-duration) ease-in-out forwards,
+      mg-handheld-sway var(--mg-duration) ease-in-out forwards;
+  }
+  @keyframes mg-handheld-walk {
+    to {
+      transform: translateY(calc(var(--mgt-unit) * -0.24));
+    }
+  }
+  @keyframes mg-handheld-sway {
+    38% {
+      translate: calc(var(--mgt-mid-width) * 0.07) 0;
+      animation-timing-function: ease-in-out;
+    }
+    74% {
+      translate: calc(var(--mgt-mid-width) * -0.04) 0;
+      animation-timing-function: ease-in-out;
+    }
+    100% {
+      translate: 0 0;
+    }
+  }
+</style>

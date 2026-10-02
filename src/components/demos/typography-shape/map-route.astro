@@ -1,0 +1,137 @@
+---
+// Map Route 데모 — 지도 위 두 곳(A → B) 사이의 굽은 길을 따라 선이 그려지고, 표식(화살)이 그 선의 끝을 따라간다
+// Line Chart Draw 와 같은 "선 그리기"지만 여기는 지도다: 축도 데이터 점도 없고, 길이 굽어 있으며, 표식 하나가 길을 따라 움직인다(저쪽은 점마다 표식이 제자리에 남는다)
+// 지도는 둥근 네모 몇 개로 짠 땅 덩어리다 — 실제 지형이 아니다. 두 곳의 자리 표시는 처음부터 있다(빈 화면으로 시작하지 않는다)
+// 시간 막대: 띠가 길을 가는 구간(10~85%), 눈금이 도착(85%) — 도착하면 B 에서 고리가 한 번 퍼진다. 키프레임의 %와 같은 값이어야 한다
+// 경로 문자열 하나를 보이는 선(d)과 표식의 이동 경로(offset-path)에 함께 쓴다 — 표식을 같은 SVG 안에 둬서 좌표가 viewBox 와 함께 늘어난다
+//   선(pathLength 1 의 빈칸 밀기)과 표식(offset-distance)이 같은 구간·같은 곡선으로 움직여 표식이 늘 선의 끝에 있다
+// 지도는 화면과 같은 비율(160×90)의 SVG 에 그린다 — 1 단위 = 0.625cqw
+import MgFrame from '../../mg/MgFrame.astro';
+
+const route = 'M30 31 C46 4 78 6 88 30 S104 72 128 58';
+// 땅: [x, y, 폭, 높이, 모서리]
+const land = [
+  [5, 9, 60, 42, 10],
+  [15, 40, 36, 38, 10],
+  [74, 16, 26, 22, 8],
+  [100, 30, 54, 50, 11],
+  [88, 54, 30, 22, 8],
+];
+---
+<div class="mg-map-route" data-demo-root aria-hidden="true">
+  <MgFrame duration="4s" ranges={[[10, 85]]} cuts={[85]}>
+    <svg class="mg-map-route-art" viewBox="0 0 160 90" fill="none">
+      {/* 테두리를 먼저 다 그리고 그 위에 속을 칠한다 — 겹친 네모들이 한 덩어리로 보인다 */}
+      {land.map(([x, y, w, h, r]) => <rect class="mg-map-route-shore" x={x} y={y} width={w} height={h} rx={r} />)}
+      {land.map(([x, y, w, h, r]) => <rect class="mg-map-route-land" x={x} y={y} width={w} height={h} rx={r} />)}
+      <path class="mg-map-route-line" pathLength="1" d={route} />
+      <circle class="mg-map-route-ring" cx="128" cy="58" r="3" />
+      <circle class="mg-map-route-place" cx="30" cy="31" r="2" />
+      <circle class="mg-map-route-place" cx="128" cy="58" r="2" />
+      <text class="mg-map-route-name" x="19" y="44">A</text>
+      <text class="mg-map-route-name" x="136" y="73">B</text>
+      <polygon class="mg-map-route-marker" points="-4.2,-3.8 5.4,0 -4.2,3.8 -2.2,0" style={`offset-path: path('${route}')`} />
+    </svg>
+  </MgFrame>
+</div>
+
+<style>
+  .mg-map-route-art {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .mg-map-route-shore {
+    stroke: var(--line);
+    stroke-width: 1.6;
+  }
+  .mg-map-route-land {
+    fill: var(--stage);
+  }
+  /* 선은 길이 1 로 맞춰 두고(pathLength) 빈칸을 밀어 그린다. 빈칸을 선보다 길게 잡아 둥근 끝이 미리 비치지 않게 한다 */
+  .mg-map-route-line {
+    stroke: var(--accent);
+    stroke-width: 1.4;
+    stroke-dasharray: 1 1.2;
+    stroke-dashoffset: 1.01;
+  }
+  /* 곳의 점은 표식(화살)보다 작다 — 출발 전과 도착 뒤에는 표식이 점을 덮는다 */
+  .mg-map-route-place {
+    fill: var(--ink);
+  }
+  .mg-map-route-name {
+    font-size: 9.5px;
+    font-weight: 800;
+    text-anchor: middle;
+    fill: var(--ink);
+  }
+  .mg-map-route-ring {
+    stroke: var(--accent);
+    stroke-width: 1.2;
+    transform-box: fill-box;
+    transform-origin: center;
+    opacity: 0;
+  }
+  .mg-map-route-marker {
+    fill: var(--accent);
+    stroke: var(--surface);
+    stroke-width: 0.7;
+    offset-rotate: auto;
+    offset-distance: 0%;
+  }
+  .mg-map-route.is-playing .mg-map-route-line {
+    animation: mg-map-route-draw var(--mg-duration) linear forwards;
+  }
+  .mg-map-route.is-playing .mg-map-route-marker {
+    animation: mg-map-route-travel var(--mg-duration) linear forwards;
+  }
+  .mg-map-route.is-playing .mg-map-route-ring {
+    animation: mg-map-route-arrive var(--mg-duration) linear forwards;
+  }
+  /* 10% 에 출발해 85% 에 닿는다 — 선과 표식이 같은 곡선으로 간다 */
+  @keyframes mg-map-route-draw {
+    0% {
+      stroke-dashoffset: 1.01;
+    }
+    10% {
+      stroke-dashoffset: 1.01;
+      animation-timing-function: ease-in-out;
+    }
+    85%,
+    100% {
+      stroke-dashoffset: 0;
+    }
+  }
+  @keyframes mg-map-route-travel {
+    0% {
+      offset-distance: 0%;
+    }
+    10% {
+      offset-distance: 0%;
+      animation-timing-function: ease-in-out;
+    }
+    85%,
+    100% {
+      offset-distance: 100%;
+    }
+  }
+  @keyframes mg-map-route-arrive {
+    0%,
+    84.9% {
+      opacity: 0;
+      scale: 1;
+    }
+    85% {
+      opacity: 1;
+      scale: 1;
+      animation-timing-function: ease-out;
+    }
+    100% {
+      opacity: 0;
+      scale: 3.4;
+    }
+  }
+</style>

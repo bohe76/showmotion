@@ -1,0 +1,27 @@
+---
+// Reverse Motion 데모 — 영상이 거꾸로 재생된다. 앞 절반은 원래대로(B 가 뛰어올라 점점 낮게 튀다 선다), 뒤 절반은 그 영상을 그대로 되감는다
+// 되감기에서는 움직임이 온 길을 되짚어 풀린다: 서 있던 B 가 점점 높이 튀다가 큰 포물선을 그려 처음 자리에 내려앉는다
+// 시간 막대의 눈금(50%)이 되감기가 시작되는 순간이고 띠가 거꾸로 가는 구간이다
+// 처음부터 거꾸로만 틀지 않은 까닭: 블록이 제 힘으로 뛰는 영상이라 거꾸로만 보면 "점점 크게 뛴다"로도 읽힌다. 앞으로 한 번 본 뒤라야 되감긴 것이 분명하다
+import MgFrame from '../../mg/MgFrame.astro';
+import MgClip from '../../mg/MgClip.astro';
+---
+<div class="mg-reverse-motion" data-demo-root aria-hidden="true">
+  <MgFrame duration="4.8s" cuts={[50]} ranges={[[50, 100]]}>
+    <MgClip />
+  </MgFrame>
+</div>
+
+<style>
+  .mg-reverse-motion.is-playing :global(.mgs-b) {
+    animation: mg-reverse-motion-run var(--mg-duration) linear forwards;
+  }
+  @keyframes mg-reverse-motion-run {
+    50% {
+      --mg-clip-t: 1;
+    }
+    100% {
+      --mg-clip-t: 0;
+    }
+  }
+</style>

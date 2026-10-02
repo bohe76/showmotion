@@ -1,0 +1,65 @@
+---
+// Crash Zoom 데모 — Zoom 과 같은 줌(0.8 → 1.25 배, 장면 전체가 같은 비율로)인데 전체 길이의 아주 짧은 구간에 몰아서 일어난다
+// Zoom 과 나란히 보면 차이가 보인다: 처음과 끝 장면은 같고, 가는 데 걸리는 시간만 다르다. 앞뒤로는 화면이 멈춰 있다
+// 시간 막대의 띠가 줌이 일어나는 구간이다(40~48%). 키프레임의 %와 같은 값이어야 한다
+// 변형: in(기본) · out
+import MgFrame from '../../mg/MgFrame.astro';
+// 위에서 보기: 카메라는 제자리이고 시야만 확 좁아진다
+import MgScene from '../../mg/MgScene.astro';
+import MgTopView from '../../mg/MgTopView.astro';
+---
+<div class="mg-crash-zoom" data-demo-root aria-hidden="true">
+  <MgFrame duration="3s" ranges={[[40, 48]]}>
+    <MgScene bleed />
+    <MgTopView />
+  </MgFrame>
+</div>
+
+<style>
+  .mg-crash-zoom {
+    --mg-crash-zoom-from: 0.8;
+    --mg-crash-zoom-to: 1.25;
+  }
+  .mg-crash-zoom[data-variant='out'] {
+    --mg-crash-zoom-from: 1.25;
+    --mg-crash-zoom-to: 0.8;
+  }
+  .mg-crash-zoom :global(.mgs) {
+    transform-origin: 50% 68%;
+    scale: var(--mg-crash-zoom-from);
+  }
+  .mg-crash-zoom.is-playing :global(.mgs) {
+    animation: mg-crash-zoom-snap var(--mg-duration) linear forwards;
+  }
+  /* 구간 안에서는 확 나갔다가 끝에서 잦아든다 — 덜컥 꽂히는 느낌 */
+  @keyframes mg-crash-zoom-snap {
+    0%,
+    40% {
+      scale: var(--mg-crash-zoom-from);
+      animation-timing-function: cubic-bezier(0.2, 0.9, 0.3, 1);
+    }
+    48%,
+    100% {
+      scale: var(--mg-crash-zoom-to);
+    }
+  }
+  /* 위에서 보기: 시야(부채꼴)의 폭이 배율에 반비례한다. 꼭짓점(카메라)이 축이다 */
+  .mg-crash-zoom :global(.mgt-view) {
+    transform-origin: 50% 100%;
+    scale: calc(1 / var(--mg-crash-zoom-from)) 1;
+  }
+  .mg-crash-zoom.is-playing :global(.mgt-view) {
+    animation: mg-crash-zoom-narrow var(--mg-duration) linear forwards;
+  }
+  @keyframes mg-crash-zoom-narrow {
+    0%,
+    40% {
+      scale: calc(1 / var(--mg-crash-zoom-from)) 1;
+      animation-timing-function: cubic-bezier(0.2, 0.9, 0.3, 1);
+    }
+    48%,
+    100% {
+      scale: calc(1 / var(--mg-crash-zoom-to)) 1;
+    }
+  }
+</style>

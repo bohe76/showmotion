@@ -1,0 +1,79 @@
+---
+// Time-Lapse 데모 — 카메라는 제자리에 있고, 느린 변화가 빠르게 흐른다: 해가 하늘을 건너가고, 그림자가 반대쪽으로 넘어가고, 뒤의 막대(C)가 자라 올라온다
+// 주인공 B 는 가만히 서 있다 — 빨라진 것은 대상의 동작이 아니라 긴 시간이다. 이어진 영상을 빨리 돌려 동작이 바빠지는 것은 Fast Motion 이다
+// 긴 간격으로 찍은 프레임이라 조금 뚝뚝 끊기며 흐른다: 화면의 모든 변화가 같은 박자(스물네 프레임)로 한꺼번에 바뀐다
+//   — 시각 변수 하나(--mg-time-lapse-t, 0 = 아침 · 1 = 저녁)를 steps() 로 움직이고 해 · 그림자 · 막대가 모두 그 값에서 자리를 계산한다
+// 카메라도 프레임 사이에 먼 거리를 가면 Hyperlapse 다(같은 해가 건너가는데 공간을 지나간다)
+import MgFrame from '../../mg/MgFrame.astro';
+import MgScene from '../../mg/MgScene.astro';
+---
+<div class="mg-time-lapse" data-demo-root aria-hidden="true">
+  <MgFrame duration="4s">
+    <span class="mg-time-lapse-sun"></span>
+    <MgScene />
+    <span class="mg-time-lapse-shadow mg-time-lapse-shadow-a" style="left: 11cqw"></span>
+    <span class="mg-time-lapse-shadow mg-time-lapse-shadow-b"></span>
+    <span class="mg-time-lapse-shadow mg-time-lapse-shadow-a" style="left: 91cqw"></span>
+  </MgFrame>
+</div>
+
+<style>
+  @property --mg-time-lapse-t {
+    syntax: '<number>';
+    inherits: true;
+    initial-value: 0;
+  }
+  .mg-time-lapse.is-playing :global(.mgf-screen) {
+    animation: mg-time-lapse-day var(--mg-duration) steps(24) forwards;
+  }
+  @keyframes mg-time-lapse-day {
+    to {
+      --mg-time-lapse-t: 1;
+    }
+  }
+  /* 해: 뒤 레이어보다 먼저 그려져 막대 뒤로 지나간다. 왼쪽 낮은 곳에서 떠서 가운데 높이 올랐다가 오른쪽 막대 뒤로 진다
+     색은 토큰이 아니라 주황 고정색이다(2026-10-03 사용자 결정 — 토큰 색으로는 해로 읽히지 않았다). Hyperlapse 의 해와 같은 색이어야 한다 */
+  .mg-time-lapse-sun {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 7cqw;
+    aspect-ratio: 1;
+    background: #ffb23e;
+    border: max(1px, 0.5cqw) solid #f08000;
+    border-radius: 50%;
+    translate: calc(4.5cqw + 84cqw * var(--mg-time-lapse-t)) calc(19cqw - 64cqw * var(--mg-time-lapse-t) * (1 - var(--mg-time-lapse-t)));
+  }
+  /* 자라는 막대: 아래로 내려 두었다가(바닥 띠가 가린다) 제 높이까지 올라온다. 막대마다 내려 둔 깊이가 달라 자라는 빠르기가 다르다 */
+  .mg-time-lapse :global(.mgs-c) {
+    --mg-time-lapse-rise: 10cqw;
+    translate: 0 calc(var(--mg-time-lapse-rise) * (1 - var(--mg-time-lapse-t)));
+  }
+  .mg-time-lapse :global(.mgs-c:nth-child(even)) {
+    --mg-time-lapse-rise: 15cqw;
+  }
+  .mg-time-lapse :global(.mgs-c:nth-child(5)) {
+    --mg-time-lapse-rise: 6cqw;
+  }
+  /* 그림자: 물체의 발치에서 옆으로 뻗는 띠. 해의 반대쪽으로 눕는다 — 아침에는 오른쪽으로 길고, 한낮에는 발밑으로 줄고, 저녁에는 왼쪽으로 길다
+     바닥과 가운데 레이어 사이에 그린다(가운데·앞 레이어를 올린다) */
+  .mg-time-lapse :global(.mgs-mid),
+  .mg-time-lapse :global(.mgs-near) {
+    z-index: 1;
+  }
+  .mg-time-lapse-shadow {
+    position: absolute;
+    width: 27cqw;
+    height: 1.6cqw;
+    background: var(--demo-muted);
+    transform-origin: 0 50%;
+    scale: calc(1 - 2 * var(--mg-time-lapse-t)) 1;
+  }
+  .mg-time-lapse-shadow-b {
+    bottom: calc(16% - 1.6cqw);
+    left: 50cqw;
+  }
+  .mg-time-lapse-shadow-a {
+    bottom: 0;
+  }
+</style>

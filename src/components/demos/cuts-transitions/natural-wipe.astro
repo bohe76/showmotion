@@ -1,0 +1,80 @@
+---
+// Natural Wipe 데모 — 렌즈 바로 앞을 지나가는 물체(큰 기둥 A)가 화면을 훑고 가고, 물체가 지나간 자리는 이미 다음 샷(E)이다
+// 샷이 바뀌는 경계는 늘 물체에 가려 있다 — 물체의 한가운데를 따라간다. 그래서 지우는 선이 보이지 않고 물체가 장면을 닦아 낸 것처럼 보인다
+// 시간 막대의 띠가 물체가 화면을 가로지르는 구간이다(30~70%). 컷 눈금은 없다 — 한순간에 바뀌는 것이 아니라 물체를 따라 차례로 바뀐다
+// 물체는 화면보다 좁다: 지나가는 내내 한쪽에는 앞 샷이, 다른 쪽에는 다음 샷이 보인다
+//   (Invisible Cut 은 화면이 물체로 가득 찬 순간에 컷 하고, 컷 뒤에도 같은 장면이 이어지는 것처럼 보인다)
+// 물체의 폭 26cqw — 오른쪽 틀 밖(101cqw)에서 왼쪽 틀 밖(-27cqw)까지 간다. 경계는 그 한가운데(114cqw → -14cqw)
+//   틀에 딱 붙여 세워 두면(100cqw) 재생 전 화면의 오른쪽 끝에 물체가 실금으로 비쳐서 1cqw 떼어 둔다
+import MgFrame from '../../mg/MgFrame.astro';
+import MgScene from '../../mg/MgScene.astro';
+import MgShot from '../../mg/MgShot.astro';
+---
+<div class="mg-natural-wipe" data-demo-root aria-hidden="true">
+  <MgFrame duration="4s" ranges={[[30, 70]]}>
+    <MgScene />
+    <MgShot shot="e" />
+    <span class="mg-natural-wipe-block">A</span>
+  </MgFrame>
+</div>
+
+<style>
+  .mg-natural-wipe :global(.mgs-b),
+  .mg-natural-wipe :global(.mgsh-subject) {
+    translate: -8cqw 0;
+  }
+  /* 움직이지 않는 세 변은 틀 밖 1px 에서 자른다 — 딱 변에서 자르면 경계가 번져 끝 장면의 가장자리에 앞 샷이 실금으로 비친다 */
+  .mg-natural-wipe :global(.mgsh) {
+    clip-path: inset(-1px -1px -1px 114cqw);
+  }
+  .mg-natural-wipe-block {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    display: grid;
+    place-items: center;
+    width: 26cqw;
+    font-size: 16cqw;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--surface);
+    background: var(--ink);
+    translate: 101cqw 0;
+  }
+  .mg-natural-wipe.is-playing :global(.mgs-b),
+  .mg-natural-wipe.is-playing :global(.mgsh-subject) {
+    animation: mg-natural-wipe-move var(--mg-duration) linear forwards;
+  }
+  .mg-natural-wipe.is-playing :global(.mgsh) {
+    animation: mg-natural-wipe-reveal var(--mg-duration) linear forwards;
+  }
+  .mg-natural-wipe.is-playing .mg-natural-wipe-block {
+    animation: mg-natural-wipe-pass var(--mg-duration) linear forwards;
+  }
+  @keyframes mg-natural-wipe-move {
+    to {
+      translate: 8cqw 0;
+    }
+  }
+  @keyframes mg-natural-wipe-reveal {
+    0%,
+    30% {
+      clip-path: inset(-1px -1px -1px 114cqw);
+    }
+    70%,
+    100% {
+      clip-path: inset(-1px -1px -1px -14cqw);
+    }
+  }
+  @keyframes mg-natural-wipe-pass {
+    0%,
+    30% {
+      translate: 101cqw 0;
+    }
+    70%,
+    100% {
+      translate: -27cqw 0;
+    }
+  }
+</style>

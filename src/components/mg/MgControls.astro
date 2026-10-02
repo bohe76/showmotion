@@ -1,0 +1,127 @@
+---
+// 모션 그래픽 상세 페이지의 조작 줄 — 큰 데모 바로 아래. 카드에는 두지 않는다(카드는 재생 버튼 하나)
+// 칩을 누르면 gallery.ts 가 데모 루트의 값을 바꾸고 처음부터 재생한다 (규약: docs/content/prompt_writing_guide.md §모션 그래픽 데모)
+//   variant → data-variant(변형 이름) / speed → --mg-speed(길이 배수) / depth → data-depth / view → data-view
+// 값은 2~3단계 선택이다 — 숫자 슬라이더를 두지 않는다(용어의 뜻을 보여 주는 자리라 수치가 요점이 아니다)
+// 처음 눌린 칩 = 데모의 기본 모습: 기본 변형(defaultVariant, 없으면 첫 변형), 보통 길이, 보통 깊이, 화면
+import type { MgMotion } from '../../data/types';
+import { ui, type Locale } from '../../i18n/locales';
+
+interface Props {
+  motion: MgMotion;
+  locale: Locale;
+}
+
+const { motion, locale } = Astro.props;
+const t = ui[locale];
+const c = t.mg.controls;
+
+type Choice = { value: string; label: string; current?: boolean };
+type Group = { set: string; label: string; choices: Choice[]; english?: boolean };
+
+const candidates: (Group | false | undefined)[] = [
+  // 변형 이름은 모든 언어에서 영어 그대로다(상세 페이지의 Variants 목록과 같다)
+  motion.variants.length > 1 && {
+    set: 'variant',
+    label: t.variants,
+    english: true,
+    choices: motion.variants.map((v) => ({ value: v, label: v, current: v === (motion.defaultVariant ?? motion.variants[0]) })),
+  },
+  {
+    set: 'speed',
+    label: c.duration,
+    choices: [
+      { value: '0.5', label: c.short },
+      { value: '1', label: c.normal, current: true },
+      { value: '2', label: c.long },
+    ],
+  },
+  motion.controls?.depth && {
+    set: 'depth',
+    label: c.depth,
+    choices: [
+      { value: 'shallow', label: c.shallow },
+      { value: 'normal', label: c.normal, current: true },
+      { value: 'deep', label: c.deep },
+    ],
+  },
+  motion.controls?.view && {
+    set: 'view',
+    label: c.view,
+    choices: [
+      { value: 'screen', label: c.screen, current: true },
+      { value: 'top', label: c.top },
+    ],
+  },
+];
+const groups = candidates.filter((g): g is Group => Boolean(g));
+---
+<!-- JS 로 동작하므로 hidden 으로 렌더하고 gallery.ts 가 노출한다 -->
+<div class="mg-controls" hidden data-demo-controls>
+  {groups.map((group) => (
+    <div class="group" role="group" aria-label={group.label} data-group={group.set}>
+      <span class="group-label" aria-hidden="true">{group.label}</span>
+      <div class="choices" lang={group.english ? 'en' : undefined}>
+        {group.choices.map((choice) => (
+          <button type="button" aria-pressed={choice.current ? 'true' : 'false'} data-set={group.set} data-value={choice.value}>
+            {choice.label}
+          </button>
+        ))}
+      </div>
+    </div>
+  ))}
+</div>
+
+<style>
+  .mg-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px 28px;
+    margin-top: 14px;
+  }
+  .group-label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .choices {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  button {
+    min-height: 32px;
+    padding: 4px 12px;
+    font: inherit;
+    font-size: 0.875rem;
+    color: var(--ink);
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    cursor: pointer;
+    transition:
+      color 150ms ease-out,
+      background-color 150ms ease-out,
+      border-color 150ms ease-out;
+  }
+  button:hover {
+    border-color: var(--ink);
+  }
+  button[aria-pressed='true'] {
+    font-weight: 600;
+    color: var(--on-accent);
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+  .mg-controls[hidden] {
+    display: none;
+  }
+  /* 3D 무대를 못 올려 2D 로 보여 줄 때, 2D 위 그림(MgTopView)이 없는 데모에서는 시점 조작을 감춘다 — 눌러도 바뀌는 것이 없다 */
+  :global(.stage[data-mg3d-off]:not(:has(.mgt))) + .mg-controls [data-group='view'] {
+    display: none;
+  }
+</style>

@@ -196,6 +196,22 @@ mark.ph {
   }
 }
 
+/* 모션 그래픽 데모: 레이어까지의 거리 — 가운데(B)가 1. 상세 페이지의 깊이 조작(data-depth)이 앞·뒤 레이어를 가운데에서 멀리 또는 가까이 둔다
+   2D 장면(MgScene)을 쓰는 데모는 이동량을 이 값으로 나누고, 위에서 보기(MgTopView)와 3D 무대(scripts/mg3d)는 이 값으로 줄을 놓는다
+   — 모두 같은 값을 써야 화면과 위에서 본 모습이 맞는다 */
+[data-demo-root] {
+  --mg-z-near: 0.5;
+  --mg-z-far: 2;
+}
+[data-demo-root][data-depth='shallow'] {
+  --mg-z-near: 0.7;
+  --mg-z-far: 1.5;
+}
+[data-demo-root][data-depth='deep'] {
+  --mg-z-near: 0.36;
+  --mg-z-far: 2.6;
+}
+
 /* 반복 데모는 reduced-motion 이면 멈춘 채로 시작한다(JS 불필요). 사용자가 재생하면 is-running 으로 풀린다 */
 @media (prefers-reduced-motion: reduce) {
   [data-demo='loop'] [data-demo-root]:not(.is-running),

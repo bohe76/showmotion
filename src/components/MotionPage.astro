@@ -2,24 +2,32 @@
 import SiteLayout from './SiteLayout.astro';
 import DemoStage from './DemoStage.astro';
 import MotionCard from './MotionCard.astro';
-import type { Motion } from '../data/types';
-import { localized, motionById, motionTitle, motionsIn } from '../data/motions';
-import { similar } from '../data/similar';
+import MgControls from './mg/MgControls.astro';
+import type { AnyMotion, MgMotion } from '../data/types';
+import { localized, motionTitle } from '../data/motions';
+import { catalog, categorySubpathIn, listSubpath, motionSubpathOf, sectionOf } from '../data/sections';
 import { motionData } from '../layouts/structured-data';
-import { categories, categoryName } from '../data/categories';
-import { categorySubpath, localeMeta, motionSubpath, pageHref, repoUrl, siteName, ui, type Locale } from '../i18n/locales';
+import { categoryName } from '../data/categories';
+import { localeMeta, pageHref, repoUrl, siteName, ui, type Locale } from '../i18n/locales';
 import { splitPlaceholders } from '../i18n/placeholder';
 import CircleArrowLeft from '@lucide/astro/icons/circle-arrow-left';
+import CodeXml from '@lucide/astro/icons/code-xml';
+import ExternalLink from '@lucide/astro/icons/external-link';
 
-// 모션 상세 페이지 — 이름으로 검색해 바로 들어오는 사람을 위한 한 모션의 모든 정보
+// 모션 상세 페이지 — 이름으로 검색해 바로 들어오는 사람을 위한 한 모션의 모든 정보. 두 구역(Web / Motion Graphics)이 같이 쓴다
 interface Props {
   locale: Locale;
-  motion: Motion;
+  motion: AnyMotion;
 }
 
 const { locale, motion } = Astro.props;
 const t = ui[locale];
-const note = splitPlaceholders(t.promptNote);
+const section = sectionOf(motion);
+// 조작 줄은 모션 그래픽에만 있다. 변형이 둘 이상이면 조작 줄이 변형 목록을 대신한다
+const mgMotion = section === 'mg' ? (motion as MgMotion) : null;
+const Variants = mgMotion && motion.variants.length > 1 ? 'noscript' : Fragment;
+const { categories, motionById, motionsIn, similar } = catalog(section);
+const note = splitPlaceholders(section === 'mg' ? t.mg.promptNote : t.promptNote);
 const nameId = `name-${motion.id}`;
 const promptId = `prompt-${motion.id}`;
 const localName = motion.localName[locale];
@@ -29,11 +37,14 @@ const prompt = localized(motion.prompt, locale);
 const category = categoryName(motion.category);
 // 이 데모의 소스 — 코드는 페이지에 싣지 않고(결정: 구현은 AI 가 한다), 보고 싶은 사람은 공개 저장소에서 본다
 const sourceHref = `${repoUrl}/blob/main/src/components/demos/${motion.category}/${motion.id}.astro`;
-const categoryHref = pageHref(locale, categorySubpath(motion.category));
-// 돌아가기 버튼이 "사이트 안 목록에서 왔는지" 가리는 기준 — 이 언어의 전체·카테고리 페이지 주소
-const listPaths = [pageHref(locale, ''), ...categories.map((c) => pageHref(locale, categorySubpath(c.id)))];
+const categoryHref = pageHref(locale, categorySubpathIn(section, motion.category));
+// 돌아가기 버튼이 "사이트 안 목록에서 왔는지" 가리는 기준 — 이 언어·이 구역의 전체·카테고리 페이지 주소
+const listPaths = [
+  pageHref(locale, listSubpath(section)),
+  ...categories.map((c) => pageHref(locale, categorySubpathIn(section, c.id))),
+];
 
-// 비슷한 모션: 눈으로 보면 헷갈리기 쉬운 모션 (src/data/similar.ts, 카테고리가 달라도 된다) — 나란히 보며 정확한 이름을 찾게 한다
+// 비슷한 모션: 눈으로 보면 헷갈리기 쉬운 모션 (src/data/similar.ts · mg.ts 의 mgSimilar, 카테고리가 달라도 된다) — 나란히 보며 정확한 이름을 찾게 한다
 const lookAlikes = (similar[motion.id] ?? []).map((id) => motionById.get(id)!);
 
 // 관련 모션: 같은 카테고리에서 이 모션 다음 순서부터 3개 (끝에 닿으면 처음으로). 비슷한 모션에 이미 나온 것은 뺀다
@@ -48,7 +59,8 @@ const related = [1, 2, 3]
 ---
 <SiteLayout
   locale={locale}
-  subpath={motionSubpath(motion.id)}
+  section={section}
+  subpath={motionSubpathOf(motion)}
   title={`${motionTitle(motion, locale)} — ${siteName}`}
   description={description.text}
   jsonLd={motionData(Astro.site!, locale, motion)}
@@ -68,7 +80,11 @@ const related = [1, 2, 3]
   </a>
 
   <article class="detail" aria-labelledby={nameId} data-motion-card>
-    <DemoStage motion={motion} locale={locale} nameId={nameId} size="large" />
+    <!-- 모션 그래픽은 데모 아래에 조작 줄(변형·길이·깊이·시점)이 붙는다 — DemoStage 바로 다음 형제여야 gallery.ts 가 찾는다 -->
+    <div class="demo">
+      <DemoStage motion={motion} locale={locale} nameId={nameId} size="large" />
+      {mgMotion && <MgControls motion={mgMotion} locale={locale} />}
+    </div>
 
     <div class="body">
       <p class="category"><a href={categoryHref} lang="en">{category}</a></p>
@@ -81,16 +97,30 @@ const related = [1, 2, 3]
       <h2 class="section-label">{t.useFor}</h2>
       <p lang={useFor.fallback ? 'en' : undefined}>{useFor.text}</p>
 
+      <!-- 모션 그래픽은 변형을 데모 아래 조작 줄에서 고르므로 여기에는 다시 적지 않는다(JS 가 꺼져 조작 줄이 없을 때만 보인다) -->
       {motion.variants.length > 0 && (
-        <>
+        <Variants>
           <h2 class="section-label">{t.variants}</h2>
           <ul class="variants" lang="en">
             {motion.variants.map((v) => <li>{v}</li>)}
           </ul>
-        </>
+        </Variants>
       )}
 
-      <p class="source"><a href={sourceHref}>{t.viewSource}</a></p>
+      <!-- 사이트 밖(공개 저장소)으로 나가는 유일한 링크 — 새 탭으로 연다. 웹 모션에만 둔다: 모션 그래픽(영상)은 붙여 쓸 코드가 아니라 뺀다 (2026-10-02 사용자 지시) -->
+      <!-- "Variants" 처럼 소제목을 달고 그 아래 테두리 버튼으로 둔다 — 소제목이 위의 변형 칩과 구역을 가른다. 아이콘은 글자 옆 장식이라 스크린리더에 숨긴다 -->
+      {section === 'web' && (
+        <>
+          <h2 class="section-label">{t.source}</h2>
+          <p class="source">
+            <a href={sourceHref} target="_blank" rel="noopener noreferrer">
+              <CodeXml size={16} aria-hidden="true" />
+              {t.viewSource}
+              <ExternalLink size={14} aria-hidden="true" />
+            </a>
+          </p>
+        </>
+      )}
     </div>
   </article>
 
@@ -205,16 +235,31 @@ const related = [1, 2, 3]
     border: 1px solid var(--line);
     border-radius: 4px;
   }
+  /* 소제목(Source) 아래의 테두리 버튼 — 이 페이지의 주 행동(프롬프트 복사, 틸 채움)보다 한 단계 낮게 둔다 */
   .source {
-    margin-top: 22px !important;
-    font-size: 0.875rem;
+    margin-top: 4px !important;
   }
   .source a {
-    color: var(--muted);
-    transition: color 150ms ease-out;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 40px;
+    padding: 8px 14px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--ink);
+    text-decoration: none;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    transition: border-color 150ms ease-out;
   }
   .source a:hover {
-    color: var(--ink);
+    border-color: var(--ink);
+  }
+  /* 새 탭 표시는 글자보다 흐리게 */
+  .source a :global(svg:last-child) {
+    color: var(--muted);
   }
   .prompt {
     padding-bottom: 40px;

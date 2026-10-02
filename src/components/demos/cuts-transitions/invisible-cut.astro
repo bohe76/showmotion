@@ -1,0 +1,79 @@
+---
+// Invisible Cut 데모 — 컷이 있는데 눈에 띄지 않는다. 카메라가 옆으로 가는 동안 렌즈 바로 앞의 어두운 벽(A)이 화면을 가득 채우고, 그 순간에 컷 한다
+// 벽이 지나가면 같은 장면이 같은 움직임으로 이어진다 — 끊기지 않은 한 번의 촬영처럼 보인다. 컷이 있었다는 것은 시간 막대의 눈금(50%)으로만 알 수 있다
+// 컷은 실제로 있다: 화면이 온통 어두운 46~54% 사이, 50% 에서 B 가 9cqw 앞으로 건너뛴다(그동안의 시간이 잘려 나갔다) — 가려져 있어 보이지 않는다
+// 벽은 화면보다 넓다(150cqw). 30% 에 오른쪽 틀 밖(101cqw)에서 들어와 70% 에 왼쪽으로 다 빠져나간다(-151cqw)
+//   틀에 딱 붙여 세워 두면(100cqw) 재생 전 화면의 오른쪽 끝에 벽이 실금으로 비쳐서 1cqw 떼어 둔다
+//   (Natural Wipe 는 화면보다 좁은 물체가 지나가며 다른 샷으로 닦아 낸다 — 샷이 바뀐 것이 보인다)
+import MgFrame from '../../mg/MgFrame.astro';
+import MgScene from '../../mg/MgScene.astro';
+---
+<div class="mg-invisible-cut" data-demo-root aria-hidden="true">
+  <MgFrame duration="4s" cuts={[50]}>
+    <MgScene />
+    <span class="mg-invisible-cut-wall">A</span>
+  </MgFrame>
+</div>
+
+<style>
+  .mg-invisible-cut :global(.mgs-layer) {
+    translate: 12cqw 0;
+  }
+  .mg-invisible-cut :global(.mgs-b) {
+    translate: -14cqw 0;
+  }
+  .mg-invisible-cut-wall {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    display: grid;
+    place-items: center;
+    width: 150cqw;
+    font-size: 22cqw;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--surface);
+    background: var(--ink);
+    translate: 101cqw 0;
+  }
+  .mg-invisible-cut.is-playing :global(.mgs-layer) {
+    animation: mg-invisible-cut-camera var(--mg-duration) linear forwards;
+  }
+  .mg-invisible-cut.is-playing :global(.mgs-b) {
+    animation: mg-invisible-cut-walk var(--mg-duration) linear forwards;
+  }
+  .mg-invisible-cut.is-playing .mg-invisible-cut-wall {
+    animation: mg-invisible-cut-pass var(--mg-duration) linear forwards;
+  }
+  @keyframes mg-invisible-cut-camera {
+    to {
+      translate: -12cqw 0;
+    }
+  }
+  /* 49.99% 까지가 앞 촬영, 50% 부터가 뒤 촬영이다 */
+  @keyframes mg-invisible-cut-walk {
+    0% {
+      translate: -14cqw 0;
+    }
+    49.99% {
+      translate: -7cqw 0;
+    }
+    50% {
+      translate: 2cqw 0;
+    }
+    100% {
+      translate: 9cqw 0;
+    }
+  }
+  @keyframes mg-invisible-cut-pass {
+    0%,
+    30% {
+      translate: 101cqw 0;
+    }
+    70%,
+    100% {
+      translate: -151cqw 0;
+    }
+  }
+</style>

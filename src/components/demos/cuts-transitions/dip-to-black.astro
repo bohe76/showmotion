@@ -1,0 +1,78 @@
+---
+// Dip to Black 데모 — 앞 샷이 단색으로 어두워지고, 그 단색에서 다음 샷(E)이 나타난다. 두 샷은 겹치지 않는다
+// 시간 막대의 띠가 전환 구간이다(30~70%). 한가운데(50%)에서 화면이 온통 단색이고, 그 순간 밑에서 샷이 바뀐다
+// 변형: black(기본) · white(흰색을 거친다 — Dip to White). --mg-dip-to-black-color 가 거치는 색이다
+// 검정·흰색은 용어가 가리키는 색 그 자체라 토큰 대신 #000·#fff 를 쓴다 — 테마에 따라 뒤집히면 안 된다
+// Fade 는 검정에서 끝나거나 검정에서 시작할 뿐 다음 샷으로 이어지지 않는다
+import MgFrame from '../../mg/MgFrame.astro';
+import MgScene from '../../mg/MgScene.astro';
+import MgShot from '../../mg/MgShot.astro';
+---
+<div class="mg-dip-to-black" data-demo-root aria-hidden="true">
+  <MgFrame duration="4s" ranges={[[30, 70]]}>
+    <MgScene />
+    <MgShot shot="e" />
+    <span class="mg-dip-to-black-color"></span>
+  </MgFrame>
+</div>
+
+<style>
+  .mg-dip-to-black {
+    --mg-dip-to-black-color: #000;
+  }
+  .mg-dip-to-black[data-variant='white'] {
+    --mg-dip-to-black-color: #fff;
+  }
+  .mg-dip-to-black :global(.mgs-b) {
+    translate: -8cqw 0;
+  }
+  .mg-dip-to-black :global(.mgsh) {
+    visibility: hidden;
+  }
+  .mg-dip-to-black-color {
+    position: absolute;
+    inset: 0;
+    background: var(--mg-dip-to-black-color);
+    opacity: 0;
+  }
+  .mg-dip-to-black.is-playing :global(.mgs-b),
+  .mg-dip-to-black.is-playing :global(.mgsh-subject) {
+    animation: mg-dip-to-black-move var(--mg-duration) linear forwards;
+  }
+  .mg-dip-to-black.is-playing :global(.mgsh) {
+    animation: mg-dip-to-black-swap var(--mg-duration) step-end forwards;
+  }
+  .mg-dip-to-black.is-playing .mg-dip-to-black-color {
+    animation: mg-dip-to-black-dip var(--mg-duration) linear forwards;
+  }
+  @keyframes mg-dip-to-black-move {
+    from {
+      translate: -8cqw 0;
+    }
+    to {
+      translate: 8cqw 0;
+    }
+  }
+  @keyframes mg-dip-to-black-swap {
+    0% {
+      visibility: hidden;
+    }
+    50%,
+    100% {
+      visibility: visible;
+    }
+  }
+  @keyframes mg-dip-to-black-dip {
+    0%,
+    30% {
+      opacity: 0;
+    }
+    50% {
+      opacity: 1;
+    }
+    70%,
+    100% {
+      opacity: 0;
+    }
+  }
+</style>

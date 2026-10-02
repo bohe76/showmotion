@@ -1,0 +1,207 @@
+---
+// Split Screen 데모 — 화면이 칸으로 나뉘어 칸마다 다른 영상이 동시에 돈다. 처음에는 한 영상(B 가 튀며 오가는 장면)이 화면을 다 쓴다
+// 시간 막대의 띠(10~30%)가 칸막이가 들어오는 구간이다: 다른 칸들이 화면 밖에서 밀고 들어오고, 장면은 제 칸으로 물러난다(줄거나 옆으로 비킨다). 키프레임의 % 와 같은 값이어야 한다
+// 칸마다 영상이 처음부터 끝까지 움직인다 — 장면의 B 는 건너갔다 되돌아오고, D 는 옆으로 가고, E 의 막대는 뻗고, F 의 마름모는 돈다
+// 본 화면 위에 작은 창이 뜨는 Picture-in-Picture 와 다르다: 어느 영상도 다른 영상을 덮지 않고 화면을 나눠 쓴다
+// 변형: two-way(기본 — 좌우 둘) · quad-split(넷, 2 × 2) · multi-panel(큰 칸 하나 + 작은 칸 둘). 칸의 자리와 그 안에 영상을 놓는 법만 변수로 바꾼다
+//   칸(.mg-split-screen-pane): --mg-split-screen-box(자리 — 위 오른쪽 아래 왼쪽) · --mg-split-screen-from(들어오기 전에 밀려나 있는 양)
+//   칸 안의 영상(.mg-split-screen-view): --mg-split-screen-size(영상의 폭 — 그 자체가 크기 기준이라 샷이 통째로 줄어든다) · --mg-split-screen-shift(칸 안에서 옆으로 옮기는 양 — 주인공이 칸에 들어오게)
+//   장면(.mg-split-screen-main): 칸에 가두지 않고 줄이고 옮기기만 한다(--mg-split-screen-main-scale · -main-to). 제 칸 밖으로 넘친 것은 다른 칸이 덮는다
+// 칸의 바깥쪽 변은 화면 틀 밖 1px 로 낸다(딱 맞추면 밑의 장면이 실금으로 비친다). 그 자리는 칸의 바탕색(샷의 바탕과 같은 색)이 메운다
+import MgFrame from '../../mg/MgFrame.astro';
+import MgClip from '../../mg/MgClip.astro';
+import MgShot from '../../mg/MgShot.astro';
+
+const shots = ['d', 'e', 'f'] as const;
+---
+<div class="mg-split-screen" data-demo-root aria-hidden="true">
+  <MgFrame duration="4.8s" ranges={[[10, 30]]}>
+    <div class="mg-split-screen-main">
+      <MgClip />
+    </div>
+    {shots.map((shot) => (
+      <div class={`mg-split-screen-pane mg-split-screen-${shot}`}>
+        <div class="mg-split-screen-view">
+          <MgShot shot={shot} />
+        </div>
+      </div>
+    ))}
+  </MgFrame>
+</div>
+
+<style>
+  /* two-way: 장면은 조금 줄어 왼쪽 반의 가운데로 간다(B 가 오가는 폭이 칸 안에 들어온다). D 는 제 크기 그대로 오른쪽 반에 — 주인공이 칸 가운데에 오게 조금 당긴다 */
+  .mg-split-screen {
+    --mg-split-screen-main-scale: 0.8;
+    --mg-split-screen-main-to: -15cqw 11.25cqw;
+  }
+  .mg-split-screen-d {
+    --mg-split-screen-box: 0 -1px -1px 50cqw;
+    --mg-split-screen-from: 51cqw 0;
+    --mg-split-screen-size: 100cqw;
+    --mg-split-screen-shift: -3cqw;
+    background: var(--ink);
+  }
+  .mg-split-screen-e {
+    display: none;
+    background: var(--accent);
+  }
+  .mg-split-screen-f {
+    display: none;
+    background: var(--demo-muted);
+  }
+  /* quad-split: 네 영상이 모두 반 크기로 한 칸씩 */
+  .mg-split-screen[data-variant='quad-split'] {
+    --mg-split-screen-main-scale: 0.5;
+    --mg-split-screen-main-to: 0 0;
+  }
+  .mg-split-screen[data-variant='quad-split'] .mg-split-screen-pane {
+    display: block;
+    --mg-split-screen-size: 50cqw;
+    --mg-split-screen-shift: 0cqw;
+  }
+  .mg-split-screen[data-variant='quad-split'] .mg-split-screen-d {
+    --mg-split-screen-box: 0 -1px 50% 50cqw;
+  }
+  .mg-split-screen[data-variant='quad-split'] .mg-split-screen-e {
+    --mg-split-screen-box: 50% 50cqw -1px 0;
+    --mg-split-screen-from: 0 29cqw;
+  }
+  .mg-split-screen[data-variant='quad-split'] .mg-split-screen-f {
+    --mg-split-screen-box: 50% -1px -1px 50cqw;
+    --mg-split-screen-from: 51cqw 29cqw;
+  }
+  /* multi-panel: 장면이 제 크기로 왼쪽 큰 칸(폭 60)을 쓰고, 오른쪽에 반 크기 영상 둘이 위아래로 선다 */
+  .mg-split-screen[data-variant='multi-panel'] {
+    --mg-split-screen-main-scale: 1;
+    --mg-split-screen-main-to: -20cqw 0;
+  }
+  .mg-split-screen[data-variant='multi-panel'] .mg-split-screen-d {
+    --mg-split-screen-box: 0 -1px 50% 60cqw;
+    --mg-split-screen-from: 41cqw 0;
+    --mg-split-screen-size: 50cqw;
+    --mg-split-screen-shift: -4cqw;
+  }
+  .mg-split-screen[data-variant='multi-panel'] .mg-split-screen-e {
+    display: block;
+    --mg-split-screen-box: 50% -1px -1px 60cqw;
+    --mg-split-screen-from: 0 29cqw;
+    --mg-split-screen-size: 50cqw;
+    --mg-split-screen-shift: -10cqw;
+  }
+
+  .mg-split-screen-main {
+    position: absolute;
+    inset: 0;
+    transform-origin: 0 0;
+  }
+  .mg-split-screen-pane {
+    position: absolute;
+    inset: var(--mg-split-screen-box);
+    overflow: hidden;
+    outline: 0.4cqw solid var(--surface);
+    translate: var(--mg-split-screen-from);
+  }
+  .mg-split-screen-view {
+    position: absolute;
+    top: 0;
+    left: var(--mg-split-screen-shift);
+    width: var(--mg-split-screen-size);
+    aspect-ratio: 16 / 9;
+    container-type: inline-size;
+  }
+  /* 칸 안의 영상들 — 재생 전의 자리. 단위(cqw)는 그 영상의 폭 기준이다 */
+  .mg-split-screen-d :global(.mgsh-subject) {
+    translate: -6cqw 0;
+  }
+  .mg-split-screen-e :global(.mgsh-prop) {
+    transform-origin: 0 50%;
+    scale: 0.3 1;
+  }
+
+  .mg-split-screen.is-playing .mg-split-screen-main {
+    animation: mg-split-screen-retreat var(--mg-duration) linear forwards;
+  }
+  .mg-split-screen.is-playing .mg-split-screen-pane {
+    animation: mg-split-screen-enter var(--mg-duration) linear forwards;
+  }
+  .mg-split-screen.is-playing :global(.mgs-b) {
+    animation: mg-split-screen-run var(--mg-duration) linear forwards;
+  }
+  .mg-split-screen.is-playing .mg-split-screen-d :global(.mgsh-subject) {
+    animation: mg-split-screen-slide var(--mg-duration) linear forwards;
+  }
+  .mg-split-screen.is-playing .mg-split-screen-e :global(.mgsh-prop) {
+    animation: mg-split-screen-extend var(--mg-duration) linear forwards;
+  }
+  .mg-split-screen.is-playing .mg-split-screen-f :global(.mgsh-subject) {
+    animation: mg-split-screen-turn var(--mg-duration) linear forwards;
+  }
+  .mg-split-screen.is-playing .mg-split-screen-f :global(.mgsh-letter-f) {
+    animation: mg-split-screen-upright var(--mg-duration) linear forwards;
+  }
+  @keyframes mg-split-screen-retreat {
+    0%,
+    10% {
+      translate: 0 0;
+      scale: 1;
+      animation-timing-function: cubic-bezier(0.5, 0, 0.2, 1);
+    }
+    30%,
+    100% {
+      translate: var(--mg-split-screen-main-to);
+      scale: var(--mg-split-screen-main-scale);
+    }
+  }
+  @keyframes mg-split-screen-enter {
+    0%,
+    10% {
+      translate: var(--mg-split-screen-from);
+      animation-timing-function: cubic-bezier(0.5, 0, 0.2, 1);
+    }
+    30%,
+    100% {
+      translate: 0 0;
+    }
+  }
+  /* 앞 절반에 한 번 건너가고, 뒤 절반에 같은 움직임으로 되돌아온다(둘 다 원래 속도) */
+  @keyframes mg-split-screen-run {
+    0% {
+      --mg-clip-t: 0;
+      --mgc-flip: 0;
+    }
+    49.99% {
+      --mg-clip-t: 1;
+      --mgc-flip: 0;
+    }
+    50% {
+      --mg-clip-t: 0;
+      --mgc-flip: 1;
+    }
+    100% {
+      --mg-clip-t: 1;
+      --mgc-flip: 1;
+    }
+  }
+  @keyframes mg-split-screen-slide {
+    to {
+      translate: 6cqw 0;
+    }
+  }
+  @keyframes mg-split-screen-extend {
+    to {
+      scale: 1 1;
+    }
+  }
+  /* 마름모가 4분의 1 바퀴 돈다. 글자는 거꾸로 돌려 바로 세워 둔다 */
+  @keyframes mg-split-screen-turn {
+    to {
+      rotate: 135deg;
+    }
+  }
+  @keyframes mg-split-screen-upright {
+    to {
+      rotate: -135deg;
+    }
+  }
+</style>

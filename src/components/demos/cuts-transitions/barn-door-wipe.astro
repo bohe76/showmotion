@@ -1,0 +1,63 @@
+---
+// Barn Door Wipe 데모 — 화면 한가운데의 세로선에서 두 변이 양옆으로 갈라지며 다음 샷(D)이 드러난다. 헛간 문이 열리는 모양이다
+// 두 샷 모두 제자리에 있다 — 밀려 나가지 않고 그 자리에서 지워진다. 시간 막대의 띠가 전환 구간이다(35~65%). 키프레임의 %와 같은 값이어야 한다
+// 변형: open(기본 — 가운데에서 열린다) · close(양 끝에서 들어온 두 변이 가운데에서 만난다)
+// 새 샷을 드러내는 마스크는 세로로 긴 조각 둘이다. open 은 둘 다 가운데에 붙어 화면 폭까지 자라고, close 는 왼쪽·오른쪽 끝에 붙어 절반씩 자란다
+//   --mg-barn-door-wipe-at(조각이 붙는 자리) · --mg-barn-door-wipe-to(다 자란 크기)
+import MgFrame from '../../mg/MgFrame.astro';
+import MgScene from '../../mg/MgScene.astro';
+import MgShot from '../../mg/MgShot.astro';
+---
+<div class="mg-barn-door-wipe" data-demo-root aria-hidden="true">
+  <MgFrame duration="4s" ranges={[[35, 65]]}>
+    <MgScene />
+    <MgShot shot="d" />
+  </MgFrame>
+</div>
+
+<style>
+  .mg-barn-door-wipe {
+    --mg-barn-door-wipe-at: center, center;
+    --mg-barn-door-wipe-to: 100% 100%;
+  }
+  /* 절반보다 조금 넓게 — 딱 절반이면 두 조각이 만나는 가운데에 실금이 남는다 */
+  .mg-barn-door-wipe[data-variant='close'] {
+    --mg-barn-door-wipe-at: left, right;
+    --mg-barn-door-wipe-to: 50.5% 100%;
+  }
+  .mg-barn-door-wipe :global(.mgs-b),
+  .mg-barn-door-wipe :global(.mgsh-subject) {
+    translate: -8cqw 0;
+  }
+  .mg-barn-door-wipe :global(.mgsh) {
+    mask-image: linear-gradient(#000 0 0), linear-gradient(#000 0 0);
+    mask-repeat: no-repeat;
+    mask-position: var(--mg-barn-door-wipe-at);
+    mask-size: 0% 100%;
+  }
+  .mg-barn-door-wipe.is-playing :global(.mgs-b),
+  .mg-barn-door-wipe.is-playing :global(.mgsh-subject) {
+    animation: mg-barn-door-wipe-move var(--mg-duration) linear forwards;
+  }
+  .mg-barn-door-wipe.is-playing :global(.mgsh) {
+    animation: mg-barn-door-wipe-doors var(--mg-duration) linear forwards;
+  }
+  @keyframes mg-barn-door-wipe-move {
+    to {
+      translate: 8cqw 0;
+    }
+  }
+  @keyframes mg-barn-door-wipe-doors {
+    0% {
+      mask-size: 0% 100%;
+    }
+    35% {
+      mask-size: 0% 100%;
+      animation-timing-function: ease-in-out;
+    }
+    65%,
+    100% {
+      mask-size: var(--mg-barn-door-wipe-to);
+    }
+  }
+</style>

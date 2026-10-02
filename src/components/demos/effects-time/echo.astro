@@ -1,0 +1,22 @@
+---
+// Echo 데모 — 같은 영상(B 가 뛰어올라 튀며 간다)에서 앞 프레임들의 복제가 B 뒤에 겹쳐 남는다. 뒤로 갈수록 옅어지는 자취다
+// 복제 셋이 같은 움직임을 조금씩 늦게 따라간다(길이의 9% 씩) — 하나하나가 구분돼 보인다. 이어진 번짐이면 Motion Blur 다
+// 빠르기는 원래 속도 그대로다. B 의 움직임은 길이의 73% 에서 끝나고, 나머지 동안 복제가 차례로 따라와 B 밑으로 사라진다
+import MgFrame from '../../mg/MgFrame.astro';
+import MgClip from '../../mg/MgClip.astro';
+---
+<div class="mg-echo" data-demo-root aria-hidden="true">
+  <MgFrame duration="3.3s">
+    <MgClip echoes={3} />
+  </MgFrame>
+</div>
+
+<style>
+  .mg-echo.is-playing :global(.mgs-b),
+  .mg-echo.is-playing :global(.mgc-echo) {
+    animation: mg-clip-run calc(var(--mg-duration) * 0.73) linear both;
+  }
+  .mg-echo.is-playing :global(.mgc-echo) {
+    animation-delay: calc(var(--mg-duration) * 0.09 * var(--mgc-i));
+  }
+</style>

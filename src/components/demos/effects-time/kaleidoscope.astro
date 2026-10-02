@@ -1,0 +1,99 @@
+---
+// Kaleidoscope 데모 — 화면의 쐐기 한 조각이 거울에 비친 듯 뒤집히고 돌려져 여섯 번 되풀이된다. 한가운데를 중심으로 한 대칭 무늬가 된다
+// 처음에는 평범한 영상(B 가 튀며 건너간다)이다. 시간 막대의 눈금(14%)에서 효과가 걸리고, 띠가 걸려 있는 구간이다(14~100%). 키프레임의 % 와 같은 값이어야 한다
+// 무늬는 원본이 움직이는 대로 변한다: B 가 조각 안으로 뛰어들면 여섯 군데에서 같이 움직이고, 원본이 천천히 돌아가면(조각에 담기는 곳이 달라진다) 무늬가 바뀐다. 무늬 전체도 조금씩 돈다
+// 쐐기는 여섯 개다(60° 씩 — 대칭 무늬로 읽히는 가장 적은 수. 쐐기마다 영상 사본이 하나라 늘리면 무거워진다)
+//   쐐기(.mg-kaleidoscope-wedge)는 화면 한가운데에서 위쪽 ~ 오른쪽 위 60° 를 자른 세모다. 짝수 번째는 돌리기만 하고 홀수 번째는 좌우로 뒤집은 뒤 돌린다 — 이웃한 쐐기끼리 거울상이다
+//   세모의 두 변은 0.3cqw 씩 바깥으로 물려 이웃과 겹친다(딱 맞대면 사이로 밑의 장면이 실금으로 비친다). 길이 68cqw 는 무늬가 돌아도 화면 귀퉁이(57cqw)까지 덮는 크기다
+//   쐐기 안의 영상(.mg-kaleidoscope-source)은 B 발밑의 바닥(50cqw, 52cqw)이 쐐기의 꼭짓점에 오게 옮겨 놓고 그 점을 중심으로 돌린다 — 조각에 B 가 지나는 길 · 뒤 막대 · 기둥이 담긴다
+import MgFrame from '../../mg/MgFrame.astro';
+import MgClip from '../../mg/MgClip.astro';
+
+const wedges = Array.from({ length: 6 }, (_, k) => {
+  const flip = k % 2 === 1;
+  return `--mg-kaleidoscope-turn: ${Math.ceil(k / 2) * 120}deg; --mg-kaleidoscope-flip: ${flip ? -1 : 1}`;
+});
+---
+<div class="mg-kaleidoscope" data-demo-root aria-hidden="true">
+  <MgFrame duration="4.4s" cuts={[14]} ranges={[[14, 100]]}>
+    <MgClip />
+    <div class="mg-kaleidoscope-mirror">
+      {wedges.map((style) => (
+        <div class="mg-kaleidoscope-wedge" style={style}>
+          <div class="mg-kaleidoscope-source">
+            <MgClip bleed />
+          </div>
+        </div>
+      ))}
+    </div>
+  </MgFrame>
+</div>
+
+<style>
+  .mg-kaleidoscope-mirror {
+    position: absolute;
+    inset: 0;
+    visibility: hidden;
+  }
+  /* 쐐기의 상자는 화면 한가운데에 중심을 둔 큰 정사각형(한 변 140cqw)이다 — 돌려도 화면을 덮고, 바탕색이 세모 끝까지 깔린다 */
+  .mg-kaleidoscope-wedge {
+    position: absolute;
+    top: -41.875cqw;
+    left: -20cqw;
+    width: 140cqw;
+    height: 140cqw;
+    background: var(--surface);
+    clip-path: polygon(69.7cqw 70.52cqw, 69.7cqw 2cqw, 129.04cqw 36.26cqw);
+    rotate: var(--mg-kaleidoscope-turn);
+    scale: var(--mg-kaleidoscope-flip) 1;
+  }
+  /* 화면 틀과 같은 자리 · 같은 크기 */
+  .mg-kaleidoscope-source {
+    position: absolute;
+    top: 41.875cqw;
+    left: 20cqw;
+    width: 100cqw;
+    height: 56.25cqw;
+    transform-origin: 50cqw 52cqw;
+    translate: 0 -23.875cqw;
+    rotate: 5deg;
+  }
+  .mg-kaleidoscope.is-playing :global(.mgs-b) {
+    animation: mg-clip-run calc(var(--mg-duration) * 0.6) linear forwards;
+  }
+  .mg-kaleidoscope.is-playing .mg-kaleidoscope-mirror {
+    animation:
+      mg-kaleidoscope-on var(--mg-duration) step-end forwards,
+      mg-kaleidoscope-spin var(--mg-duration) linear forwards;
+  }
+  .mg-kaleidoscope.is-playing .mg-kaleidoscope-source {
+    animation: mg-kaleidoscope-drift var(--mg-duration) linear forwards;
+  }
+  @keyframes mg-kaleidoscope-on {
+    0% {
+      visibility: hidden;
+    }
+    14%,
+    100% {
+      visibility: visible;
+    }
+  }
+  @keyframes mg-kaleidoscope-spin {
+    0%,
+    14% {
+      rotate: 0deg;
+    }
+    100% {
+      rotate: 40deg;
+    }
+  }
+  @keyframes mg-kaleidoscope-drift {
+    0%,
+    14% {
+      rotate: 5deg;
+    }
+    100% {
+      rotate: -40deg;
+    }
+  }
+</style>

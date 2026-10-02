@@ -1,0 +1,100 @@
+---
+// Logo Resolve 데모 — 흩어져 있던 조각들이 날아들어 모이고, 움직임의 맨 끝에서 로고가 짜 맞춰진다
+// Logo Reveal 과 같은 표식·같은 끝 장면이다: 저쪽은 로고가 제자리에서 드러나고, 여기는 조각들이 따로 떨어진 곳에서 와서 마지막에야 로고가 된다
+// 재생 전에는 여섯 조각(네모 · 동그라미 · 막대 · A · B · C)이 화면 가장자리에 흩어져 돌아가 있다 — 무엇이 모일지 처음부터 보인다
+// 조각마다 출발 자리(끝 자리에서 떨어진 거리)·기울기·크기와 출발 시각이 다르다. 모두 75% 까지 제자리에 닿고, 로고 전체가 한 번 살짝 부풀었다 자리 잡는다
+// 시간 막대: 띠가 조각들이 모이는 구간(5~75%), 눈금이 로고가 다 맞춰지는 지점(75%). 지연·길이의 비율과 같은 값이어야 한다
+import MgFrame from '../../mg/MgFrame.astro';
+import MgMark from '../../mg/MgMark.astro';
+---
+<div class="mg-logo-resolve" data-demo-root aria-hidden="true">
+  <MgFrame duration="4s" ranges={[[5, 75]]} cuts={[75]}>
+    <div class="mg-logo-resolve-set"><MgMark /></div>
+  </MgFrame>
+</div>
+
+<style>
+  .mg-logo-resolve-set {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+  }
+  /* 출발 자리: 끝 자리에서 떨어진 거리(x, y) · 기울기 · 크기 · 출발 시각(길이에 대한 비율). 걸리는 시간은 모두 길이의 45% */
+  .mg-logo-resolve :global(.mgm-piece) {
+    translate: var(--mg-logo-resolve-x) var(--mg-logo-resolve-y);
+    rotate: var(--mg-logo-resolve-r);
+    scale: var(--mg-logo-resolve-s);
+  }
+  .mg-logo-resolve :global(.mgm-square) {
+    --mg-logo-resolve-x: -20cqw;
+    --mg-logo-resolve-y: -13cqw;
+    --mg-logo-resolve-r: -35deg;
+    --mg-logo-resolve-s: 0.8;
+    --mg-logo-resolve-at: 0.05;
+  }
+  .mg-logo-resolve :global(.mgm-circle) {
+    --mg-logo-resolve-x: 48cqw;
+    --mg-logo-resolve-y: -12cqw;
+    --mg-logo-resolve-r: 0deg;
+    --mg-logo-resolve-s: 1.5;
+    --mg-logo-resolve-at: 0.2;
+  }
+  .mg-logo-resolve :global(.mgm-bar) {
+    --mg-logo-resolve-x: -17cqw;
+    --mg-logo-resolve-y: 12cqw;
+    --mg-logo-resolve-r: 70deg;
+    --mg-logo-resolve-s: 0.9;
+    --mg-logo-resolve-at: 0.3;
+  }
+  .mg-logo-resolve :global(.mgm-letter:nth-child(1)) {
+    --mg-logo-resolve-x: -4cqw;
+    --mg-logo-resolve-y: -19cqw;
+    --mg-logo-resolve-r: -50deg;
+    --mg-logo-resolve-s: 0.7;
+    --mg-logo-resolve-at: 0.25;
+  }
+  .mg-logo-resolve :global(.mgm-letter:nth-child(2)) {
+    --mg-logo-resolve-x: 2cqw;
+    --mg-logo-resolve-y: 19cqw;
+    --mg-logo-resolve-r: 60deg;
+    --mg-logo-resolve-s: 1.2;
+    --mg-logo-resolve-at: 0.1;
+  }
+  .mg-logo-resolve :global(.mgm-letter:nth-child(3)) {
+    --mg-logo-resolve-x: 22cqw;
+    --mg-logo-resolve-y: 14cqw;
+    --mg-logo-resolve-r: -80deg;
+    --mg-logo-resolve-s: 0.8;
+    --mg-logo-resolve-at: 0.15;
+  }
+  /* 끝에서 살짝 지나쳤다 자리 잡는 곡선 */
+  .mg-logo-resolve.is-playing :global(.mgm-piece) {
+    animation: mg-logo-resolve-fly calc(var(--mg-duration) * 0.45) cubic-bezier(0.4, 0.1, 0.2, 1.1) calc(var(--mg-duration) * var(--mg-logo-resolve-at)) forwards;
+  }
+  .mg-logo-resolve.is-playing :global(.mgm) {
+    animation: mg-logo-resolve-settle var(--mg-duration) linear forwards;
+  }
+  @keyframes mg-logo-resolve-fly {
+    to {
+      translate: 0 0;
+      rotate: 0deg;
+      scale: 1;
+    }
+  }
+  @keyframes mg-logo-resolve-settle {
+    0%,
+    75% {
+      scale: 1;
+      animation-timing-function: ease-out;
+    }
+    81% {
+      scale: 1.06;
+      animation-timing-function: ease-in-out;
+    }
+    90%,
+    100% {
+      scale: 1;
+    }
+  }
+</style>

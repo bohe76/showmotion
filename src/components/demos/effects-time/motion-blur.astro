@@ -1,0 +1,70 @@
+---
+// Motion Blur 데모 — 빠르게 움직이는 B 가 가는 길을 따라 이어진 줄로 번진다. 셔터를 오래 열고 찍은 것과 같다
+// 영상에는 빠른 순간이 둘 있다(MgFxFootage): 첫 질주(14~22%)는 번짐 없이 또렷하고, 둘째 질주(62~70%)에만 번짐을 건다 — 시간 막대의 띠가 그 구간이다
+// 번지는 것은 움직이는 대상(B)뿐이다. 뒤 막대·앞 기둥·바닥은 내내 또렷하다 — 화면 전체가 번지는 Whip Pan(카메라가 돈다)과 다르다
+//   모양을 일부러 일그러뜨려 그리는 Smear Frame 과도 다르다: 모양은 그대로고, 찍히는 동안 지나간 자리가 겹쳐 흐려진 것이다. 복제가 따로 보이는 Echo 와 달리 한 줄로 이어진다
+// 번짐은 가로로만 흐리는 SVG 필터다(CSS blur 는 사방으로 번진다). B 자체가 아니라 B 가 든 레이어(.mgs-mid)에 건다 — 세기는 레이어 폭(화면 폭의 2배)에 대한 비율이라 카드와 상세에서 같다
+// 번짐의 길이는 속도를 따른다: 질주가 붙을 때와 멎을 때는 짧고 한가운데서 길다(필터 속 값은 CSS 로 움직일 수 없어 짧은 것 · 긴 것 둘을 갈아 끼운다)
+// 변형: high-shutter-angle(기본 — 셔터가 오래 열려 번짐이 길다) · low-shutter-angle(셔터가 짧게 열려 번짐이 짧고 또렷하다)
+// 필터 주소는 루트의 인라인 스타일에 둔다 — 따로 떨어진 CSS 파일 안의 url(#…) 을 그 파일 기준으로 찾는 브라우저가 있다
+import MgFrame from '../../mg/MgFrame.astro';
+import MgFxFootage from '../../mg/MgFxFootage.astro';
+
+// 가로 번짐의 세기(레이어 폭에 대한 비율): [붙을 때·멎을 때, 한가운데]
+const blurs = { high: [0.009, 0.024], low: [0.003, 0.007] };
+const filters = Object.entries(blurs).flatMap(([angle, [soft, full]]) => [
+  { id: `mg-motion-blur-${angle}-soft`, deviation: soft },
+  { id: `mg-motion-blur-${angle}-full`, deviation: full },
+]);
+const filterVars = filters.map(({ id }) => `--${id}: url(#${id})`).join('; ');
+---
+<div class="mg-motion-blur" data-demo-root aria-hidden="true" style={filterVars}>
+  <MgFrame duration="4s" ranges={[[62, 70]]}>
+    <MgFxFootage />
+  </MgFrame>
+  <svg class="mg-motion-blur-defs" width="0" height="0" focusable="false">
+    <defs>
+      {filters.map(({ id, deviation }) => (
+        <filter id={id} x="0" y="0" width="1" height="1" primitiveUnits="objectBoundingBox" color-interpolation-filters="sRGB">
+          <feGaussianBlur stdDeviation={`${deviation} 0`}></feGaussianBlur>
+        </filter>
+      ))}
+    </defs>
+  </svg>
+</div>
+
+<style>
+  .mg-motion-blur {
+    --mg-motion-blur-soft: var(--mg-motion-blur-high-soft);
+    --mg-motion-blur-full: var(--mg-motion-blur-high-full);
+  }
+  .mg-motion-blur[data-variant='low-shutter-angle'] {
+    --mg-motion-blur-soft: var(--mg-motion-blur-low-soft);
+    --mg-motion-blur-full: var(--mg-motion-blur-low-full);
+  }
+  .mg-motion-blur-defs {
+    position: absolute;
+  }
+  .mg-motion-blur.is-playing :global(.mgs-mid) {
+    animation: mg-motion-blur-smear var(--mg-duration) step-end forwards;
+  }
+  /* 둘째 질주 동안만 번진다 — 붙는 순간과 멎는 순간은 또렷하다 */
+  @keyframes mg-motion-blur-smear {
+    0% {
+      filter: none;
+    }
+    62.8% {
+      filter: var(--mg-motion-blur-soft);
+    }
+    64.2% {
+      filter: var(--mg-motion-blur-full);
+    }
+    67.8% {
+      filter: var(--mg-motion-blur-soft);
+    }
+    69.2%,
+    100% {
+      filter: none;
+    }
+  }
+</style>

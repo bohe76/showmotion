@@ -1,0 +1,58 @@
+---
+// Truck 데모 — 카메라 몸이 옆으로 이동한다. 가까운 레이어일수록 더 많이 밀린다(뒤 4.5 · 가운데 9 · 앞 18 — 거리에 반비례)
+// Pan 과 나란히 보면 차이가 보인다: 가운데 레이어(B)의 이동량은 두 데모가 같다
+// 변형: left(기본 — 카메라가 왼쪽으로 가서 화면이 오른쪽으로 밀린다) · right. --mg-dir 이 방향이다(왼쪽 -1, 오른쪽 1)
+// 깊이: 레이어 사이가 멀수록 앞·뒤의 이동량 차이가 커진다. 가운데(B)는 그대로다
+// 위에서 보기: 카메라가 같은 방향을 본 채 자리를 옮긴다
+import MgFrame from '../../mg/MgFrame.astro';
+import MgScene from '../../mg/MgScene.astro';
+import MgTopView from '../../mg/MgTopView.astro';
+---
+<div class="mg-truck" data-demo-root aria-hidden="true">
+  <MgFrame duration="3s">
+    <MgScene />
+    <MgTopView />
+  </MgFrame>
+</div>
+
+<style>
+  .mg-truck {
+    --mg-dir: -1;
+  }
+  .mg-truck[data-variant='right'] {
+    --mg-dir: 1;
+  }
+  /* 이동량 = 가운데 레이어의 이동량(9cqw) ÷ 레이어까지의 거리 */
+  .mg-truck :global(.mgs-far) {
+    --mg-truck-shift: calc(9cqw / var(--mg-z-far));
+  }
+  .mg-truck :global(.mgs-mid) {
+    --mg-truck-shift: 9cqw;
+  }
+  .mg-truck :global(.mgs-near) {
+    --mg-truck-shift: calc(9cqw / var(--mg-z-near));
+  }
+  .mg-truck :global(.mgs-layer) {
+    translate: calc(var(--mg-truck-shift) * var(--mg-dir)) 0;
+  }
+  .mg-truck.is-playing :global(.mgs-layer) {
+    animation: mg-truck-move var(--mg-duration) ease-in-out forwards;
+  }
+  @keyframes mg-truck-move {
+    to {
+      translate: calc(var(--mg-truck-shift) * var(--mg-dir) * -1) 0;
+    }
+  }
+  /* 위에서 보기: 가운데 레이어가 화면 폭의 9% 밀리는 만큼 카메라가 움직인다(가운데 줄에서의 시야 폭 × 0.09) */
+  .mg-truck :global(.mgt-cam) {
+    translate: calc(var(--mgt-mid-width) * -0.09 * var(--mg-dir)) 0;
+  }
+  .mg-truck.is-playing :global(.mgt-cam) {
+    animation: mg-truck-slide var(--mg-duration) ease-in-out forwards;
+  }
+  @keyframes mg-truck-slide {
+    to {
+      translate: calc(var(--mgt-mid-width) * 0.09 * var(--mg-dir)) 0;
+    }
+  }
+</style>

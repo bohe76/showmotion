@@ -1,0 +1,145 @@
+---
+// Line Burst 데모 — 요소가 등장하는 순간, 그 둘레에서 짧은 선들이 사방으로 뻗었다가 바깥쪽으로 거둬진다
+// A 는 처음부터 있고(빈 화면으로 시작하지 않는다) B·C 가 차례로 튀어나온다 — 선은 등장하는 요소에만 붙는다
+// Circle Burst 와 같은 요소·같은 박자다: 다른 것은 강조의 모양뿐이다(따로 뻗는 짧은 선들 ↔ 닫힌 고리 하나)
+// 시간 막대의 띠가 선이 뻗었다 사라지는 구간이다(10~38%, 50~78%). 지연·길이의 비율과 같은 값이어야 한다
+// 선 하나: 안쪽 끝에서 자라나(오른쪽 자르기가 풀린다) 다 뻗은 뒤 안쪽부터 사라진다(왼쪽을 자른다) — 바깥으로 쏘아진 것처럼 보인다
+// 변형: line(기본) — 짧은 선 · polygon — 선 대신 작은 도형(네모·세모)이 돌면서 튀어 나가 작아진다
+import MgFrame from '../../mg/MgFrame.astro';
+
+const rays = Array.from({ length: 8 }, (_, r) => r);
+---
+<div class="mg-line-burst" data-demo-root aria-hidden="true">
+  <MgFrame duration="3s" ranges={[[10, 38], [50, 78]]}>
+    <div class="mg-line-burst-row">
+      {['A', 'B', 'C'].map((label, i) => (
+        <span class="mg-line-burst-slot" style={`--i: ${i}`}>
+          {i > 0 && rays.map((r) => (
+            <span class="mg-line-burst-ray" style={`--r: ${r}`}>
+              <span class="mg-line-burst-stroke"></span>
+            </span>
+          ))}
+          <span class="mg-line-burst-item">{label}</span>
+        </span>
+      ))}
+    </div>
+  </MgFrame>
+</div>
+
+<style>
+  .mg-line-burst-row {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    gap: 15cqw;
+    align-items: center;
+    justify-content: center;
+  }
+  /* 등장 시각: B 는 10%, C 는 50% */
+  .mg-line-burst-slot {
+    --mg-line-burst-at: calc(var(--mg-duration) * (0.1 + (var(--i) - 1) * 0.4));
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 13cqw;
+    aspect-ratio: 1;
+  }
+  .mg-line-burst-item {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    place-items: center;
+    width: 100%;
+    height: 100%;
+    font-size: 6cqw;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--on-accent);
+    background: var(--accent);
+    border-radius: 3px;
+  }
+  .mg-line-burst-slot:not(:first-child) .mg-line-burst-item {
+    scale: 0;
+  }
+  /* 요소 한가운데에 놓인 크기 없는 축 — 45도씩 돌려 여덟 방향을 만든다 */
+  .mg-line-burst-ray {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    rotate: calc(var(--r) * 45deg);
+  }
+  .mg-line-burst-stroke {
+    position: absolute;
+    top: -0.5cqw;
+    left: 10.8cqw;
+    width: 6cqw;
+    height: 1cqw;
+    background: var(--accent);
+    border-radius: 0.5cqw;
+    clip-path: inset(0 100% 0 0);
+  }
+  .mg-line-burst[data-variant='polygon'] .mg-line-burst-stroke {
+    top: -1.5cqw;
+    left: 9cqw;
+    width: 3cqw;
+    height: 3cqw;
+    border-radius: 0;
+    clip-path: none;
+    scale: 0;
+  }
+  .mg-line-burst[data-variant='polygon'] .mg-line-burst-ray:nth-child(odd) .mg-line-burst-stroke {
+    clip-path: polygon(50% 0, 100% 100%, 0 100%);
+  }
+  .mg-line-burst.is-playing .mg-line-burst-slot:not(:first-child) .mg-line-burst-item {
+    animation: mg-line-burst-pop calc(var(--mg-duration) * 0.2) ease-out var(--mg-line-burst-at) forwards;
+  }
+  .mg-line-burst.is-playing .mg-line-burst-stroke {
+    animation: mg-line-burst-shoot calc(var(--mg-duration) * 0.28) ease-out var(--mg-line-burst-at) forwards;
+  }
+  .mg-line-burst[data-variant='polygon'].is-playing .mg-line-burst-stroke {
+    animation-name: mg-line-burst-fly;
+  }
+  /* 0 에서 커지며 살짝 지나쳤다 자리 잡는다 */
+  @keyframes mg-line-burst-pop {
+    0% {
+      scale: 0;
+    }
+    55% {
+      scale: 1.16;
+    }
+    80% {
+      scale: 0.97;
+    }
+    100% {
+      scale: 1;
+    }
+  }
+  @keyframes mg-line-burst-shoot {
+    0% {
+      clip-path: inset(0 100% 0 0);
+    }
+    45% {
+      clip-path: inset(0 0 0 0);
+    }
+    100% {
+      clip-path: inset(0 0 0 100%);
+    }
+  }
+  @keyframes mg-line-burst-fly {
+    0% {
+      translate: 0 0;
+      scale: 0;
+      rotate: 0deg;
+    }
+    30% {
+      scale: 1;
+    }
+    100% {
+      translate: 7.5cqw 0;
+      scale: 0;
+      rotate: 160deg;
+    }
+  }
+</style>

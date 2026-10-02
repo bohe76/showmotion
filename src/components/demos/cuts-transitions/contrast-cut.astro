@@ -1,0 +1,51 @@
+---
+// Contrast Cut 데모 — 톤이 반대인 두 그림 사이의 컷. 밝은 바탕의 작은 사각형(B)에서 바탕이 뒤집힌 큰 원(D)으로 한 번에 넘어간다
+// 견주어 보라는 컷이라 두 샷을 같은 길이로 보여 주고, 움직임도 반대로 둔다(B 는 오른쪽으로, D 는 왼쪽으로) — 빠르기는 같다
+// 시간 막대의 눈금이 컷 지점이다(50%). Hard Cut 은 톤이 비슷한 샷으로, Smash Cut 은 조용한 샷에서 격한 샷으로 넘어간다
+import MgFrame from '../../mg/MgFrame.astro';
+import MgScene from '../../mg/MgScene.astro';
+import MgShot from '../../mg/MgShot.astro';
+---
+<div class="mg-contrast-cut" data-demo-root aria-hidden="true">
+  <MgFrame duration="4s" cuts={[50]}>
+    <MgScene />
+    <MgShot shot="d" />
+  </MgFrame>
+</div>
+
+<style>
+  .mg-contrast-cut :global(.mgs-b) {
+    translate: -8cqw 0;
+  }
+  .mg-contrast-cut :global(.mgsh) {
+    visibility: hidden;
+  }
+  .mg-contrast-cut.is-playing :global(.mgs-b),
+  .mg-contrast-cut.is-playing :global(.mgsh-subject) {
+    animation: mg-contrast-cut-move var(--mg-duration) linear forwards;
+  }
+  /* 같은 움직임을 거꾸로 — 오른쪽에서 왼쪽으로 */
+  .mg-contrast-cut.is-playing :global(.mgsh-subject) {
+    animation-direction: reverse;
+  }
+  .mg-contrast-cut.is-playing :global(.mgsh) {
+    animation: mg-contrast-cut-cut var(--mg-duration) step-end forwards;
+  }
+  @keyframes mg-contrast-cut-move {
+    from {
+      translate: -8cqw 0;
+    }
+    to {
+      translate: 8cqw 0;
+    }
+  }
+  @keyframes mg-contrast-cut-cut {
+    0% {
+      visibility: hidden;
+    }
+    50%,
+    100% {
+      visibility: visible;
+    }
+  }
+</style>

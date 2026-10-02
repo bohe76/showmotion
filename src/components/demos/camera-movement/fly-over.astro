@@ -1,0 +1,81 @@
+---
+// Fly-Over 데모 — 카메라가 높이 떠서 내려다보며 앞으로 날아간다. 장면이 발밑으로 흘러 지나가고(커지면서 화면 아래로 빠진다), 끝에 시선을 들면 그 뒤의 장면이 열린다
+// 첫 장면은 높은 데서 내려다본 모습이다: 지평선이 화면 위쪽 밖에 있어서 뒤 줄 C 는 밑동만, B 는 화면 위쪽에, 가까운 A 는 그 아래에 놓인다(가까울수록 아래)
+// Dolly 와 나란히 보면 차이가 보인다: Dolly 는 눈높이에서 다가가 레이어가 제자리에서 커진다. 여기서는 레이어가 아래로 흘러 화면 밖으로 지나간다 — A, 이어서 B
+// 카메라의 앞뒤 자리 d(B 까지의 거리를 1 로 본 값)와 내려다보는 정도 tilt(장면을 위로 미는 cqw)를 움직인다. 높이는 80(거리 1 에서 80cqw 아래로 밀리는 높이)으로 그대로다
+//   등록해 움직이는 것은 d 와 시선을 드는 진행도(--mg-fly-over-lift, 0 → 1)다. tilt 는 레이어가 진행도에서 계산한다 — 끝 값에 깊이(var)가 들어가는데, 키프레임에 var() 가 든 값을 두면 Firefox 가 중간값 없이 건너뛴다
+//   배율 = 거리 ÷ (거리 − d) · 세로 이동 = 80 × 배율 ÷ 거리 − tilt. 지나간 레이어는 배율이 아주 커진 채 화면 아래에 남는다(max 로 0 나누기를 막는다)
+//   처음의 tilt 는 뒤 줄의 글자 C 가 화면 위로 다 나가 있는 값이다 — 반쯤 잘린 글자는 재생 전 카드에서 오류처럼 보인다
+// 시간 막대의 띠가 시선을 드는 구간이다(66~100%). 끝 장면의 tilt 는 뒤 줄의 밑변이 기본 장면의 자리(화면 위에서 43cqw)에 오도록 뒤 레이어의 거리에서 계산한다
+// 깊이: 레이어 사이가 멀수록 지나가는 때가 벌어진다
+import MgFrame from '../../mg/MgFrame.astro';
+import MgScene from '../../mg/MgScene.astro';
+---
+<div class="mg-fly-over" data-demo-root aria-hidden="true">
+  <MgFrame duration="4s" ranges={[[66, 100]]}>
+    <MgScene bleed />
+  </MgFrame>
+</div>
+
+<style>
+  @property --mg-fly-over-d {
+    syntax: '<number>';
+    inherits: true;
+    initial-value: 0;
+  }
+  @property --mg-fly-over-lift {
+    syntax: '<number>';
+    inherits: true;
+    initial-value: 0;
+  }
+  .mg-fly-over {
+    --mg-fly-over-d: -0.8;
+  }
+  .mg-fly-over :global(.mgs-far),
+  .mg-fly-over :global(.mgs-ground) {
+    --mg-fly-over-z: var(--mg-z-far);
+  }
+  .mg-fly-over :global(.mgs-mid) {
+    --mg-fly-over-z: 1;
+  }
+  .mg-fly-over :global(.mgs-near) {
+    --mg-fly-over-z: var(--mg-z-near);
+  }
+  /* 배율의 중심은 레이어의 눈높이 선(화면 위에서 68% = B 의 한가운데). 바닥선은 뒤 레이어의 밑변이라 뒤 레이어와 같이 움직인다 */
+  /* tilt — 처음 60.3 에서 시선을 다 든 값(끝 장면)까지 */
+  .mg-fly-over :global(.mgs-layer),
+  .mg-fly-over :global(.mgs-ground) {
+    --mg-fly-over-tilt: calc(60.3 + ((80 + 4.5 * var(--mg-z-far)) / (var(--mg-z-far) - 0.3) - 4.75 - 60.3) * var(--mg-fly-over-lift));
+    --mg-fly-over-s: calc(var(--mg-fly-over-z) / max(var(--mg-fly-over-z) - var(--mg-fly-over-d), 0.05));
+    transform-origin: 50% 68%;
+    translate: 0 calc((80 * var(--mg-fly-over-s) / var(--mg-fly-over-z) - var(--mg-fly-over-tilt)) * 1cqw);
+    scale: var(--mg-fly-over-s);
+  }
+  .mg-fly-over :global(.mgs-ground) {
+    transform-origin: 50% -4.5cqw;
+  }
+  /* 화면 밖까지 잇는 것(bleed)은 바닥만 쓴다 — 내려다본 장면에서는 기둥의 밑동이 보여야 한다. 장면의 규칙보다 앞서도록 선택자를 길게 쓴다 */
+  .mg-fly-over :global(.mgs.mgs-bleed .mgs-a)::after {
+    content: none;
+  }
+  /* 변수는 장면(.mgs)에서 움직인다 — 길이(--mg-duration)가 화면 틀 안에서만 잡힌다 */
+  .mg-fly-over.is-playing :global(.mgs) {
+    animation:
+      mg-fly-over-travel var(--mg-duration) cubic-bezier(0.35, 0, 0.65, 1) forwards,
+      mg-fly-over-lift var(--mg-duration) linear forwards;
+  }
+  @keyframes mg-fly-over-travel {
+    to {
+      --mg-fly-over-d: 0.3;
+    }
+  }
+  @keyframes mg-fly-over-lift {
+    66% {
+      --mg-fly-over-lift: 0;
+      animation-timing-function: ease-in-out;
+    }
+    100% {
+      --mg-fly-over-lift: 1;
+    }
+  }
+</style>

@@ -1,0 +1,63 @@
+---
+// Title Crawl 데모 — 글줄이 올라가면서 뒤로 누워, 멀어질수록 작아지며 소실점으로 사라진다
+// Credit Roll 과 같은 글줄 묶음이다: 저쪽은 납작한 채 같은 크기로 지나가고, 여기는 뒤로 누운 면 위를 미끄러져 멀어진다
+// 원근은 CSS 3D 로 만든다: 화면 아래 변을 축으로 뒤로 눕힌 면(plane) 위에서 글줄이 등속으로 올라간다
+//   면 위에서는 등속이지만 화면에서는 멀어질수록 느려지고 작아진다 — 그것이 이 용어의 모습이다
+// 먼 쪽(화면 위)은 흐려져 사라진다. 첫 장면에 첫 묶음이 이미 화면에 들어와 있다(빈 화면으로 시작하지 않는다)
+import MgFrame from '../../mg/MgFrame.astro';
+import MgLines from '../../mg/MgLines.astro';
+---
+<div class="mg-title-crawl" data-demo-root aria-hidden="true">
+  <MgFrame duration="8s">
+    <div class="mg-title-crawl-space">
+      <div class="mg-title-crawl-plane">
+        <div class="mg-title-crawl-text"><MgLines blocks={5} /></div>
+      </div>
+    </div>
+  </MgFrame>
+</div>
+
+<style>
+  /* 보는 자리: 화면 가운데보다 조금 아래. 소실점은 여기서 위로 올라간 화면 위쪽 끝 언저리에 생긴다 */
+  .mg-title-crawl-space {
+    position: absolute;
+    inset: 0;
+    perspective: 56cqw;
+    perspective-origin: 50% 34cqw;
+    mask-image: linear-gradient(to bottom, transparent 8%, #000 40%);
+  }
+  /* 화면 아래 변을 축으로 뒤로 눕힌 면. 축 아래로 내려간 글줄은 면이 자른다 */
+  .mg-title-crawl-plane {
+    position: absolute;
+    bottom: 0;
+    left: 2cqw;
+    width: 96cqw;
+    height: 360cqw;
+    overflow: hidden;
+    transform-origin: 50% 100%;
+    transform: rotateX(62deg);
+  }
+  .mg-title-crawl-text {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    display: flex;
+    justify-content: center;
+    translate: 0 calc(100% - 66cqw);
+  }
+  .mg-title-crawl :global(.mgl) {
+    font-size: 8.4cqw;
+  }
+  .mg-title-crawl.is-playing .mg-title-crawl-text {
+    animation: mg-title-crawl-move var(--mg-duration) linear forwards;
+  }
+  @keyframes mg-title-crawl-move {
+    from {
+      translate: 0 calc(100% - 66cqw);
+    }
+    to {
+      translate: 0 -16cqw;
+    }
+  }
+</style>

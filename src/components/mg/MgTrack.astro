@@ -1,0 +1,125 @@
+---
+// 모션 그래픽 데모의 타이밍 무대 — 블록이 출발선에서 도착선까지 가는 트랙 (규약: docs/content/prompt_writing_guide.md §모션 그래픽 데모)
+// 타이밍·애니메이션 원칙 용어는 카메라도 컷도 아니다. 같은 움직임이 속도 곡선에 따라 어떻게 달라 보이는지가 내용이라 장면(MgScene) 대신 이 무대를 쓴다
+// 위 줄: 주인공 B. 아래 줄: 같은 거리를 같은 시간에 등속으로 가는 옅은 대조 블록 — 어느 용어를 재생해도 똑같이 간다(그래야 용어끼리 비교가 된다)
+// 세로선 둘은 출발선과 도착선이다. 블록의 앞쪽 끝(오른쪽 변)이 출발선에서 떠나 도착선에 닿는다
+//   — 도착선을 넘으면 지나친 것(Overshoot), 도착선에서 되튀면 부딪힌 것(Bounce), 출발선 뒤로 물러나면 미리 빠진 것(Anticipation)
+// 줄 아래의 눈금은 같은 시간 간격(길이의 1/12)마다 블록의 앞쪽 끝이 있는 자리다 — 촘촘하면 느리고 성기면 빠르다. 재생하지 않아도 곡선이 읽힌다
+//
+// 이 부품이 움직이는 것은 대조 블록뿐이다. 주인공은 데모가 움직인다 — 곡선을 루트의 --mgtr-curve 에 두고(변형은 이 변수 하나로 가른다) 그 값으로 건다:
+//   .mg-{id} { --mgtr-curve: cubic-bezier(…); }
+//   .mg-{id}.is-playing :global(.mgtr-hero) { animation: mg-track-run var(--mg-duration) var(--mgtr-curve) forwards; }
+//   mg-track-run 은 출발 자리에서 도착 자리까지 가는 공용 키프레임이다. 주인공의 눈금도 --mgtr-curve 를 읽어서, 곡선을 바꾸면 눈금이 따라 바뀐다
+//   직선이 아닌 길(호, 제자리 떨림)은 데모가 자기 키프레임을 쓰고 눈금을 감춘다(.mgtr-tick { display: none }) — 눈금은 mg-track-run 의 길만 안다
+//   블록에 scale·rotate 를 쓰면 이동도 개별 translate 로 준다
+// 잡는 클래스: .mgtr(무대) · .mgtr-lane(줄 — 바닥선) · .mgtr-hero · .mgtr-ghost · .mgtr-block(두 블록 공통) · .mgtr-mark(출발선·도착선) · .mgtr-tick(눈금)
+// 자리와 크기는 .mgtr 의 변수다 — 데모가 바꿔 쓸 수 있다: --mgtr-size(블록 한 변) · --mgtr-start(출발선의 왼쪽 위치) · --mgtr-distance(가는 거리)
+//   기본값은 도착선 너머와 출발선 뒤에 거리의 약 40% 씩 남긴다 — Elastic 처럼 크게 넘나드는 곡선도 화면 틀 안에 든다
+// 이 파일의 선택자는 데모의 `.mg-{id} :global(.mgtr-…)`·`.mg-{id}.is-playing :global(.mgtr-…)` 보다 늘 약하다 — 데모가 자리·모습·대조 블록의 움직임까지 바꿀 수 있다
+// 이 파일은 demos/ 밖에 둔다 — demos/registry.ts 가 demos/*/ 의 파일을 모두 데모로 본다
+
+const ticks = Array.from({ length: 13 }, (_, i) => i);
+---
+<div class="mgtr">
+  <span class="mgtr-mark mgtr-mark-start"></span>
+  <span class="mgtr-mark mgtr-mark-end"></span>
+  <div class="mgtr-lane mgtr-lane-hero">
+    {ticks.map((i) => <span class="mgtr-tick mgtr-tick-hero" style={`--mgtr-i: ${i}`} />)}
+    <span class="mgtr-block mgtr-hero">B</span>
+  </div>
+  <div class="mgtr-lane mgtr-lane-ghost">
+    {ticks.map((i) => <span class="mgtr-tick" style={`--mgtr-i: ${i}`} />)}
+    <span class="mgtr-block mgtr-ghost"></span>
+  </div>
+</div>
+
+<style>
+  .mgtr {
+    --mgtr-size: 14cqw;
+    --mgtr-start: 32cqw;
+    --mgtr-distance: 46cqw;
+    position: absolute;
+    inset: 0;
+    font-weight: 700;
+    line-height: 1;
+  }
+  /* 줄: 블록이 서는 바닥선이 화면 폭을 가로지른다 */
+  .mgtr-lane {
+    position: absolute;
+    right: 0;
+    left: 0;
+    height: var(--mgtr-size);
+    border-bottom: 1px solid var(--line);
+  }
+  .mgtr-lane-hero {
+    top: 10cqw;
+  }
+  .mgtr-lane-ghost {
+    top: 32cqw;
+  }
+  /* 출발선·도착선: 두 줄을 함께 가로지른다 */
+  .mgtr-mark {
+    position: absolute;
+    top: 6cqw;
+    bottom: 6cqw;
+    width: 1px;
+    background: var(--muted);
+  }
+  .mgtr-mark-start {
+    left: var(--mgtr-start);
+  }
+  .mgtr-mark-end {
+    left: calc(var(--mgtr-start) + var(--mgtr-distance));
+  }
+  /* 블록: 앞쪽 끝(오른쪽 변)이 출발선에 닿아 있다 */
+  .mgtr-block {
+    position: absolute;
+    bottom: 0;
+    left: calc(var(--mgtr-start) - var(--mgtr-size));
+    display: grid;
+    place-items: center;
+    width: var(--mgtr-size);
+    aspect-ratio: 1;
+    border-radius: 3px;
+  }
+  .mgtr-hero {
+    font-size: 6.2cqw;
+    color: var(--on-accent);
+    background: var(--accent);
+  }
+  .mgtr-ghost {
+    background: var(--demo-muted);
+  }
+  /* 눈금: 바닥선 아래. 대조 블록의 눈금은 고르게 놓인다(등속) */
+  .mgtr-tick {
+    position: absolute;
+    top: calc(100% + 1.2cqw);
+    left: calc(var(--mgtr-start) + var(--mgtr-distance) * var(--mgtr-i) / 12);
+    width: max(1px, 0.3cqw);
+    height: 1.8cqw;
+    background: var(--demo-muted);
+  }
+  /* 주인공의 눈금은 멈춰 둔 애니메이션이다 — 같은 길을 같은 곡선으로 가다가 i/12 지점에 멈춘 모습이라, 곡선이 무엇이든 그 시각의 자리에 놓인다
+     움직이지 않는다(paused). 길이 1s 는 진행도를 재는 단위일 뿐 재생 길이와 무관하다. left 로 옮겨 레이어를 만들지 않는다 */
+  .mgtr-tick-hero {
+    background: var(--accent);
+    animation: mg-track-tick 1s var(--mgtr-curve, linear) both paused;
+    animation-delay: calc(var(--mgtr-i) * -1s / 12);
+  }
+  @keyframes mg-track-tick {
+    from {
+      left: var(--mgtr-start);
+    }
+    to {
+      left: calc(var(--mgtr-start) + var(--mgtr-distance));
+    }
+  }
+  :global(.is-playing) .mgtr-ghost {
+    animation: mg-track-run var(--mg-duration) linear forwards;
+  }
+  @keyframes mg-track-run {
+    to {
+      translate: var(--mgtr-distance) 0;
+    }
+  }
+</style>

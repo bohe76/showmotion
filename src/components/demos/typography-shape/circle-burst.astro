@@ -1,0 +1,105 @@
+---
+// Circle Burst 데모 — 요소가 등장하는 순간, 그 뒤에서 고리 하나가 빠르게 커지며 가늘어지다 사라진다
+// A 는 처음부터 있고(빈 화면으로 시작하지 않는다) B·C 가 차례로 튀어나온다 — 고리는 등장하는 요소에만 붙는다
+// Line Burst 와 같은 요소·같은 박자다: 다른 것은 강조의 모양뿐이다(닫힌 고리 하나 ↔ 따로 뻗는 짧은 선들)
+// 시간 막대의 띠가 고리가 퍼지는 구간이다(10~38%, 50~78%). 지연·길이의 비율과 같은 값이어야 한다
+// 고리는 크기(width)와 테두리 굵기를 같이 바꿔 그린다: 처음에는 속이 찬 원이다가 커지면서 가는 고리가 된다
+import MgFrame from '../../mg/MgFrame.astro';
+---
+<div class="mg-circle-burst" data-demo-root aria-hidden="true">
+  <MgFrame duration="3s" ranges={[[10, 38], [50, 78]]}>
+    <div class="mg-circle-burst-row">
+      {['A', 'B', 'C'].map((label, i) => (
+        <span class="mg-circle-burst-slot" style={`--i: ${i}`}>
+          <span class="mg-circle-burst-ring"></span>
+          <span class="mg-circle-burst-item">{label}</span>
+        </span>
+      ))}
+    </div>
+  </MgFrame>
+</div>
+
+<style>
+  .mg-circle-burst-row {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    gap: 15cqw;
+    align-items: center;
+    justify-content: center;
+  }
+  /* 등장 시각: B 는 10%, C 는 50% */
+  .mg-circle-burst-slot {
+    --mg-circle-burst-at: calc(var(--mg-duration) * (0.1 + (var(--i) - 1) * 0.4));
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 13cqw;
+    aspect-ratio: 1;
+  }
+  .mg-circle-burst-item {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    place-items: center;
+    width: 100%;
+    height: 100%;
+    font-size: 6cqw;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--on-accent);
+    background: var(--accent);
+    border-radius: 3px;
+  }
+  .mg-circle-burst-slot:not(:first-child) .mg-circle-burst-item {
+    scale: 0;
+  }
+  .mg-circle-burst-ring {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    box-sizing: border-box;
+    width: 6cqw;
+    aspect-ratio: 1;
+    border: 3cqw solid var(--accent);
+    border-radius: 50%;
+    opacity: 0;
+    translate: -50% -50%;
+  }
+  .mg-circle-burst.is-playing .mg-circle-burst-slot:not(:first-child) .mg-circle-burst-item {
+    animation: mg-circle-burst-pop calc(var(--mg-duration) * 0.2) ease-out var(--mg-circle-burst-at) forwards;
+  }
+  .mg-circle-burst.is-playing .mg-circle-burst-slot:not(:first-child) .mg-circle-burst-ring {
+    animation: mg-circle-burst-ring calc(var(--mg-duration) * 0.28) cubic-bezier(0.1, 0.7, 0.25, 1) var(--mg-circle-burst-at) forwards;
+  }
+  /* 0 에서 커지며 살짝 지나쳤다 자리 잡는다 */
+  @keyframes mg-circle-burst-pop {
+    0% {
+      scale: 0;
+    }
+    55% {
+      scale: 1.16;
+    }
+    80% {
+      scale: 0.97;
+    }
+    100% {
+      scale: 1;
+    }
+  }
+  @keyframes mg-circle-burst-ring {
+    0% {
+      width: 6cqw;
+      border-width: 3cqw;
+      opacity: 1;
+    }
+    60% {
+      opacity: 1;
+    }
+    100% {
+      width: 30cqw;
+      border-width: 0;
+      opacity: 0;
+    }
+  }
+</style>

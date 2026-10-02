@@ -1,0 +1,100 @@
+---
+// Pixelate 데모 — 영상이 큰 네모(모자이크)로 쪼개진다. 블록 크기가 움직인다: 또렷한 화면이 점점 거친 픽셀로 녹아 들어갔다가, 다시 잘게 풀려 또렷해진다
+// 시간 막대의 띠가 쪼개져 있는 구간이다(28~84%). 네 단계로 거칠어지고(28·32·36·40%) 거친 채로 머물다가 같은 단계를 거슬러 풀린다(72·76·80·84%)
+//   거친 동안에도 영상은 흐른다 — 둘째 질주(62~70%)에서 B 가 블록 단위로 뚝뚝 건너간다. 블록 크기를 바꾸지 않고 세워 두면 가림용 모자이크다
+// 모자이크는 SVG 필터다: 칸마다 한가운데의 작은 점만 남기고(feFlood 로 점 하나 → feTile 로 온 화면에 깐다 → 영상과 겹친 곳만 남긴다) 그 점의 색을 칸 가득 부풀린다(feMorphology)
+//   칸 크기는 화면에 대한 비율(objectBoundingBox)이라 카드와 상세에서 같은 모습이다. 화면이 16:9 라 칸의 세로 비율은 가로의 16/9 배다(정사각형)
+//   필터 속 값은 CSS 로 움직일 수 없어 칸 크기가 다른 필터 넷을 갈아 끼운다(step-end). 필터는 재생할 때만 건다
+// 필터를 거는 겹(.mg-pixelate-pic)에는 화면 바탕색을 깐다 — 빈 곳이 투명하면 부풀릴 때 물체 색이 빈 칸으로 번진다
+// 필터 주소는 루트의 인라인 스타일에 둔다 — 따로 떨어진 CSS 파일 안의 url(#…) 을 그 파일 기준으로 찾는 브라우저가 있다
+import MgFrame from '../../mg/MgFrame.astro';
+import MgFxFootage from '../../mg/MgFxFootage.astro';
+
+// 화면 가로에 들어가는 칸 수: 잘다 → 거칠다
+const columns = [48, 24, 16, 32 / 3];
+const filters = columns.map((n, i) => {
+  const w = 1 / n;
+  const h = (1 / n) * (16 / 9);
+  return { id: `mg-pixelate-${i}`, w, h };
+});
+// 칸마다 남기는 점의 크기(화면에 대한 비율) — 카드에서 1px, 상세에서 2px 쯤. 점이 크면 칸 안의 색이 고르지 않다
+const dotW = 0.004;
+const dotH = dotW * (16 / 9);
+const filterVars = filters.map(({ id }, i) => `--mg-pixelate-f${i}: url(#${id})`).join('; ');
+const f = (v: number) => v.toFixed(5);
+---
+<div class="mg-pixelate" data-demo-root aria-hidden="true" style={filterVars}>
+  <MgFrame duration="4s" ranges={[[28, 84]]}>
+    <div class="mg-pixelate-pic">
+      <MgFxFootage />
+    </div>
+  </MgFrame>
+  <svg class="mg-pixelate-defs" width="0" height="0" focusable="false">
+    <defs>
+      {filters.map(({ id, w, h }) => (
+        <filter id={id} x="0" y="0" width="1" height="1" primitiveUnits="objectBoundingBox" color-interpolation-filters="sRGB">
+          <feGaussianBlur in="SourceGraphic" stdDeviation={`${f(w * 0.25)} ${f(h * 0.25)}`} result="soft"></feGaussianBlur>
+          <feFlood x={f(w / 2 - dotW / 2)} y={f(h / 2 - dotH / 2)} width={f(dotW)} height={f(dotH)} result="dot"></feFlood>
+          <feComposite in="dot" in2="dot" operator="over" x="0" y="0" width={f(w)} height={f(h)} result="cell"></feComposite>
+          <feTile in="cell" x="0" y="0" width="1" height="1" result="dots"></feTile>
+          <feComposite in="soft" in2="dots" operator="in" result="samples"></feComposite>
+          <feMorphology in="samples" operator="dilate" radius={`${f(w * 0.52)} ${f(h * 0.52)}`} result="wide"></feMorphology>
+          <feMorphology in="samples" operator="dilate" radius={`${f((w - dotW) / 2)} ${f((h - dotH) / 2)}`} result="tight"></feMorphology>
+          <feMerge>
+            <feMergeNode in="wide"></feMergeNode>
+            <feMergeNode in="tight"></feMergeNode>
+          </feMerge>
+          <feComponentTransfer>
+            <feFuncA type="discrete" tableValues="0 1 1 1 1 1 1 1"></feFuncA>
+          </feComponentTransfer>
+        </filter>
+      ))}
+    </defs>
+  </svg>
+</div>
+
+<style>
+  .mg-pixelate-defs {
+    position: absolute;
+  }
+  /* 넘친 것을 잘라 둔다 — 장면의 레이어는 화면보다 넓고, 넘친 것까지 필터의 기준 상자로 치는 브라우저에서는 칸이 그만큼 커진다 */
+  .mg-pixelate-pic {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    background: var(--surface);
+  }
+  .mg-pixelate.is-playing .mg-pixelate-pic {
+    animation: mg-pixelate-blocks var(--mg-duration) step-end forwards;
+  }
+  @keyframes mg-pixelate-blocks {
+    0% {
+      filter: none;
+    }
+    28% {
+      filter: var(--mg-pixelate-f0);
+    }
+    32% {
+      filter: var(--mg-pixelate-f1);
+    }
+    36% {
+      filter: var(--mg-pixelate-f2);
+    }
+    40% {
+      filter: var(--mg-pixelate-f3);
+    }
+    72% {
+      filter: var(--mg-pixelate-f2);
+    }
+    76% {
+      filter: var(--mg-pixelate-f1);
+    }
+    80% {
+      filter: var(--mg-pixelate-f0);
+    }
+    84%,
+    100% {
+      filter: none;
+    }
+  }
+</style>

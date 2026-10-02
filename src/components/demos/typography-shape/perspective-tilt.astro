@@ -1,0 +1,106 @@
+---
+// Perspective Tilt 데모 — 정면을 보던 납작한 판(화면·카드)이 3D 로 뒤로 누워, 위쪽 변이 멀어지며 작아진다
+// 기우는 것은 판이지 카메라가 아니다: 밑에 깐 장면(A·B·C)은 처음부터 끝까지 그대로다 — 카메라의 Tilt 는 장면 전체가 위아래로 밀린다
+// 판은 아래 변을 축으로 뒤로 눕는다(rotateX). 원근 때문에 먼 쪽(위)은 좁아지고, 축인 아래 변은 그대로다
+// 재생 전에는 정면으로 서 있다 — 처음부터 누워 있으면 카드가 이상해 보인다. 판이 누우면 가려져 있던 뒤 막대(C)가 드러난다 — 장면은 움직이지 않았다
+// 판 안의 내용은 자리 채움이다: 머리줄(표식 + 막대) · 그림 블록 · 글줄 막대
+import MgFrame from '../../mg/MgFrame.astro';
+import MgMark from '../../mg/MgMark.astro';
+import MgScene from '../../mg/MgScene.astro';
+---
+<div class="mg-perspective-tilt" data-demo-root aria-hidden="true">
+  <MgFrame duration="3s">
+    <MgScene />
+    <div class="mg-perspective-tilt-space">
+      <div class="mg-perspective-tilt-card">
+        <div class="mg-perspective-tilt-head">
+          <MgMark />
+          <span class="mg-perspective-tilt-bar"></span>
+        </div>
+        <div class="mg-perspective-tilt-body">
+          <span class="mg-perspective-tilt-pic"></span>
+          <span class="mg-perspective-tilt-lines">
+            <span class="mg-perspective-tilt-bar"></span>
+            <span class="mg-perspective-tilt-bar"></span>
+            <span class="mg-perspective-tilt-bar"></span>
+          </span>
+        </div>
+      </div>
+    </div>
+  </MgFrame>
+</div>
+
+<style>
+  .mg-perspective-tilt-space {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    perspective: 76cqw;
+  }
+  .mg-perspective-tilt-card {
+    box-sizing: border-box;
+    display: grid;
+    grid-template-rows: auto 1fr;
+    gap: 2.4cqw;
+    width: 50cqw;
+    height: 38cqw;
+    translate: 0 1.2cqw;
+    transform-origin: 50% 100%;
+    padding: 2.6cqw 3cqw 3cqw;
+    background: var(--surface);
+    border: 0.4cqw solid var(--ink);
+    border-radius: 1.4cqw;
+  }
+  .mg-perspective-tilt-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .mg-perspective-tilt :global(.mgm) {
+    font-size: 5cqw;
+  }
+  .mg-perspective-tilt-bar {
+    display: block;
+    width: 9cqw;
+    height: 1.4cqw;
+    background: var(--demo-muted);
+    border-radius: 0.7cqw;
+  }
+  .mg-perspective-tilt-body {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3cqw;
+  }
+  .mg-perspective-tilt-pic {
+    background: var(--accent);
+    border-radius: 0.8cqw;
+  }
+  .mg-perspective-tilt-lines {
+    display: grid;
+    gap: 2cqw;
+    align-content: center;
+  }
+  .mg-perspective-tilt-lines .mg-perspective-tilt-bar {
+    width: 100%;
+    height: 1.8cqw;
+    background: var(--ink);
+    border-radius: 0.9cqw;
+  }
+  .mg-perspective-tilt-lines .mg-perspective-tilt-bar:nth-child(2) {
+    width: 78%;
+    background: var(--demo-muted);
+  }
+  .mg-perspective-tilt-lines .mg-perspective-tilt-bar:nth-child(3) {
+    width: 52%;
+    background: var(--demo-muted);
+  }
+  .mg-perspective-tilt.is-playing .mg-perspective-tilt-card {
+    animation: mg-perspective-tilt-back var(--mg-duration) ease-in-out forwards;
+  }
+  @keyframes mg-perspective-tilt-back {
+    to {
+      transform: rotateX(56deg);
+    }
+  }
+</style>

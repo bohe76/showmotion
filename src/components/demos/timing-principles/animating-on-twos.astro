@@ -1,0 +1,37 @@
+---
+// Animating on Twos 데모 — B 의 자세가 매 프레임이 아니라 두 프레임에 한 번만 바뀐다. 같은 길을 같은 빠르기로 가는데 끊기며 간다
+// 아래 옅은 블록은 같은 거리를 등속으로 매끄럽게 간다 — 두 블록의 빠르기는 같고(눈금 간격도 같다) 다른 것은 끊김뿐이다
+// 변형은 자세가 바뀌는 빈도다(초당 24프레임 기준): twos(기본 — 초당 12번) · threes(초당 8번, 더 끊긴다) · ones(초당 24번, 매 프레임 — 거의 매끄럽다)
+// Steps 와 원리는 같다(steps()). 계단이 수십 개라 "건너뛰며 머문다"가 아니라 "프레임이 모자라 끊긴다"로 보인다
+import MgFrame from '../../mg/MgFrame.astro';
+import MgTrack from '../../mg/MgTrack.astro';
+---
+<div class="mg-animating-on-twos" data-demo-root aria-hidden="true">
+  <MgFrame duration="3s">
+    <MgTrack />
+  </MgFrame>
+</div>
+
+<style>
+  /* 자세 수 = 보통 길이(3s) 동안 바뀌는 횟수: 12 × 3 */
+  .mg-animating-on-twos {
+    --mg-animating-on-twos-poses: 36;
+    --mgtr-curve: steps(var(--mg-animating-on-twos-poses));
+  }
+  .mg-animating-on-twos[data-variant='threes'] {
+    --mg-animating-on-twos-poses: 24;
+  }
+  .mg-animating-on-twos[data-variant='ones'] {
+    --mg-animating-on-twos-poses: 72;
+  }
+  /* 길이 조작으로 재생이 길어지거나 짧아져도 초당 횟수는 그대로여야 한다 — 자세 수를 길이 배수만큼 늘리거나 줄인다
+     steps() 안의 calc() 를 모르는 브라우저는 위의 고정 값으로 간다(길이를 바꾸면 초당 횟수가 달라진다) */
+  @supports (animation-timing-function: steps(calc(2 * 3))) {
+    .mg-animating-on-twos {
+      --mgtr-curve: steps(calc(var(--mg-animating-on-twos-poses) * var(--mg-speed, 1)));
+    }
+  }
+  .mg-animating-on-twos.is-playing :global(.mgtr-hero) {
+    animation: mg-track-run var(--mg-duration) var(--mgtr-curve) forwards;
+  }
+</style>

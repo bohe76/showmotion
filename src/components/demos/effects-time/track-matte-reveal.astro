@@ -1,0 +1,110 @@
+---
+// Track Matte Reveal 데모 — 밑의 영상(E)은 화면 가득 제자리에서 돌고 있는데, 위 레이어(매트)의 모양 안으로만 보인다. 매트가 움직이면 창이 옮겨 가며 영상의 다른 곳이 드러난다
+// 시간 막대의 띠가 매트가 움직이는 구간이다(15~85%): 왼쪽에서 오른쪽으로 가며 조금 커진다. 키프레임의 % 와 같은 값이어야 한다
+// 모양 구멍이 커지며 다음 샷으로 넘어가는 Star Wipe 와 다르다: 샷이 바뀌지 않는다. 창 밖은 끝까지 비어 있고, 움직이는 것은 창이다
+// 영상은 창과 따로 움직인다 — E 의 블록은 왼쪽으로 가고 막대는 뻗는다. 창이 지나가도 영상이 딸려 가지 않는다
+// 변형: alpha-matte(기본 — 매트의 투명도로 자른다. 글자 A 모양의 또렷한 창) · luma-matte(매트의 밝기로 자른다. 밝은 한가운데는 다 비치고 어두운 가장자리로 갈수록 옅어지는 둥근 창)
+//   alpha: 자르는 모양(clip-path 다각형)의 좌표를 처음 자리에서 끝 자리로 옮긴다 — 영상을 감싼 겹은 움직이지 않으므로 영상이 제자리에 있다
+//     글자 A 는 바깥 윤곽 8점 + 속 구멍 3점을 한 줄로 이은 다각형이다(evenodd — 구멍으로 드나드는 선은 폭이 없어 보이지 않는다)
+//   luma: 가운데가 밝고 가장자리가 어두운 둥근 그라데이션을 마스크로 쓰고, 그 자리와 크기를 옮긴다
+import MgFrame from '../../mg/MgFrame.astro';
+import MgShot from '../../mg/MgShot.astro';
+
+// 글자 A — 글자 상자(폭 = 높이 × 0.9)에 대한 0~1 좌표. 바깥 윤곽을 돌고 첫 점으로 돌아온 뒤 속 구멍(세모)을 돈다
+const letter = [
+  [0.34, 0], [0.66, 0], [1, 1], [0.72, 1], [0.652, 0.8], [0.348, 0.8], [0.28, 1], [0, 1], [0.34, 0],
+  [0.5, 0.353], [0.577, 0.58], [0.423, 0.58], [0.5, 0.353],
+];
+// 화면 위의 자리(중심 cx · cy, 높이 h — 모두 cqw)에 놓은 글자 모양
+function matte(cx: number, cy: number, h: number): string {
+  const w = h * 0.9;
+  const points = letter.map(([u, v]) => `${(cx - w / 2 + u * w).toFixed(2)}cqw ${(cy - h / 2 + v * h).toFixed(2)}cqw`);
+  return `polygon(evenodd, ${points.join(', ')})`;
+}
+const shapes = `--mg-track-matte-reveal-from: ${matte(25, 28.1, 40)}; --mg-track-matte-reveal-to: ${matte(60, 28.1, 46)}`;
+---
+<div class="mg-track-matte-reveal" data-demo-root aria-hidden="true" style={shapes}>
+  <MgFrame duration="4s" ranges={[[15, 85]]}>
+    <div class="mg-track-matte-reveal-empty"></div>
+    <div class="mg-track-matte-reveal-matte">
+      <MgShot shot="e" />
+    </div>
+  </MgFrame>
+</div>
+
+<style>
+  /* 창 밖은 아무것도 없는 바탕이다. 화면 틀의 바탕색(--surface)은 E 의 흰 블록과 같은 색이라 창의 모양이 끊겨 보인다 — 중간 회색을 깐다 */
+  .mg-track-matte-reveal-empty,
+  .mg-track-matte-reveal-matte {
+    position: absolute;
+    inset: 0;
+  }
+  .mg-track-matte-reveal-empty {
+    background: var(--demo-muted);
+  }
+  .mg-track-matte-reveal-matte {
+    clip-path: var(--mg-track-matte-reveal-from);
+  }
+  /* luma: 지름 52cqw 의 둥근 창. 중심이 alpha 의 글자와 같은 자리(25cqw, 28.1cqw)에 온다 */
+  .mg-track-matte-reveal[data-variant='luma-matte'] .mg-track-matte-reveal-matte {
+    clip-path: none;
+    mask-image: radial-gradient(closest-side, #000 30%, transparent 100%);
+    mask-repeat: no-repeat;
+    mask-position: -1cqw 2.1cqw;
+    mask-size: 52cqw 52cqw;
+  }
+  .mg-track-matte-reveal :global(.mgsh-subject) {
+    translate: 6cqw 0;
+  }
+  .mg-track-matte-reveal :global(.mgsh-prop) {
+    transform-origin: 0 50%;
+    scale: 0.3 1;
+  }
+  .mg-track-matte-reveal.is-playing .mg-track-matte-reveal-matte {
+    animation: mg-track-matte-reveal-alpha var(--mg-duration) linear forwards;
+  }
+  .mg-track-matte-reveal[data-variant='luma-matte'].is-playing .mg-track-matte-reveal-matte {
+    animation-name: mg-track-matte-reveal-luma;
+  }
+  .mg-track-matte-reveal.is-playing :global(.mgsh-subject) {
+    animation: mg-track-matte-reveal-slide var(--mg-duration) linear forwards;
+  }
+  .mg-track-matte-reveal.is-playing :global(.mgsh-prop) {
+    animation: mg-track-matte-reveal-extend var(--mg-duration) linear forwards;
+  }
+  @keyframes mg-track-matte-reveal-alpha {
+    0%,
+    15% {
+      clip-path: var(--mg-track-matte-reveal-from);
+      animation-timing-function: cubic-bezier(0.5, 0, 0.3, 1);
+    }
+    85%,
+    100% {
+      clip-path: var(--mg-track-matte-reveal-to);
+    }
+  }
+  /* 끝: 지름 62cqw, 중심 (60cqw, 28.1cqw) */
+  @keyframes mg-track-matte-reveal-luma {
+    0%,
+    15% {
+      mask-position: -1cqw 2.1cqw;
+      mask-size: 52cqw 52cqw;
+      animation-timing-function: cubic-bezier(0.5, 0, 0.3, 1);
+    }
+    85%,
+    100% {
+      mask-position: 29cqw -2.9cqw;
+      mask-size: 62cqw 62cqw;
+    }
+  }
+  @keyframes mg-track-matte-reveal-slide {
+    to {
+      translate: -6cqw 0;
+    }
+  }
+  @keyframes mg-track-matte-reveal-extend {
+    to {
+      scale: 1 1;
+    }
+  }
+</style>

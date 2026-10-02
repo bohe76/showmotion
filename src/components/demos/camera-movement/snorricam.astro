@@ -1,0 +1,120 @@
+---
+// Snorricam 데모 — 카메라가 사람(B) 몸에 달려 있다. B 는 화면에 못 박힌 듯 조금도 움직이지 않고, 둘레가 B 의 움직임을 그대로 받아 움직인다
+// 걸음마다 둘레가 좌우로 쏠리고 들썩이고 기울다가, B 가 돌아서면 한꺼번에 휙 돈다(뒤는 왼쪽으로, 앞 기둥은 B 앞을 가로질러 오른쪽으로 — Orbit 과 같은 엇갈림이 훨씬 빠르게)
+// Tracking Shot 과 나란히 보면 차이가 보인다: Tracking Shot 은 둘레가 한 방향으로 고르게 흘러가고 B 가 들썩인다. 여기서는 B 가 꼼짝 않고 둘레가 흔들리고 기울고 돈다
+// 쏠림 sx · 들썩임 sy(가운데 레이어 거리에서의 cqw) · 기울기 roll(도) · 돌아선 정도 turn 을 숫자 변수로 등록해 따로 움직이고, 뒤·앞 레이어가 그 값을 합쳐 쓴다
+//   쏠림·들썩임은 거리로 나누고(가까울수록 많이), 돌아섬은 (거리 − 1) ÷ 거리 를 곱한다(뒤와 앞이 반대로). 거리는 보통 깊이의 값(뒤 2 · 앞 0.5)으로 박아 둔다
+//   — 깊이 조작을 주지 않는다: 돌아선 뒤 앞 기둥이 B 를 가리지 않는 자리에 서야 해서다
+// 시간 막대의 띠가 돌아서는 구간이다(40~64%). 걸음은 처음부터 끝까지 여덟 번이다
+import MgFrame from '../../mg/MgFrame.astro';
+// 위에서 보기: B 가 돌아설 때 카메라가 B 를 축으로 같이 돈다(걸음의 쏠림은 그리지 않는다)
+import MgScene from '../../mg/MgScene.astro';
+import MgTopView from '../../mg/MgTopView.astro';
+---
+<div class="mg-snorricam" data-demo-root aria-hidden="true">
+  <MgFrame duration="4s" ranges={[[40, 64]]}>
+    <MgScene bleed />
+    <MgTopView />
+  </MgFrame>
+</div>
+
+<style>
+  @property --mg-snorricam-sx {
+    syntax: '<number>';
+    inherits: true;
+    initial-value: 0;
+  }
+  @property --mg-snorricam-sy {
+    syntax: '<number>';
+    inherits: true;
+    initial-value: 0;
+  }
+  @property --mg-snorricam-roll {
+    syntax: '<number>';
+    inherits: true;
+    initial-value: 0;
+  }
+  @property --mg-snorricam-turn {
+    syntax: '<number>';
+    inherits: true;
+    initial-value: 0;
+  }
+  /* near: 거리의 역수(쏠림·들썩임에 곱한다) · swing: (거리 − 1) ÷ 거리(돌아섬에 곱한다) */
+  .mg-snorricam :global(.mgs-far),
+  .mg-snorricam :global(.mgs-ground) {
+    --mg-snorricam-near: 0.5;
+    --mg-snorricam-swing: 0.5;
+  }
+  .mg-snorricam :global(.mgs-near) {
+    --mg-snorricam-near: 2;
+    --mg-snorricam-swing: -1;
+  }
+  /* 기우는 축은 B 의 한가운데(화면 위에서 68%). 바닥선은 뒤 레이어의 밑변이라 뒤 레이어와 같이 움직인다 */
+  .mg-snorricam :global(.mgs-far),
+  .mg-snorricam :global(.mgs-near),
+  .mg-snorricam :global(.mgs-ground) {
+    transform-origin: 50% 68%;
+    translate:
+      calc((var(--mg-snorricam-sx) * var(--mg-snorricam-near) - var(--mg-snorricam-turn) * var(--mg-snorricam-swing)) * 1cqw)
+      calc(var(--mg-snorricam-sy) * var(--mg-snorricam-near) * 1cqw);
+    rotate: calc(var(--mg-snorricam-roll) * 1deg);
+  }
+  .mg-snorricam :global(.mgs-ground) {
+    transform-origin: 50% -4.5cqw;
+  }
+  /* 변수는 장면(.mgs)에서 움직인다 — 길이(--mg-duration)가 화면 틀 안에서만 잡힌다. 걸음 두 번(왼발·오른발)이 한 바퀴다 */
+  .mg-snorricam.is-playing :global(.mgs) {
+    animation:
+      mg-snorricam-sway calc(var(--mg-duration) / 4) ease-in-out 4,
+      mg-snorricam-bob calc(var(--mg-duration) / 4) ease-in-out 4,
+      mg-snorricam-turn var(--mg-duration) linear forwards;
+  }
+  @keyframes mg-snorricam-sway {
+    25% {
+      --mg-snorricam-sx: 1.6;
+      --mg-snorricam-roll: 1.5;
+    }
+    75% {
+      --mg-snorricam-sx: -1.3;
+      --mg-snorricam-roll: -1.9;
+    }
+  }
+  @keyframes mg-snorricam-bob {
+    25% {
+      --mg-snorricam-sy: 1.4;
+    }
+    50% {
+      --mg-snorricam-sy: 0.1;
+    }
+    75% {
+      --mg-snorricam-sy: 1.1;
+    }
+  }
+  @keyframes mg-snorricam-turn {
+    40% {
+      --mg-snorricam-turn: 0;
+      animation-timing-function: ease-in-out;
+    }
+    64%,
+    100% {
+      --mg-snorricam-turn: 66;
+    }
+  }
+  /* 위에서 보기: 가운데 줄의 한가운데(B)를 축으로 시계 방향으로 돈다. 뒤 줄이 화면 폭의 33% 밀리는 각 — 시야 반각의 탄젠트가 1.15 일 때 약 74° */
+  .mg-snorricam :global(.mgt-cam) {
+    transform-origin: 0 calc(var(--mgt-unit) * -1);
+  }
+  .mg-snorricam.is-playing :global(.mgt-cam) {
+    animation: mg-snorricam-swing var(--mg-duration) linear forwards;
+  }
+  @keyframes mg-snorricam-swing {
+    40% {
+      rotate: 0deg;
+      animation-timing-function: ease-in-out;
+    }
+    64%,
+    100% {
+      rotate: 74.4deg;
+    }
+  }
+</style>

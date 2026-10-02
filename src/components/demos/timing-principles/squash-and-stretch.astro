@@ -1,0 +1,106 @@
+---
+// Squash and Stretch 데모 — B 가 출발선에서 도착선으로 한 번 뛰어 건너간다. 움츠려 납작해졌다가(squash) 길게 늘며 뛰어오르고(stretch), 꼭대기에서 제 모양, 떨어지며 다시 늘고, 닿는 순간 납작하게 눌렸다가 되살아난다
+// 부피는 그대로다 — 가로가 늘면 세로가 그만큼 준다(가로 × 세로 ≈ 1). 그래서 커졌다 작아지는 것이 아니라 눌리고 늘어나는 것으로 보인다
+// 아래 옅은 블록은 같은 뜀을 같은 때에 하되 모양이 그대로다(딱딱한 물체) — 다른 것은 모양뿐이다
+// 시간 막대의 띠는 바닥에 닿아 눌리는 구간이다(뛰기 전 0~14%, 닿은 뒤 74~94%). 키프레임의 %와 같은 값이어야 한다
+// 웹 구역의 Rubber Band·Jello 는 제자리에서 출렁이는 강조다. 이쪽은 변형이 움직임에 묶여 있다 — 빠를 때 늘고, 닿을 때 눌린다
+// 가로는 공용 키프레임(translate)으로 공중에 떠 있는 동안만 가고, 세로와 모양은 transform 하나에 같이 둔다(translateY 뒤에 scale — 뜀 높이가 배율에 끌려가지 않는다)
+import MgFrame from '../../mg/MgFrame.astro';
+import MgTrack from '../../mg/MgTrack.astro';
+---
+<div class="mg-squash-and-stretch" data-demo-root aria-hidden="true">
+  <MgFrame
+    duration="3s"
+    ranges={[
+      [0, 14],
+      [74, 94],
+    ]}
+  >
+    <MgTrack />
+  </MgFrame>
+</div>
+
+<style>
+  /* 두 줄 모두 뛰어오를 자리를 위에 낸다: 블록을 줄이고 줄을 내린다 */
+  .mg-squash-and-stretch :global(.mgtr) {
+    --mgtr-size: 11cqw;
+    --mg-squash-and-stretch-height: -8cqw;
+  }
+  .mg-squash-and-stretch :global(.mgtr-lane-hero) {
+    top: 16cqw;
+  }
+  .mg-squash-and-stretch :global(.mgtr-lane-ghost) {
+    top: 37cqw;
+  }
+  .mg-squash-and-stretch :global(.mgtr-hero) {
+    font-size: 5cqw;
+  }
+  .mg-squash-and-stretch :global(.mgtr-tick) {
+    display: none;
+  }
+  /* 눌리고 늘어나는 기준은 바닥이다 */
+  .mg-squash-and-stretch :global(.mgtr-block) {
+    transform-origin: 50% 100%;
+  }
+  /* 가로: 바닥을 떠나 있는 동안(14~74%)만 등속으로 간다 */
+  .mg-squash-and-stretch.is-playing :global(.mgtr-hero) {
+    animation:
+      mg-track-run var(--mg-duration) linear(0, 0 14%, 1 74%, 1) forwards,
+      mg-squash-and-stretch-hop var(--mg-duration) forwards;
+  }
+  .mg-squash-and-stretch.is-playing :global(.mgtr-ghost) {
+    animation:
+      mg-track-run var(--mg-duration) linear(0, 0 14%, 1 74%, 1) forwards,
+      mg-squash-and-stretch-rigid var(--mg-duration) forwards;
+  }
+  /* 오를 때 2차 감속, 내릴 때 2차 가속 — 등속인 가로와 합쳐 포물선. 늘어남도 같은 곡선을 타서 빠를수록 길다 */
+  @keyframes mg-squash-and-stretch-hop {
+    0% {
+      transform: translateY(0) scale(1, 1);
+      animation-timing-function: ease-out;
+    }
+    10% {
+      transform: translateY(0) scale(1.28, 0.78);
+      animation-timing-function: ease-in;
+    }
+    14% {
+      transform: translateY(0) scale(0.8, 1.25);
+      animation-timing-function: cubic-bezier(0.333, 0.667, 0.667, 1);
+    }
+    44% {
+      transform: translateY(var(--mg-squash-and-stretch-height)) scale(1, 1);
+      animation-timing-function: cubic-bezier(0.333, 0, 0.667, 0.333);
+    }
+    74% {
+      transform: translateY(0) scale(0.8, 1.25);
+      animation-timing-function: ease-out;
+    }
+    79% {
+      transform: translateY(0) scale(1.32, 0.76);
+      animation-timing-function: ease-in-out;
+    }
+    87% {
+      transform: translateY(0) scale(0.94, 1.07);
+      animation-timing-function: ease-in-out;
+    }
+    94%,
+    100% {
+      transform: translateY(0) scale(1, 1);
+    }
+  }
+  @keyframes mg-squash-and-stretch-rigid {
+    0%,
+    14% {
+      transform: translateY(0);
+      animation-timing-function: cubic-bezier(0.333, 0.667, 0.667, 1);
+    }
+    44% {
+      transform: translateY(var(--mg-squash-and-stretch-height));
+      animation-timing-function: cubic-bezier(0.333, 0, 0.667, 0.333);
+    }
+    74%,
+    100% {
+      transform: translateY(0);
+    }
+  }
+</style>

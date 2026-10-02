@@ -1,0 +1,66 @@
+---
+// Smash Cut 데모 — 조용한 장면에서 정반대로 격한 장면으로 예고 없이 넘어간다. 시간 막대의 눈금이 컷 지점이다(62%)
+// 앞 샷은 길게 끈다: B 가 거의 움직이지 않는다. 컷 뒤에는 이미 한창인 격한 장면 — 큰 블록과 막대가 처음부터 세게 흔들린다
+// Hard Cut 은 두 샷의 빠르기가 같고, Contrast Cut 은 톤만 반대다. 여기는 움직임의 세기가 한순간에 뒤집힌다
+// 흔들림은 컷 지점(62%)부터 끝까지 — 지연 0.62 + 한 번 0.038 × 10번 = 1. 컷 지점을 바꾸면 세 값을 같이 맞춘다
+import MgFrame from '../../mg/MgFrame.astro';
+import MgScene from '../../mg/MgScene.astro';
+import MgShot from '../../mg/MgShot.astro';
+---
+<div class="mg-smash-cut" data-demo-root aria-hidden="true">
+  <MgFrame duration="4s" cuts={[62]}>
+    <MgScene />
+    <MgShot shot="e" />
+  </MgFrame>
+</div>
+
+<style>
+  .mg-smash-cut :global(.mgs-b) {
+    translate: -3cqw 0;
+  }
+  .mg-smash-cut :global(.mgsh) {
+    visibility: hidden;
+  }
+  /* 화면에 바짝 다가온 크기 */
+  .mg-smash-cut :global(.mgsh-subject) {
+    scale: 1.2;
+  }
+  .mg-smash-cut.is-playing :global(.mgs-b) {
+    animation: mg-smash-cut-calm var(--mg-duration) linear forwards;
+  }
+  .mg-smash-cut.is-playing :global(.mgsh) {
+    animation: mg-smash-cut-cut var(--mg-duration) step-end forwards;
+  }
+  .mg-smash-cut.is-playing :global(.mgsh-subject),
+  .mg-smash-cut.is-playing :global(.mgsh-prop) {
+    animation: mg-smash-cut-shake calc(var(--mg-duration) * 0.038) linear calc(var(--mg-duration) * 0.62) 10 alternate forwards;
+  }
+  /* 막대는 블록과 엇갈려 흔들린다 */
+  .mg-smash-cut.is-playing :global(.mgsh-prop) {
+    animation-direction: alternate-reverse;
+  }
+  @keyframes mg-smash-cut-calm {
+    to {
+      translate: 0 0;
+    }
+  }
+  @keyframes mg-smash-cut-cut {
+    0% {
+      visibility: hidden;
+    }
+    62%,
+    100% {
+      visibility: visible;
+    }
+  }
+  @keyframes mg-smash-cut-shake {
+    from {
+      translate: -3cqw 1.5cqw;
+      rotate: -5deg;
+    }
+    to {
+      translate: 3cqw -1.5cqw;
+      rotate: 5deg;
+    }
+  }
+</style>

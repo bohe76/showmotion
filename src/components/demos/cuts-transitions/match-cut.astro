@@ -1,0 +1,78 @@
+---
+// Match Cut 데모 — 두 샷의 모양·자리·움직임이 맞아떨어져 하나가 다른 것으로 바뀐 듯 보인다. 시간 막대의 눈금이 컷 지점이다(50%)
+// 둘째 샷(D)의 원을 B 와 같은 자리·같은 크기로 놓는다 — 컷에서 사각형이 그 자리에서 원이 된다. 바탕은 전혀 다른 샷이다
+// 변형: graphic-match(기본) — 대상은 제자리에 있고, 화면이 천천히 다가가는 움직임이 컷을 넘어 이어진다(모양·자리·크기가 맞는다)
+//       match-on-action — B 가 가로질러 가다가 컷에서 원이 같은 자리에서 같은 빠르기로 이어 간다(움직임이 맞는다)
+// 두 변형은 변수 둘로 가른다: --mg-match-cut-zoom(다가가는 배율), --mg-match-cut-run(가로지르는 거리)
+import MgFrame from '../../mg/MgFrame.astro';
+import MgScene from '../../mg/MgScene.astro';
+import MgShot from '../../mg/MgShot.astro';
+---
+<div class="mg-match-cut" data-demo-root aria-hidden="true">
+  <MgFrame duration="4s" cuts={[50]}>
+    <MgScene />
+    <MgShot shot="d" />
+  </MgFrame>
+</div>
+
+<style>
+  .mg-match-cut {
+    --mg-match-cut-zoom: 1.4;
+    --mg-match-cut-run: 0cqw;
+  }
+  .mg-match-cut[data-variant='match-on-action'] {
+    --mg-match-cut-zoom: 1;
+    --mg-match-cut-run: 22cqw;
+  }
+  /* 다가가는 중심 = B 의 한가운데(화면 높이의 68%) */
+  .mg-match-cut :global(.mgs),
+  .mg-match-cut :global(.mgsh) {
+    transform-origin: 50% 68%;
+  }
+  .mg-match-cut :global(.mgsh) {
+    visibility: hidden;
+  }
+  /* 원을 B 의 자리에 — MgScene 의 .mgs-b 와 같은 값 */
+  .mg-match-cut :global(.mgsh-subject) {
+    top: auto;
+    bottom: 16%;
+    left: calc(50% - 9cqw);
+    width: 18cqw;
+    font-size: 8cqw;
+  }
+  .mg-match-cut :global(.mgs-b),
+  .mg-match-cut :global(.mgsh-subject) {
+    translate: calc(var(--mg-match-cut-run) * -1) 0;
+  }
+  .mg-match-cut.is-playing :global(.mgs-b),
+  .mg-match-cut.is-playing :global(.mgsh-subject) {
+    animation: mg-match-cut-run var(--mg-duration) linear forwards;
+  }
+  .mg-match-cut.is-playing :global(.mgs) {
+    animation: mg-match-cut-push var(--mg-duration) linear forwards;
+  }
+  .mg-match-cut.is-playing :global(.mgsh) {
+    animation:
+      mg-match-cut-cut var(--mg-duration) step-end forwards,
+      mg-match-cut-push var(--mg-duration) linear forwards;
+  }
+  @keyframes mg-match-cut-run {
+    to {
+      translate: var(--mg-match-cut-run) 0;
+    }
+  }
+  @keyframes mg-match-cut-push {
+    to {
+      scale: var(--mg-match-cut-zoom);
+    }
+  }
+  @keyframes mg-match-cut-cut {
+    0% {
+      visibility: hidden;
+    }
+    50%,
+    100% {
+      visibility: visible;
+    }
+  }
+</style>

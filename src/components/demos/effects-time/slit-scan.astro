@@ -1,0 +1,86 @@
+---
+// Slit-Scan 데모 — 화면을 가는 세로 틈으로 차례차례 찍는다: 세로 띠마다 찍힌 때가 다르다. 그래서 움직이는 B 가 길게 늘어진 줄무늬가 되고, 튀는 포물선대로 휜다
+// 가만히 있는 것(뒤 막대 · 기둥 · 바닥)은 어느 때 찍어도 같아서 그대로다 — 움직임만 늘어난다. 시간 막대의 띠가 띠들의 시각이 서로 어긋나 있는 구간이다(5~93%)
+// 복제가 따로따로 보이는 Echo 와 다르다: 여기는 한 덩어리가 이어진 채 늘어난다. 움직이는 방향으로 고르게 번지는 Motion Blur 와도 다르다 — 윤곽은 또렷하고 길이와 모양이 달라진다
+// 만드는 법: MgClip 의 복제(.mgc-echo) 29개가 저마다 폭 2cqw 의 세로 띠 하나만 맡는다(B 가 오가는 21~79cqw 를 나눈다)
+//   띠 i(1 = 맨 오른쪽)의 자리는 화면의 (79 - 2i)cqw 부터다. 복제는 움직이므로 자르는 자리를 복제 기준으로 바꿔 쓴다: 복제의 왼쪽 끝이 화면의 (21 + 40 × --mgc-x)cqw 에 있다
+//   띠는 서로 0.3cqw 겹친다 — 딱 맞대면 사이에 실금이 보인다
+// 띠마다 영상의 시각(--mg-slit-scan-c)이 다르다: 오른쪽 띠일수록 앞서 있다(띠 하나에 0.03). 모든 띠가 같은 빠르기로 0.72 만큼 흐른다
+//   흐름(--mg-slit-scan-p, 0 → 1)과 켜짐(--mg-slit-scan-on)을 등록해 움직이고 시각은 규칙에서 계산한다 — 키프레임에는 숫자만 둔다(var() 가 든 값은 Firefox 가 중간값 없이 건너뛴다)
+//   켜짐은 띠들이 흐르기 시작할 때 1 이 된다 — 그 전(재생 전 · 처음 5%)에는 시각이 모두 0 이다
+//   B 가 가는 쪽의 띠가 앞서 있으니 B 의 앞머리는 금세 닿고 꼬리는 늦게 빠진다 — B 가 제 길이의 두 배 반으로 늘어난다(B 가 띠 하나를 지나는 데 0.05 가 걸리는데 그 가운데 0.03 을 앞서 있다)
+//   시작값(0.6 - 0.03i)은 B 가 아직 그 띠에 닿지 않은 시각이고(B 가 서 있던 띠는 0 밑이라 0 으로 붙든다), 끝값은 B 가 지나갔거나 끝 자리에 선 시각이다 — 처음과 끝 화면이 원본과 같다
+// 복제에는 글자가 없어서 같은 글자를 덧그린다(::after) — 글자도 띠마다 잘려 같이 늘어난다
+// 진짜 B 는 띠들이 흐르는 동안 빠져 있다. 처음과 끝에는 띠들이 모여 B 한 덩어리가 되고 진짜 B 가 그 위에 겹친다
+import MgFrame from '../../mg/MgFrame.astro';
+import MgClip from '../../mg/MgClip.astro';
+---
+<div class="mg-slit-scan" data-demo-root aria-hidden="true">
+  <MgFrame duration="3.6s" ranges={[[5, 93]]}>
+    <MgClip echoes={29} />
+  </MgFrame>
+</div>
+
+<style>
+  @property --mg-slit-scan-p {
+    syntax: '<number>';
+    inherits: false;
+    initial-value: 0;
+  }
+  @property --mg-slit-scan-on {
+    syntax: '<number>';
+    inherits: false;
+    initial-value: 0;
+  }
+  .mg-slit-scan :global(.mgc-echo) {
+    --mg-slit-scan-c: calc((0.6 - 0.03 * var(--mgc-i)) * var(--mg-slit-scan-on) + 0.72 * var(--mg-slit-scan-p));
+    --mg-clip-t: clamp(0, var(--mg-slit-scan-c), 1);
+    /* 이 복제가 맡은 띠의 왼쪽 끝 — 복제의 왼쪽 끝에서 잰 거리 */
+    --mg-slit-scan-from: calc((58 - 2 * var(--mgc-i) - 40 * var(--mgc-x)) * 1cqw);
+    display: grid;
+    place-items: center;
+    font-size: 8cqw;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--on-accent);
+    opacity: 1;
+    clip-path: inset(0 calc(15.7cqw - var(--mg-slit-scan-from)) 0 var(--mg-slit-scan-from));
+  }
+  .mg-slit-scan :global(.mgc-echo)::after {
+    content: 'B';
+  }
+  .mg-slit-scan.is-playing :global(.mgc-echo) {
+    animation: mg-slit-scan-expose calc(var(--mg-duration) * 0.88) linear calc(var(--mg-duration) * 0.05) forwards;
+  }
+  .mg-slit-scan.is-playing :global(.mgs-b) {
+    animation: mg-slit-scan-whole var(--mg-duration) linear forwards;
+  }
+  @keyframes mg-slit-scan-expose {
+    from {
+      --mg-slit-scan-on: 1;
+      --mg-slit-scan-p: 0;
+    }
+    to {
+      --mg-slit-scan-on: 1;
+      --mg-slit-scan-p: 1;
+    }
+  }
+  /* 띠들이 흐르기 시작할 때 빠지고, 다 흐른 뒤 끝 자리에 돌아온다 */
+  @keyframes mg-slit-scan-whole {
+    0%,
+    4.99% {
+      visibility: visible;
+      --mg-clip-t: 0;
+    }
+    5%,
+    92.99% {
+      visibility: hidden;
+      --mg-clip-t: 1;
+    }
+    93%,
+    100% {
+      visibility: visible;
+      --mg-clip-t: 1;
+    }
+  }
+</style>

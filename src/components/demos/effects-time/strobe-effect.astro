@@ -1,0 +1,41 @@
+---
+// Strobe Effect 데모 — 같은 영상(B 가 뛰어올라 튀며 간다)에서 B 가 번쩍일 때만 보인다. 번쩍임마다 띄엄띄엄한 자세로 얼어 있고 그 사이에는 보이지 않는다
+// 빠르기는 원래 속도 그대로다(한 번 건너는 데 2.4초). Stop Motion Look 과 나란히 보면 차이가 보인다: 저쪽은 화면이 내내 켜져 있고 자세만 끊긴다
+// 번쩍임 한 번 = 꺼짐(앞 55%) 뒤 켜짐(뒤 45%). 자세는 번쩍임의 경계에서 바뀐다 — 꺼져 있는 동안 다음 자세로 가 있다
+// 접근성(WCAG 2.3.1): 화면 전체가 아니라 B 만 켜고 끈다(작은 면적). 횟수는 초당 2.5번 — 길이 조작으로 재생이 짧아져도 초당 횟수는 그대로다
+import MgFrame from '../../mg/MgFrame.astro';
+import MgClip from '../../mg/MgClip.astro';
+---
+<div class="mg-strobe-effect" data-demo-root aria-hidden="true">
+  <MgFrame duration="2.4s">
+    <MgClip />
+  </MgFrame>
+</div>
+
+<style>
+  /* 번쩍이는 횟수 = 보통 길이(2.4s) 동안 여섯 번 */
+  .mg-strobe-effect {
+    --mg-strobe-effect-count: 6;
+  }
+  /* steps() 안의 calc() 를 모르는 브라우저는 위의 고정 값으로 간다(길이를 줄이면 초당 횟수가 늘지만 B 만 깜빡이는 작은 면적이다) */
+  @supports (animation-timing-function: steps(calc(2 * 3))) {
+    .mg-strobe-effect {
+      --mg-strobe-effect-count: calc(6 * var(--mg-speed, 1));
+    }
+  }
+  /* jump-none: 첫 번쩍임이 첫 자세, 마지막 번쩍임이 끝 자세다 */
+  .mg-strobe-effect.is-playing :global(.mgs-b) {
+    animation:
+      mg-clip-run var(--mg-duration) steps(var(--mg-strobe-effect-count), jump-none) forwards,
+      mg-strobe-effect-flash calc(var(--mg-duration) / var(--mg-strobe-effect-count)) steps(1) var(--mg-strobe-effect-count) forwards;
+  }
+  @keyframes mg-strobe-effect-flash {
+    0% {
+      opacity: 0;
+    }
+    55%,
+    100% {
+      opacity: 1;
+    }
+  }
+</style>

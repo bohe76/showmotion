@@ -1,0 +1,194 @@
+---
+// Text Morph 데모 — 글자가 제자리에서 모양이 변해 다른 글자가 된다(A → B → C). 사라졌다 나타나거나 바꿔치기하지 않는다 — 획이 그대로 옮겨 가 다음 글자의 획이 된다
+// 글자는 획 여섯 조각으로 짠다(왼 기둥 · 오른쪽 위 · 오른쪽 아래 · 윗줄 · 가운뎃줄 · 아랫줄). 조각마다 글자별 모양(네 꼭짓점)이 있고, 그 사이를 clip-path 가 이어 준다
+//   A 의 가로줄은 조각 둘이 겹쳐 있다가 B 에서 가운뎃줄과 아랫줄로 갈라지고, C 에서는 가운뎃줄이 왼 기둥 속으로 들어간다
+// 시간 막대의 띠가 모양이 변하는 구간이다. 키프레임의 %와 같은 값이어야 한다
+// 변형: letter(기본 — 글자에서 글자로, 15~40% · 60~85%) · weight(같은 글자의 굵기가 가는 데서 굵은 데로, 20~80%) · liquid(녹아 한 덩어리가 됐다가 다음 글자로 굳는다)
+// liquid 는 같은 변형 위에 흐림을 얹고(조각 묶음에 CSS blur), 그 바깥에서 알파 문턱 필터로 경계를 다시 세운다 — 흐림이 커질수록 획이 서로 붙어 덩어리가 된다
+//   흐림은 cqw 라 카드와 상세에서 같은 비율이다. 필터 주소는 루트의 인라인 스타일에 둔다(따로 떨어진 CSS 파일 안의 url(#…) 을 그 파일 기준으로 찾는 브라우저가 있다)
+import MgFrame from '../../mg/MgFrame.astro';
+
+// 조각마다 [thin, a, b, c] — 글자 상자에 대한 % 좌표의 네 꼭짓점(왼쪽 위부터 시계 방향). 맞닿는 조각은 조금씩 겹쳐 실금이 없게 한다
+const shapes = {
+  thin: [
+    [[36, 0], [47, 0], [11, 100], [0, 100]],
+    [[53, 0], [64, 0], [82.7, 52], [71.7, 52]],
+    [[70.3, 48], [81.3, 48], [100, 100], [89, 100]],
+    [[36, 0], [64, 0], [64, 9], [36, 9]],
+    [[22, 62], [78, 62], [78, 71], [22, 71]],
+    [[22, 62], [78, 62], [78, 71], [22, 71]],
+  ],
+  a: [
+    [[36, 0], [60, 0], [24, 100], [0, 100]],
+    [[40, 0], [64, 0], [82.7, 52], [58.7, 52]],
+    [[57.3, 48], [81.3, 48], [100, 100], [76, 100]],
+    [[36, 0], [64, 0], [64, 18], [36, 18]],
+    [[25, 60], [75, 60], [75, 78], [25, 78]],
+    [[25, 60], [75, 60], [75, 78], [25, 78]],
+  ],
+  b: [
+    [[0, 0], [24, 0], [24, 100], [0, 100]],
+    [[64, 9], [88, 9], [88, 52], [64, 52]],
+    [[70, 48], [94, 48], [94, 91], [70, 91]],
+    [[0, 0], [74, 0], [74, 18], [0, 18]],
+    [[0, 41], [78, 41], [78, 59], [0, 59]],
+    [[0, 82], [80, 82], [80, 100], [0, 100]],
+  ],
+  c: [
+    [[0, 9], [24, 9], [24, 91], [0, 91]],
+    [[70, 9], [94, 9], [94, 36], [70, 36]],
+    [[70, 64], [94, 64], [94, 91], [70, 91]],
+    [[10, 0], [84, 0], [84, 18], [10, 18]],
+    [[0, 41], [24, 41], [24, 59], [0, 59]],
+    [[10, 82], [84, 82], [84, 100], [10, 100]],
+  ],
+};
+const polygon = (points: number[][]) => `polygon(${points.map(([x, y]) => `${x}% ${y}%`).join(', ')})`;
+const pieces = shapes.a.map((_, i) =>
+  Object.entries(shapes)
+    .map(([name, list]) => `--mg-text-morph-${name}: ${polygon(list[i])}`)
+    .join('; '),
+);
+const ranges = {
+  letter: [[15, 40], [60, 85]] as [number, number][],
+  weight: [[20, 80]] as [number, number][],
+  liquid: [[15, 40], [60, 85]] as [number, number][],
+};
+---
+<div class="mg-text-morph" data-demo-root aria-hidden="true" style="--mg-text-morph-goo: url(#mg-text-morph-goo)">
+  <MgFrame duration="5s" ranges={ranges}>
+    <div class="mg-text-morph-set">
+      <div class="mg-text-morph-glyph">
+        {pieces.map((style) => <span class="mg-text-morph-piece" style={style}></span>)}
+      </div>
+    </div>
+  </MgFrame>
+  <svg class="mg-text-morph-defs" width="0" height="0" focusable="false">
+    <defs>
+      <filter id="mg-text-morph-goo" color-interpolation-filters="sRGB">
+        <feColorMatrix type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -8"></feColorMatrix>
+      </filter>
+    </defs>
+  </svg>
+</div>
+
+<style>
+  .mg-text-morph-defs {
+    position: absolute;
+  }
+  .mg-text-morph-set {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+  }
+  .mg-text-morph-glyph {
+    position: relative;
+    width: 21cqw;
+    height: 27cqw;
+  }
+  .mg-text-morph-piece {
+    position: absolute;
+    inset: 0;
+    background: var(--ink);
+    clip-path: var(--mg-text-morph-a);
+  }
+  .mg-text-morph[data-variant='weight'] .mg-text-morph-piece {
+    clip-path: var(--mg-text-morph-thin);
+  }
+  .mg-text-morph.is-playing .mg-text-morph-piece {
+    animation: mg-text-morph-letter var(--mg-duration) linear forwards;
+  }
+  .mg-text-morph[data-variant='weight'].is-playing .mg-text-morph-piece {
+    animation-name: mg-text-morph-weight;
+  }
+  .mg-text-morph[data-variant='liquid'].is-playing .mg-text-morph-glyph {
+    animation: mg-text-morph-melt var(--mg-duration) linear forwards;
+  }
+  .mg-text-morph[data-variant='liquid'].is-playing .mg-text-morph-set {
+    animation: mg-text-morph-goo var(--mg-duration) linear forwards;
+  }
+  /* A 로 머물다 15~40% 에 B 가 되고, 머물다 60~85% 에 C 가 된다 */
+  @keyframes mg-text-morph-letter {
+    0% {
+      clip-path: var(--mg-text-morph-a);
+    }
+    15% {
+      clip-path: var(--mg-text-morph-a);
+      animation-timing-function: ease-in-out;
+    }
+    40% {
+      clip-path: var(--mg-text-morph-b);
+    }
+    60% {
+      clip-path: var(--mg-text-morph-b);
+      animation-timing-function: ease-in-out;
+    }
+    85%,
+    100% {
+      clip-path: var(--mg-text-morph-c);
+    }
+  }
+  /* 같은 글자 A: 가는 획이 20~80% 에 굵어진다 */
+  @keyframes mg-text-morph-weight {
+    0% {
+      clip-path: var(--mg-text-morph-thin);
+    }
+    20% {
+      clip-path: var(--mg-text-morph-thin);
+      animation-timing-function: ease-in-out;
+    }
+    80%,
+    100% {
+      clip-path: var(--mg-text-morph-a);
+    }
+  }
+  /* 변하는 구간의 한가운데에서 가장 많이 녹는다. 머무는 동안에는 또렷하다 */
+  @keyframes mg-text-morph-melt {
+    0%,
+    15% {
+      filter: blur(0);
+      animation-timing-function: ease-in-out;
+    }
+    27.5% {
+      filter: blur(2.6cqw);
+      animation-timing-function: ease-in-out;
+    }
+    40%,
+    60% {
+      filter: blur(0);
+      animation-timing-function: ease-in-out;
+    }
+    72.5% {
+      filter: blur(2.6cqw);
+      animation-timing-function: ease-in-out;
+    }
+    85%,
+    100% {
+      filter: blur(0);
+    }
+  }
+  /* 문턱 필터는 변하는 구간에만 건다 — 머무는 동안의 글자는 필터 없이 또렷하다 */
+  @keyframes mg-text-morph-goo {
+    0%,
+    14.99% {
+      filter: none;
+    }
+    15%,
+    40% {
+      filter: var(--mg-text-morph-goo);
+    }
+    40.01%,
+    59.99% {
+      filter: none;
+    }
+    60%,
+    85% {
+      filter: var(--mg-text-morph-goo);
+    }
+    85.01%,
+    100% {
+      filter: none;
+    }
+  }
+</style>

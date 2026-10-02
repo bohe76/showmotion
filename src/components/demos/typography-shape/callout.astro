@@ -1,0 +1,195 @@
+---
+// Callout 데모 — 그림 안의 한 지점(주인공 B)에서 선이 뻗어 나가고, 그 끝에 꼬리표가 튀어나온다
+// Lower Third 는 화면 아래 정해진 자리에 놓이지만, Callout 은 그림 안의 특정 자리를 가리킨다 — 그래서 선이 B 위의 점에서 출발한다
+// 시간 막대: 띠가 선이 뻗는 구간(15~45%), 눈금이 꼬리표가 튀어나오는 지점(45%). 키프레임의 %와 같은 값이어야 한다
+// 장면은 가만히 있다 — 움직이는 것은 얹은 그래픽뿐이다
+// 변형: line(기본) — 점 + 꺾인 직선 + 상자 꼬리표 · sketch — 손으로 그린 듯한 동그라미와 곡선, 상자 없는 글자와 밑줄
+// 선은 화면과 같은 비율(160×90)의 SVG 에 그린다 — 1 단위 = 0.625cqw. B 는 x 65.6~94.4, y 46.8~75.6 에 있다
+import MgFrame from '../../mg/MgFrame.astro';
+import MgScene from '../../mg/MgScene.astro';
+---
+<div class="mg-callout" data-demo-root aria-hidden="true">
+  <MgFrame duration="4s" ranges={[[15, 45]]} cuts={[45]}>
+    <MgScene />
+    <svg class="mg-callout-art" viewBox="0 0 160 90" fill="none">
+      <g class="mg-callout-straight">
+        <path class="mg-callout-line" pathLength="1" d="M89 52 L104 26 H117" />
+        <circle class="mg-callout-dot" cx="89" cy="52" r="1.8" />
+      </g>
+      <g class="mg-callout-sketch">
+        <path class="mg-callout-loop" pathLength="1" d="M96 45 C86 37 65 40 60 55 C55 70 68 83 83 82 C98 81 105 66 100 53 C98 47 92 42 85 42" />
+        <path class="mg-callout-line" pathLength="1" d="M100 46 C103 38 108 31 116 27" />
+        <path class="mg-callout-under" pathLength="1" d="M120 34.5 q2.6 -2.4 5.2 0 t5.2 0 t5.2 0" />
+      </g>
+    </svg>
+    <div class="mg-callout-label">
+      <span class="mg-callout-word">ABC</span>
+      <span class="mg-callout-bar"></span>
+    </div>
+  </MgFrame>
+</div>
+
+<style>
+  .mg-callout-art {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    stroke: var(--ink);
+    stroke-width: 0.9;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .mg-callout-sketch,
+  .mg-callout[data-variant='sketch'] .mg-callout-straight {
+    display: none;
+  }
+  .mg-callout[data-variant='sketch'] .mg-callout-sketch {
+    display: inline;
+  }
+  /* 선은 길이 1 로 맞춰 두고(pathLength) 빈칸을 밀어 그린다. 빈칸을 선보다 길게 잡아 둥근 끝이 미리 비치지 않게 한다 */
+  .mg-callout-line,
+  .mg-callout-loop,
+  .mg-callout-under {
+    stroke-dasharray: 1 1.2;
+    stroke-dashoffset: 1.01;
+  }
+  .mg-callout-dot {
+    fill: var(--ink);
+    stroke: var(--surface);
+    stroke-width: 0.7;
+    transform-box: fill-box;
+    transform-origin: center;
+    scale: 0;
+  }
+  /* 꼬리표: 선이 끝나는 자리(117, 26)에 왼쪽 가운데를 맞춘다 */
+  .mg-callout-label {
+    position: absolute;
+    top: 16.25cqw;
+    left: 73.1cqw;
+    display: grid;
+    gap: 0.8cqw;
+    padding: 1.2cqw 1.8cqw;
+    font-size: 5cqw;
+    font-weight: 800;
+    line-height: 1;
+    color: var(--surface);
+    background: var(--ink);
+    border-radius: 0.6cqw;
+    transform-origin: 0 50%;
+    translate: 0 -50%;
+    scale: 0;
+  }
+  .mg-callout-bar {
+    width: 10cqw;
+    height: 0.9cqw;
+    background: var(--surface);
+    border-radius: 0.45cqw;
+    opacity: 0.6;
+  }
+  /* sketch: 상자와 글줄 막대를 빼고 글자만 남긴다. 글자는 왼쪽에서 오른쪽으로 써지듯 드러난다(외곽선까지 보이게 넉넉히 자른다) */
+  .mg-callout[data-variant='sketch'] .mg-callout-label {
+    padding: 0 1.8cqw;
+    color: var(--ink);
+    background: none;
+    scale: 1;
+    clip-path: inset(-30% 100% -30% -10%);
+  }
+  .mg-callout[data-variant='sketch'] .mg-callout-word {
+    -webkit-text-stroke: 0.24em var(--surface);
+    paint-order: stroke fill;
+  }
+  .mg-callout[data-variant='sketch'] .mg-callout-bar {
+    display: none;
+  }
+
+  .mg-callout.is-playing .mg-callout-dot {
+    animation: mg-callout-dot var(--mg-duration) ease-out forwards;
+  }
+  .mg-callout.is-playing .mg-callout-loop {
+    animation: mg-callout-loop var(--mg-duration) ease-in-out forwards;
+  }
+  .mg-callout.is-playing .mg-callout-line {
+    animation: mg-callout-draw var(--mg-duration) linear forwards;
+  }
+  .mg-callout.is-playing .mg-callout-label {
+    animation: mg-callout-pop var(--mg-duration) ease-out forwards;
+  }
+  .mg-callout[data-variant='sketch'].is-playing .mg-callout-label {
+    animation-name: mg-callout-write;
+  }
+  .mg-callout.is-playing .mg-callout-under {
+    animation: mg-callout-under var(--mg-duration) ease-out forwards;
+  }
+  @keyframes mg-callout-dot {
+    0%,
+    3% {
+      scale: 0;
+    }
+    11% {
+      scale: 1.35;
+    }
+    15%,
+    100% {
+      scale: 1;
+    }
+  }
+  @keyframes mg-callout-loop {
+    0%,
+    2% {
+      stroke-dashoffset: 1.01;
+    }
+    15%,
+    100% {
+      stroke-dashoffset: 0;
+    }
+  }
+  /* 15% 에 출발해 45% 에 끝에 닿는다 */
+  @keyframes mg-callout-draw {
+    0% {
+      stroke-dashoffset: 1.01;
+    }
+    15% {
+      stroke-dashoffset: 1.01;
+      animation-timing-function: ease-in-out;
+    }
+    45%,
+    100% {
+      stroke-dashoffset: 0;
+    }
+  }
+  /* 선이 닿는 45% 에 튀어나온다 — 살짝 지나쳤다 자리 잡는다 */
+  @keyframes mg-callout-pop {
+    0%,
+    45% {
+      scale: 0;
+    }
+    53% {
+      scale: 1.14;
+    }
+    58%,
+    100% {
+      scale: 1;
+    }
+  }
+  @keyframes mg-callout-write {
+    0%,
+    45% {
+      clip-path: inset(-30% 100% -30% -10%);
+    }
+    60%,
+    100% {
+      clip-path: inset(-30% -10% -30% -10%);
+    }
+  }
+  @keyframes mg-callout-under {
+    0%,
+    60% {
+      stroke-dashoffset: 1.01;
+    }
+    72%,
+    100% {
+      stroke-dashoffset: 0;
+    }
+  }
+</style>

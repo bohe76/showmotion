@@ -1,0 +1,90 @@
+---
+// Line Boil 데모 — B 는 가만히 있는데 윤곽선이 프레임마다 다시 그린 듯 조금씩 다르게 떨린다. 손으로 여러 장 베껴 그린 그림을 넘기는 것과 같다
+// 아래 옅은 블록은 같은 윤곽을 한 번만 그려 둔 것이다 — 손그림처럼 삐뚤지만 떨리지 않는다. 다른 것은 "매번 다시 그리느냐"뿐이다
+// 낮은 프레임률로 뚝뚝 바뀐다(초당 여덟 장, step-end) — 매끄럽게 출렁이면 Liquid 다. 모양 전체가 옮겨 다니는 것도 아니다(그러면 Wiggle 이다): 자리는 그대로고 선만 다르다
+// 웹 구역의 Squiggly Text 와 같은 방법이다: 씨앗(seed)만 다른 잡음 변위 필터 넷을 갈아 끼운다(CSS 는 필터 속 seed 를 움직일 수 없다)
+// 필터 주소는 루트의 인라인 스타일에 둔다 — 따로 떨어진 CSS 파일 안의 url(#…) 을 그 파일 기준으로 찾는 브라우저가 있다. 필터는 재생할 때만 건다(재생 전은 또렷한 윤곽)
+// 변위의 세기는 블록 크기에 대한 비율(objectBoundingBox)이라 카드와 상세에서 같다
+// 가는 길이 없는 용어라 출발선·도착선·눈금을 감추고 두 블록을 가운데에 세운다. 윤곽이 내용이라 블록을 채우지 않고 선으로 그린다
+import MgFrame from '../../mg/MgFrame.astro';
+import MgTrack from '../../mg/MgTrack.astro';
+
+const seeds = [3, 11, 19, 27];
+const filterVars = seeds.map((_, i) => `--mg-line-boil-f${i}: url(#mg-line-boil-${i})`).join('; ');
+---
+<div class="mg-line-boil" data-demo-root aria-hidden="true" style={filterVars}>
+  <MgFrame duration="3s">
+    <MgTrack />
+  </MgFrame>
+  <svg class="mg-line-boil-defs" width="0" height="0" focusable="false">
+    <defs>
+      {seeds.map((seed, i) => (
+        <filter id={`mg-line-boil-${i}`} x="-0.2" y="-0.2" width="1.4" height="1.4" primitiveUnits="objectBoundingBox" color-interpolation-filters="sRGB">
+          <feTurbulence type="fractalNoise" baseFrequency="0.034" numOctaves="1" seed={seed} result="noise"></feTurbulence>
+          <feDisplacementMap in="SourceGraphic" in2="noise" scale="0.09" xChannelSelector="R" yChannelSelector="G"></feDisplacementMap>
+        </filter>
+      ))}
+    </defs>
+  </svg>
+</div>
+
+<style>
+  .mg-line-boil-defs {
+    position: absolute;
+  }
+  .mg-line-boil :global(.mgtr) {
+    --mgtr-size: 17cqw;
+  }
+  .mg-line-boil :global(.mgtr-lane-hero) {
+    top: 7cqw;
+  }
+  .mg-line-boil :global(.mgtr-lane-ghost) {
+    top: 31cqw;
+  }
+  .mg-line-boil :global(.mgtr-mark),
+  .mg-line-boil :global(.mgtr-tick) {
+    display: none;
+  }
+  .mg-line-boil :global(.mgtr-block) {
+    left: calc(50% - var(--mgtr-size) / 2);
+    background: var(--surface);
+    border: 1.1cqw solid var(--demo-muted);
+  }
+  .mg-line-boil :global(.mgtr-hero) {
+    font-size: 8.4cqw;
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+  /* 한 바퀴 = 그림 넉 장. 보통 길이에 여섯 바퀴(초당 여덟 장) */
+  .mg-line-boil.is-playing :global(.mgtr-hero) {
+    animation: mg-line-boil-redraw calc(var(--mg-duration) / 6) step-end 6 forwards;
+  }
+  /* 길이 조작으로 재생이 길어지거나 짧아져도 초당 장수는 그대로여야 한다 — 바퀴 수를 길이 배수만큼 늘리거나 줄인다
+     횟수에 calc() 를 모르는 브라우저는 위의 고정 값으로 간다(길이를 바꾸면 초당 장수가 달라진다) */
+  @supports (animation-iteration-count: calc(2 * 3)) {
+    .mg-line-boil.is-playing :global(.mgtr-hero) {
+      animation-duration: calc(var(--mg-duration) / 6 / var(--mg-speed, 1));
+      animation-iteration-count: calc(6 * var(--mg-speed, 1));
+    }
+  }
+  /* 대조 블록: 움직이지 않고, 첫 그림 한 장 그대로다 */
+  .mg-line-boil.is-playing :global(.mgtr-ghost) {
+    filter: var(--mg-line-boil-f0);
+    animation: none;
+  }
+  @keyframes mg-line-boil-redraw {
+    0% {
+      filter: var(--mg-line-boil-f1);
+    }
+    25% {
+      filter: var(--mg-line-boil-f2);
+    }
+    50% {
+      filter: var(--mg-line-boil-f3);
+    }
+    75%,
+    100% {
+      filter: var(--mg-line-boil-f0);
+    }
+  }
+</style>

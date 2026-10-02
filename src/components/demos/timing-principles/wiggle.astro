@@ -1,0 +1,148 @@
+---
+// Wiggle 데모 — B 가 제자리에서 조금씩 무작위하게 벗어난다. 잦기와 폭은 일정한데 어디로 얼마나 가는지가 매번 다르다
+// 아래 옅은 블록은 같은 잦기·같은 폭으로 고르게 오간다(정해 둔 길) — 불규칙함이 Wiggle 이고, 고르게 오가면 웹 구역의 Shake 다
+// 규칙적으로 보이면 안 된다: 간격도 크기도 고르지 않은 열네 지점을 한 번만 지난다(되풀이하지 않는다). 끝에는 제자리로 돌아와 멈춘다
+// 카메라 구역의 Handheld 는 화면 전체가 떨린다. 이쪽은 요소 하나만 떤다 — 바닥선과 대조 블록은 그대로다
+// 변형(무엇이 떠는가): position(기본 — 자리) · rotation(기울기) · scale(크기). 키프레임은 하나고 변수 셋(0 또는 1)이 어느 것을 켤지 가른다
+// 가는 길이 없는 용어라 출발선·도착선·눈금을 감추고 두 블록을 가운데에 세운다
+import MgFrame from '../../mg/MgFrame.astro';
+import MgTrack from '../../mg/MgTrack.astro';
+---
+<div class="mg-wiggle" data-demo-root aria-hidden="true">
+  <MgFrame duration="3s">
+    <MgTrack />
+  </MgFrame>
+</div>
+
+<style>
+  .mg-wiggle {
+    --mg-wiggle-pos: 1;
+    --mg-wiggle-rot: 0;
+    --mg-wiggle-scl: 0;
+  }
+  .mg-wiggle[data-variant='rotation'] {
+    --mg-wiggle-pos: 0;
+    --mg-wiggle-rot: 1;
+  }
+  .mg-wiggle[data-variant='scale'] {
+    --mg-wiggle-pos: 0;
+    --mg-wiggle-scl: 1;
+  }
+  .mg-wiggle :global(.mgtr-mark),
+  .mg-wiggle :global(.mgtr-tick) {
+    display: none;
+  }
+  .mg-wiggle :global(.mgtr-block) {
+    left: calc(50% - var(--mgtr-size) / 2);
+  }
+  .mg-wiggle.is-playing :global(.mgtr-hero) {
+    animation: mg-wiggle-random var(--mg-duration) ease-in-out forwards;
+  }
+  /* 여섯 번 오간다 — 방향이 바뀌는 횟수가 주인공과 비슷하다 */
+  .mg-wiggle.is-playing :global(.mgtr-ghost) {
+    animation: mg-wiggle-even calc(var(--mg-duration) / 6) 6 forwards;
+  }
+  @keyframes mg-wiggle-random {
+    5% {
+      translate: calc(1.6cqw * var(--mg-wiggle-pos)) calc(-0.9cqw * var(--mg-wiggle-pos));
+      rotate: calc(5deg * var(--mg-wiggle-rot));
+      scale: calc(1 + 0.1 * var(--mg-wiggle-scl));
+    }
+    11% {
+      translate: calc(0.4cqw * var(--mg-wiggle-pos)) calc(1.3cqw * var(--mg-wiggle-pos));
+      rotate: calc(-2deg * var(--mg-wiggle-rot));
+      scale: calc(1 - 0.06 * var(--mg-wiggle-scl));
+    }
+    18% {
+      translate: calc(-1.9cqw * var(--mg-wiggle-pos)) calc(0.4cqw * var(--mg-wiggle-pos));
+      rotate: calc(-7deg * var(--mg-wiggle-rot));
+      scale: calc(1 + 0.14 * var(--mg-wiggle-scl));
+    }
+    23% {
+      translate: calc(-0.7cqw * var(--mg-wiggle-pos)) calc(-1.5cqw * var(--mg-wiggle-pos));
+      rotate: calc(3deg * var(--mg-wiggle-rot));
+      scale: calc(1 - 0.1 * var(--mg-wiggle-scl));
+    }
+    31% {
+      translate: calc(2.1cqw * var(--mg-wiggle-pos)) calc(0.6cqw * var(--mg-wiggle-pos));
+      rotate: calc(8deg * var(--mg-wiggle-rot));
+      scale: calc(1 + 0.05 * var(--mg-wiggle-scl));
+    }
+    36% {
+      translate: calc(1cqw * var(--mg-wiggle-pos)) calc(1.6cqw * var(--mg-wiggle-pos));
+      rotate: calc(1deg * var(--mg-wiggle-rot));
+      scale: calc(1 - 0.13 * var(--mg-wiggle-scl));
+    }
+    44% {
+      translate: calc(-1.2cqw * var(--mg-wiggle-pos)) calc(-0.5cqw * var(--mg-wiggle-pos));
+      rotate: calc(-5deg * var(--mg-wiggle-rot));
+      scale: calc(1 + 0.12 * var(--mg-wiggle-scl));
+    }
+    49% {
+      translate: calc(-2.2cqw * var(--mg-wiggle-pos)) calc(1.1cqw * var(--mg-wiggle-pos));
+      rotate: calc(-9deg * var(--mg-wiggle-rot));
+      scale: calc(1 + 0.02 * var(--mg-wiggle-scl));
+    }
+    57% {
+      translate: calc(0.3cqw * var(--mg-wiggle-pos)) calc(-1.8cqw * var(--mg-wiggle-pos));
+      rotate: calc(4deg * var(--mg-wiggle-rot));
+      scale: calc(1 - 0.08 * var(--mg-wiggle-scl));
+    }
+    63% {
+      translate: calc(1.7cqw * var(--mg-wiggle-pos)) calc(0.2cqw * var(--mg-wiggle-pos));
+      rotate: calc(7deg * var(--mg-wiggle-rot));
+      scale: calc(1 + 0.15 * var(--mg-wiggle-scl));
+    }
+    70% {
+      translate: calc(-0.5cqw * var(--mg-wiggle-pos)) calc(1.4cqw * var(--mg-wiggle-pos));
+      rotate: calc(-3deg * var(--mg-wiggle-rot));
+      scale: calc(1 - 0.04 * var(--mg-wiggle-scl));
+    }
+    77% {
+      translate: calc(-2cqw * var(--mg-wiggle-pos)) calc(-1cqw * var(--mg-wiggle-pos));
+      rotate: calc(-8deg * var(--mg-wiggle-rot));
+      scale: calc(1 + 0.09 * var(--mg-wiggle-scl));
+    }
+    84% {
+      translate: calc(1.2cqw * var(--mg-wiggle-pos)) calc(-0.3cqw * var(--mg-wiggle-pos));
+      rotate: calc(6deg * var(--mg-wiggle-rot));
+      scale: calc(1 - 0.12 * var(--mg-wiggle-scl));
+    }
+    91% {
+      translate: calc(0.2cqw * var(--mg-wiggle-pos)) calc(1.2cqw * var(--mg-wiggle-pos));
+      rotate: calc(-4deg * var(--mg-wiggle-rot));
+      scale: calc(1 + 0.06 * var(--mg-wiggle-scl));
+    }
+    100% {
+      translate: 0 0;
+      rotate: 0deg;
+      scale: 1;
+    }
+  }
+  /* 사인 곡선 한 번: 가운데에서 가장 빠르고 양 끝에서 멈칫한다. 자리는 좌우로만 오간다 */
+  @keyframes mg-wiggle-even {
+    0% {
+      translate: 0 0;
+      rotate: 0deg;
+      scale: 1;
+      animation-timing-function: cubic-bezier(0.61, 1, 0.88, 1);
+    }
+    25% {
+      translate: calc(2cqw * var(--mg-wiggle-pos)) 0;
+      rotate: calc(7deg * var(--mg-wiggle-rot));
+      scale: calc(1 + 0.12 * var(--mg-wiggle-scl));
+      animation-timing-function: cubic-bezier(0.37, 0, 0.63, 1);
+    }
+    75% {
+      translate: calc(-2cqw * var(--mg-wiggle-pos)) 0;
+      rotate: calc(-7deg * var(--mg-wiggle-rot));
+      scale: calc(1 - 0.12 * var(--mg-wiggle-scl));
+      animation-timing-function: cubic-bezier(0.12, 0, 0.39, 0);
+    }
+    100% {
+      translate: 0 0;
+      rotate: 0deg;
+      scale: 1;
+    }
+  }
+</style>

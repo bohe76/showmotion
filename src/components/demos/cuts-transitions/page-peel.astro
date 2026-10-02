@@ -1,0 +1,128 @@
+---
+// Page Peel 데모 — 앞 샷이 종이처럼 들려 넘어가며 밑에 있던 다음 샷(D)이 드러난다. 넘어간 부분은 접힘선 너머로 뒤집혀 종이 뒷면이 보인다
+// 시간 막대의 띠가 전환 구간이다(30~70%). 키프레임의 %와 같은 값이어야 한다
+// 변형: peel(기본) — 오른쪽 아래 모서리부터 들린다. 접힘선이 45° 로 비스듬하고 왼쪽 위로 쓸고 간다
+//       turn — 책장을 넘기듯 오른쪽 변부터 넘어간다. 접힘선이 세로로 서서 왼쪽으로 간다
+// 뒷면(.mg-page-peel-flap)은 드러난 부분을 접힘선에 대고 뒤집은 모양이다 — 그래서 드러난 부분과 늘 같은 크기다
+//   peel: 모서리에 붙은 정사각형을 대각선으로 반 가른 것 — 아래쪽 반이 드러난 샷, 위쪽 반이 뒷면. 한 변이 156cqw 를 넘으면 접힘선이 왼쪽 위 귀퉁이를 지난다
+//   turn: 드러난 띠와 같은 폭의 띠가 접힘선 왼쪽에 놓인다
+import MgFrame from '../../mg/MgFrame.astro';
+import MgScene from '../../mg/MgScene.astro';
+import MgShot from '../../mg/MgShot.astro';
+---
+<div class="mg-page-peel" data-demo-root aria-hidden="true">
+  <MgFrame duration="4s" ranges={[[30, 70]]}>
+    <MgScene />
+    <MgShot shot="d" />
+    <span class="mg-page-peel-flap"></span>
+  </MgFrame>
+</div>
+
+<style>
+  .mg-page-peel :global(.mgs-b),
+  .mg-page-peel :global(.mgsh-subject) {
+    translate: -8cqw 0;
+  }
+  /* 자르는 모양의 오른쪽·아래 변은 틀 밖 1px 에 둔다 — 딱 변에서 자르면 경계가 번져 끝 장면의 가장자리에 앞 샷이 실금으로 비친다
+     나머지 두 꼭짓점도 1px 씩 더 나가야 빗변(접힘선)이 뒷면의 빗변과 같은 선에 놓인다 */
+  .mg-page-peel :global(.mgsh) {
+    clip-path: polygon(calc(100% + 1px) calc(100% + 1px), calc(100% - 1px) calc(100% + 1px), calc(100% + 1px) calc(100% - 1px));
+  }
+  .mg-page-peel-flap {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    width: 0;
+    aspect-ratio: 1;
+    background: var(--highlight);
+    clip-path: polygon(0 0, 100% 0, 0 100%);
+  }
+  .mg-page-peel[data-variant='turn'] :global(.mgsh) {
+    clip-path: inset(-1px -1px -1px 100%);
+  }
+  .mg-page-peel[data-variant='turn'] .mg-page-peel-flap {
+    top: 0;
+    aspect-ratio: auto;
+    clip-path: none;
+  }
+  .mg-page-peel.is-playing :global(.mgs-b),
+  .mg-page-peel.is-playing :global(.mgsh-subject) {
+    animation: mg-page-peel-move var(--mg-duration) linear forwards;
+  }
+  .mg-page-peel.is-playing :global(.mgsh) {
+    animation: mg-page-peel-corner var(--mg-duration) linear forwards;
+  }
+  .mg-page-peel.is-playing .mg-page-peel-flap {
+    animation: mg-page-peel-corner-flap var(--mg-duration) linear forwards;
+  }
+  .mg-page-peel[data-variant='turn'].is-playing :global(.mgsh) {
+    animation-name: mg-page-peel-turn;
+  }
+  .mg-page-peel[data-variant='turn'].is-playing .mg-page-peel-flap {
+    animation-name: mg-page-peel-turn-flap;
+  }
+  @keyframes mg-page-peel-move {
+    to {
+      translate: 8cqw 0;
+    }
+  }
+  @keyframes mg-page-peel-corner {
+    0% {
+      clip-path: polygon(calc(100% + 1px) calc(100% + 1px), calc(100% - 1px) calc(100% + 1px), calc(100% + 1px) calc(100% - 1px));
+    }
+    30% {
+      clip-path: polygon(calc(100% + 1px) calc(100% + 1px), calc(100% - 1px) calc(100% + 1px), calc(100% + 1px) calc(100% - 1px));
+      animation-timing-function: ease-in-out;
+    }
+    70%,
+    100% {
+      clip-path: polygon(
+        calc(100% + 1px) calc(100% + 1px),
+        calc(100% - 1px - 160cqw) calc(100% + 1px),
+        calc(100% + 1px) calc(100% - 1px - 160cqw)
+      );
+    }
+  }
+  @keyframes mg-page-peel-corner-flap {
+    0% {
+      width: 0;
+    }
+    30% {
+      width: 0;
+      animation-timing-function: ease-in-out;
+    }
+    70%,
+    100% {
+      width: 160cqw;
+    }
+  }
+  @keyframes mg-page-peel-turn {
+    0% {
+      clip-path: inset(-1px -1px -1px 100%);
+    }
+    30% {
+      clip-path: inset(-1px -1px -1px 100%);
+      animation-timing-function: ease-in-out;
+    }
+    70%,
+    100% {
+      clip-path: inset(-1px);
+    }
+  }
+  @keyframes mg-page-peel-turn-flap {
+    0% {
+      right: 0;
+      width: 0;
+    }
+    30% {
+      right: 0;
+      width: 0;
+      animation-timing-function: ease-in-out;
+    }
+    70%,
+    100% {
+      right: 100cqw;
+      width: 100cqw;
+    }
+  }
+</style>

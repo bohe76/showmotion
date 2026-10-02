@@ -1,0 +1,89 @@
+---
+// Cycle Loop 데모 — B 가 도착선까지 가면 출발선으로 건너뛰어 처음부터 다시 간다. 세 번 되풀이하고 도착선에서 멈춘다
+// 아래 옅은 블록은 같은 움직임을 한 번만 하고 서 있다(되풀이하지 않은 것) — 변형마다 "한 번"이 어디까지인지 보여 준다
+// Ping-Pong Loop 데모와 움직임·횟수·길이가 같다. 다른 것은 끝난 뒤다 — 이쪽은 건너뛰어 다시 가고, Ping-Pong 은 거꾸로 되돌아온다
+// 시간 막대의 눈금이 한 번이 끝나는 순간이다(되풀이 경계)
+// 변형(되풀이가 끝난 자리에서 무엇을 하나):
+//   cycle(기본 — 처음 자리로 건너뛰어 다시. 눈금 33.3·66.7%)
+//   · offset(끝난 자리에서 이어서 다시 — 건너뛰지 않고 한 번만큼씩 쌓여 간다. 한 번이 거리의 1/3 이라 세 번에 도착선에 닿는다. 눈금 33.3·66.7%)
+//   · continue(되풀이하지 않고 마지막 속도 그대로 계속 간다 — 한 번은 점점 빨라지는 움직임(거리의 1/5)이고, 끝난 뒤에도 그 속도로 도착선까지 간다. 눈금 33.3%)
+//     continue 는 끝에서 속도가 남아 있어야 보인다(부드럽게 멈추는 움직임이면 그대로 선다). 그래서 이 변형만 한 번의 곡선이 가속이다
+// 눈금은 감춘다 — 한 번의 길이만 아는 표시라 되풀이를 나타내지 못한다
+import MgFrame from '../../mg/MgFrame.astro';
+import MgTrack from '../../mg/MgTrack.astro';
+
+const cuts: Record<string, number[]> = {
+  cycle: [33.3, 66.7],
+  offset: [33.3, 66.7],
+  continue: [33.3],
+};
+---
+<div class="mg-cycle-loop" data-demo-root aria-hidden="true">
+  <MgFrame duration="3s" cuts={cuts}>
+    <MgTrack />
+  </MgFrame>
+</div>
+
+<style>
+  .mg-cycle-loop {
+    --mgtr-curve: cubic-bezier(0.65, 0, 0.35, 1);
+  }
+  /* 한 번에 가는 거리 */
+  .mg-cycle-loop :global(.mgtr-block) {
+    --mg-cycle-loop-leg: var(--mgtr-distance);
+  }
+  .mg-cycle-loop[data-variant='offset'] :global(.mgtr-block) {
+    --mg-cycle-loop-leg: calc(var(--mgtr-distance) / 3);
+  }
+  /* 한 번(전체의 1/3 동안 y = x² 로 가속)의 끝 속도로 남은 2/3 을 가면 한 번 거리의 네 배를 더 간다 — 한 번이 1/5 이면 도착선에서 끝난다 */
+  .mg-cycle-loop[data-variant='continue'] {
+    --mgtr-curve: cubic-bezier(0.333, 0, 0.667, 0.333);
+  }
+  .mg-cycle-loop[data-variant='continue'] :global(.mgtr-block) {
+    --mg-cycle-loop-leg: calc(var(--mgtr-distance) / 5);
+  }
+  .mg-cycle-loop :global(.mgtr-tick) {
+    display: none;
+  }
+  .mg-cycle-loop.is-playing :global(.mgtr-hero) {
+    animation: mg-cycle-loop-leg calc(var(--mg-duration) / 3) var(--mgtr-curve) 3 forwards;
+  }
+  .mg-cycle-loop.is-playing :global(.mgtr-ghost) {
+    animation: mg-cycle-loop-leg calc(var(--mg-duration) / 3) var(--mgtr-curve) forwards;
+  }
+  .mg-cycle-loop[data-variant='offset'].is-playing :global(.mgtr-hero) {
+    animation: mg-cycle-loop-offset var(--mg-duration) var(--mgtr-curve) forwards;
+  }
+  .mg-cycle-loop[data-variant='continue'].is-playing :global(.mgtr-hero) {
+    animation: mg-cycle-loop-continue var(--mg-duration) linear forwards;
+  }
+  @keyframes mg-cycle-loop-leg {
+    to {
+      translate: var(--mg-cycle-loop-leg) 0;
+    }
+  }
+  /* 곡선은 구간마다 따로 먹는다 — 한 번씩 가고 서기를 세 번 */
+  @keyframes mg-cycle-loop-offset {
+    33.33% {
+      translate: var(--mg-cycle-loop-leg) 0;
+    }
+    66.67% {
+      translate: calc(var(--mg-cycle-loop-leg) * 2) 0;
+    }
+    100% {
+      translate: calc(var(--mg-cycle-loop-leg) * 3) 0;
+    }
+  }
+  @keyframes mg-cycle-loop-continue {
+    0% {
+      translate: 0 0;
+      animation-timing-function: var(--mgtr-curve);
+    }
+    33.33% {
+      translate: var(--mg-cycle-loop-leg) 0;
+    }
+    100% {
+      translate: calc(var(--mg-cycle-loop-leg) * 5) 0;
+    }
+  }
+</style>

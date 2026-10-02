@@ -1,0 +1,32 @@
+---
+// Steps 데모 — B 가 매끄럽게 가지 않고 계단처럼 뚝뚝 건너뛴다. 건너뛰는 사이에는 그 자리에 멈춰 있다. 아래 옅은 블록은 같은 거리를 등속으로 매끄럽게 간다
+// 시간 막대의 눈금이 건너뛰는 순간이다 — steps() 의 계단과 같은 값이어야 한다. 눈금이 겹쳐 몇 자리에만 찍힌다(B 가 머무는 자리가 그것뿐이다)
+// 변형: multi-step(기본 — 다섯 번에 나눠 건너뛴다. 20·40·60·80% 와 끝. 건너뛸 때마다 대조 블록이 와 있는 자리로 옮겨 간다)
+//       · hold(한 번만 건너뛴다 — 출발선에 머물다가 50% 에서 도착선으로 한순간에 옮겨 가 그대로 머문다)
+// 계단 수가 훨씬 많아 끊기며 흐르는 것은 Animating on Twos 다
+import MgFrame from '../../mg/MgFrame.astro';
+import MgTrack from '../../mg/MgTrack.astro';
+
+const cuts: Record<string, number[]> = {
+  'multi-step': [20, 40, 60, 80],
+  hold: [50],
+};
+---
+<div class="mg-steps" data-demo-root aria-hidden="true">
+  <MgFrame duration="3s" cuts={cuts}>
+    <MgTrack />
+  </MgFrame>
+</div>
+
+<style>
+  .mg-steps {
+    --mgtr-curve: steps(5, end);
+  }
+  /* jump-none: 처음 자리와 끝 자리 둘뿐 — 앞 절반은 출발선, 뒤 절반은 도착선 */
+  .mg-steps[data-variant='hold'] {
+    --mgtr-curve: steps(2, jump-none);
+  }
+  .mg-steps.is-playing :global(.mgtr-hero) {
+    animation: mg-track-run var(--mg-duration) var(--mgtr-curve) forwards;
+  }
+</style>

@@ -1,0 +1,58 @@
+---
+// Orbit 데모 — 카메라가 B 를 바라본 채 그 둘레를 돈다. B 는 화면 한가운데에 그대로 있고, 뒤 레이어와 앞 레이어가 서로 반대 방향으로 흐른다
+// Truck · Tracking Shot 과 나란히 보면 차이가 보인다: 그 둘은 모든 레이어가 같은 방향으로 흐른다
+// 이동량 = 12cqw × (레이어까지의 거리 − 1) ÷ 거리 — B(거리 1)는 0, 뒤는 +, 앞은 − 라서 방향이 갈린다
+// 변형: clockwise(기본 — 위에서 볼 때 시계 방향. 카메라가 왼쪽으로 돌아가 뒤 레이어는 왼쪽, 앞 레이어는 오른쪽으로 흐른다) · counter-clockwise. --mg-dir 이 방향이다(시계 -1, 반시계 1)
+// 깊이: 레이어 사이가 멀수록 뒤·앞이 더 많이 흐른다
+import MgFrame from '../../mg/MgFrame.astro';
+// 위에서 보기: 카메라가 B 를 본 채 그 둘레의 호를 따라간다
+import MgScene from '../../mg/MgScene.astro';
+import MgTopView from '../../mg/MgTopView.astro';
+---
+<div class="mg-orbit" data-demo-root aria-hidden="true">
+  <MgFrame duration="3s">
+    <MgScene />
+    <MgTopView />
+  </MgFrame>
+</div>
+
+<style>
+  .mg-orbit {
+    --mg-dir: -1;
+  }
+  .mg-orbit[data-variant='counter-clockwise'] {
+    --mg-dir: 1;
+  }
+  .mg-orbit :global(.mgs-far) {
+    --mg-orbit-shift: calc(12cqw * (var(--mg-z-far) - 1) / var(--mg-z-far));
+  }
+  .mg-orbit :global(.mgs-near) {
+    --mg-orbit-shift: calc(12cqw * (var(--mg-z-near) - 1) / var(--mg-z-near));
+  }
+  .mg-orbit :global(.mgs-far),
+  .mg-orbit :global(.mgs-near) {
+    translate: calc(var(--mg-orbit-shift) * var(--mg-dir) * -1) 0;
+  }
+  .mg-orbit.is-playing :global(.mgs-far),
+  .mg-orbit.is-playing :global(.mgs-near) {
+    animation: mg-orbit-move var(--mg-duration) ease-in-out forwards;
+  }
+  @keyframes mg-orbit-move {
+    to {
+      translate: calc(var(--mg-orbit-shift) * var(--mg-dir)) 0;
+    }
+  }
+  /* 위에서 보기: 가운데 줄의 한가운데(B)를 축으로 돈다. 뒤 줄이 화면 폭의 6% 밀리는 각 — 시야 반각의 탄젠트가 1.15 일 때 ±15.7° */
+  .mg-orbit :global(.mgt-cam) {
+    transform-origin: 0 calc(var(--mgt-unit) * -1);
+    rotate: calc(15.7deg * var(--mg-dir));
+  }
+  .mg-orbit.is-playing :global(.mgt-cam) {
+    animation: mg-orbit-arc var(--mg-duration) ease-in-out forwards;
+  }
+  @keyframes mg-orbit-arc {
+    to {
+      rotate: calc(-15.7deg * var(--mg-dir));
+    }
+  }
+</style>

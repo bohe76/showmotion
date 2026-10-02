@@ -1,0 +1,48 @@
+---
+// Hard Cut 데모 — 아무 효과 없이 한 샷이 다음 샷으로 바뀐다. 시간 막대의 눈금이 컷 지점이다(50%). 키프레임의 바뀌는 지점과 같은 값이어야 한다
+// 다른 모든 전환의 기준이라 가장 단순하게 둔다: 두 샷 모두 같은 빠르기로 조용히 움직이고, 컷은 한 번이다
+// (Contrast Cut 은 톤이 반대인 샷으로, Smash Cut 은 조용한 샷에서 격한 샷으로 넘어간다 — 여기는 그런 대비가 없다)
+import MgFrame from '../../mg/MgFrame.astro';
+import MgScene from '../../mg/MgScene.astro';
+import MgShot from '../../mg/MgShot.astro';
+---
+<div class="mg-hard-cut" data-demo-root aria-hidden="true">
+  <MgFrame duration="4s" cuts={[50]}>
+    <MgScene />
+    <MgShot shot="f" />
+  </MgFrame>
+</div>
+
+<style>
+  .mg-hard-cut :global(.mgs-b) {
+    translate: -8cqw 0;
+  }
+  .mg-hard-cut :global(.mgsh) {
+    visibility: hidden;
+  }
+  .mg-hard-cut.is-playing :global(.mgs-b),
+  .mg-hard-cut.is-playing :global(.mgsh-subject) {
+    animation: mg-hard-cut-move var(--mg-duration) linear forwards;
+  }
+  /* step-end: 50% 가 될 때까지 앞 값을 지키다가 그 지점에서 중간 과정 없이 바뀐다 */
+  .mg-hard-cut.is-playing :global(.mgsh) {
+    animation: mg-hard-cut-cut var(--mg-duration) step-end forwards;
+  }
+  @keyframes mg-hard-cut-move {
+    from {
+      translate: -8cqw 0;
+    }
+    to {
+      translate: 8cqw 0;
+    }
+  }
+  @keyframes mg-hard-cut-cut {
+    0% {
+      visibility: hidden;
+    }
+    50%,
+    100% {
+      visibility: visible;
+    }
+  }
+</style>

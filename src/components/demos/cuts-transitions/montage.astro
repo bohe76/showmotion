@@ -1,0 +1,93 @@
+---
+// Montage 데모 — 짧은 샷 여럿이 빠르게 이어진다. 시간 막대의 눈금이 컷 지점이다 — 샷마다 길이가 같다
+// 변형: sequence(기본) — 다섯 샷, 컷 20·40·60·80%
+//       rapid-cut — 열 샷, 컷 10·20·…·90% (같은 길이에 두 배로 잘게 자른다)
+// 샷은 차례대로 위에 쌓인다: i 번째 샷이 i × --mg-montage-step 지점에 나타나 앞 샷을 덮는다(지연 = 그 지점, 길이 = 남은 시간)
+// 같은 샷을 다시 쓸 때는 구도를 바꾼다(tight — 주인공 도형에 바짝 다가간 구도). 이웃한 샷은 늘 종류가 다르다
+import MgFrame from '../../mg/MgFrame.astro';
+import MgScene from '../../mg/MgScene.astro';
+import MgShot from '../../mg/MgShot.astro';
+
+// 넷째 샷까지는 두 변형이 같이 쓰고, 그 뒤는 rapid-cut 에만 나온다
+const shots = [
+  { shot: 'd' },
+  { shot: 'e' },
+  { shot: 'f' },
+  { shot: 'd', tight: true },
+  { shot: 'e', tight: true },
+  { shot: 'f', tight: true },
+  { shot: 'e' },
+  { shot: 'd' },
+  { shot: 'f', tight: true },
+] as const;
+const sequenceShots = 4;
+const cuts = {
+  sequence: [20, 40, 60, 80],
+  'rapid-cut': [10, 20, 30, 40, 50, 60, 70, 80, 90],
+};
+---
+<div class="mg-montage" data-demo-root aria-hidden="true">
+  <MgFrame duration="4s" cuts={cuts}>
+    <MgScene />
+    {
+      shots.map((s, i) => (
+        <div
+          class:list={['mg-montage-shot', 'tight' in s && 'mg-montage-tight', i >= sequenceShots && 'mg-montage-extra']}
+          style={`--mg-montage-i: ${i + 1}`}
+        >
+          <MgShot shot={s.shot} />
+        </div>
+      ))
+    }
+  </MgFrame>
+</div>
+
+<style>
+  .mg-montage {
+    --mg-montage-step: 0.2;
+  }
+  .mg-montage[data-variant='rapid-cut'] {
+    --mg-montage-step: 0.1;
+  }
+  .mg-montage :global(.mgs-b) {
+    translate: -6cqw 0;
+  }
+  .mg-montage-shot {
+    --mg-montage-at: calc(var(--mg-montage-i) * var(--mg-montage-step));
+    position: absolute;
+    inset: 0;
+    visibility: hidden;
+  }
+  .mg-montage:not([data-variant='rapid-cut']) .mg-montage-extra {
+    display: none;
+  }
+  .mg-montage-tight :global(.mgsh-subject) {
+    scale: 1.7;
+  }
+  .mg-montage-tight :global(.mgsh-prop) {
+    scale: 1.7;
+    translate: -8cqw 6cqw;
+  }
+  .mg-montage.is-playing :global(.mgs-b),
+  .mg-montage.is-playing :global(.mgsh-subject) {
+    animation: mg-montage-move var(--mg-duration) linear forwards;
+  }
+  .mg-montage.is-playing .mg-montage-shot {
+    animation: mg-montage-show calc(var(--mg-duration) * (1 - var(--mg-montage-at))) step-end calc(var(--mg-duration) * var(--mg-montage-at))
+      forwards;
+  }
+  @keyframes mg-montage-move {
+    from {
+      translate: -6cqw 0;
+    }
+    to {
+      translate: 6cqw 0;
+    }
+  }
+  @keyframes mg-montage-show {
+    from,
+    to {
+      visibility: visible;
+    }
+  }
+</style>

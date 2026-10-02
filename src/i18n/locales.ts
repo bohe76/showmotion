@@ -71,6 +71,36 @@ type UiStrings = {
   toDark: string;
   // 전체 페이지 오른쪽 카테고리 레일(섹션 바로 가기)의 이름 — 스크린리더용
   sectionsLabel: string;
+  // 헤더의 최상위 구분(Web / Motion Graphics) 내비게이션의 이름 — 스크린리더용. 구분 이름 자체는 모든 언어에서 영어다
+  areasLabel: string;
+  // 모션 그래픽 구역의 목록 페이지 제목·소개·메타와 프롬프트 안내
+  // promptNote 의 자리 표시는 그 언어의 프롬프트가 쓰는 것과 같아야 한다 — en [scene]·[duration], ko [장면]·[길이] … (docs/content/prompt_writing_guide.md §모션 그래픽 구역 §프롬프트)
+  // categoryDescription·searchPlaceholder 는 웹 문구(AI 코딩 에이전트, marquee·fade 예시)가 이 구역에 맞지 않아 따로 둔다
+  mg: {
+    // 목록 카드의 3D 표시(DemoStage 왼쪽 위 Box 아이콘)에 마우스를 올리면 뜨는 툴팁
+    stage3d: string;
+    metaTitle: string;
+    metaDescription: string;
+    tagline: string;
+    intro: string;
+    promptNote: string;
+    categoryDescription: (category: string, n: number) => string;
+    searchPlaceholder: string;
+    // 상세 페이지의 데모 조작 줄(MgControls) — 묶음 이름과 선택지. 변형 묶음의 이름은 variants 를 같이 쓴다
+    // normal 은 길이·깊이 두 묶음의 가운데 선택지가 같이 쓴다
+    controls: {
+      duration: string;
+      short: string;
+      normal: string;
+      long: string;
+      depth: string;
+      shallow: string;
+      deep: string;
+      view: string;
+      screen: string;
+      top: string;
+    };
+  };
   back: string;
   // 404 페이지: 제목, 안내, 전체 페이지 링크
   notFoundTitle: string;
@@ -81,6 +111,8 @@ type UiStrings = {
   related: (category: string) => string;
   promptHeading: string;
   // 상세 페이지: 이 모션 데모의 소스(공개 저장소) 링크, 헷갈리기 쉬운 모션 목록의 제목
+  // 상세 페이지: 데모 소스 링크 위의 소제목 (Use for·Variants 와 같은 줄)
+  source: string;
   viewSource: string;
   similar: string;
   // 조작해야 움직이는 데모의 스테이지 안내
@@ -89,12 +121,12 @@ type UiStrings = {
 
 export const ui: Record<Locale, UiStrings> = {
   en: {
-    metaTitle: 'ShowMotion — Web animations with copy-ready AI agent prompts',
+    metaTitle: 'ShowMotion — Web animations & motion graphics with AI prompts',
     metaDescription:
-      'See common web motions play live, learn what each one is called, and copy a prompt your AI coding agent can implement directly.',
+      'See common web motions and motion graphics terms play live, learn what each one is called, and copy a prompt your AI coding agent can implement directly.',
     tagline: 'Web motions, shown live. Prompts, ready to paste.',
     intro:
-      'You know the motion when you see it, but not what it is called. Watch each one play, learn its name, and copy a prompt that tells your AI coding agent exactly how to build it.',
+      'You know the motion when you see it, but not what it is called. Watch each one play, learn its name, and copy a prompt that tells your AI coding agent exactly how to build it. Camera moves, cuts and other video terms are under Motion Graphics.',
     count: (n) => (n === 1 ? '1 motion' : `${n} motions`),
     languageLabel: 'Language',
     replay: 'Replay',
@@ -123,6 +155,35 @@ export const ui: Record<Locale, UiStrings> = {
     toLight: 'Switch to light mode',
     toDark: 'Switch to dark mode',
     sectionsLabel: 'Jump to a category',
+    areasLabel: 'Sections',
+    mg: {
+      stage3d: '3D demo',
+      controls: {
+        duration: 'Duration',
+        short: 'Short',
+        normal: 'Normal',
+        long: 'Long',
+        depth: 'Depth',
+        shallow: 'Shallow',
+        deep: 'Deep',
+        view: 'View',
+        screen: 'Screen',
+        top: 'From above',
+      },
+      categoryDescription: (c, n) =>
+        `${c}: ${n === 1 ? '1 motion graphics term' : `${n} motion graphics terms`} shown live, each with a copy-ready prompt for your AI agent.`,
+      searchPlaceholder: 'Search by name or what it does (e.g. pan, jump cut, camera)',
+      metaTitle:
+        'Motion Graphics Terms — ShowMotion',
+      metaDescription:
+        'See camera moves, cuts and timing terms from video and motion graphics play live, learn what each one is called, and copy a prompt your AI agent can follow.',
+      tagline:
+        'Motion graphics terms, shown live. Prompts, ready to paste.',
+      intro:
+        'Camera moves, cuts and timing all have names. Press play to watch each one, learn what it is called, and copy a prompt that asks your AI agent for it by name.',
+      promptNote:
+        'Replace [scene] with the shot and [duration] with how long it should take, then paste the prompt into your AI agent. Each prompt includes the name of the technique, so next time you can simply ask for it by name.',
+    },
     back: 'Back',
     notFoundTitle: 'Page not found',
     notFoundBody: 'This page does not exist or has moved. Browse all motions or search by name.',
@@ -131,6 +192,7 @@ export const ui: Record<Locale, UiStrings> = {
     variants: 'Variants',
     related: (c) => `More in ${c}`,
     promptHeading: 'Prompt',
+    source: 'Source',
     viewSource: 'View demo source',
     similar: 'Similar motions',
     hint: {
@@ -142,12 +204,12 @@ export const ui: Record<Locale, UiStrings> = {
     },
   },
   es: {
-    metaTitle: 'ShowMotion — Animaciones web con prompts listos para agentes de IA',
+    metaTitle: 'ShowMotion — Animaciones web y motion graphics con prompts de IA',
     metaDescription:
-      'Mira animaciones web comunes en acción, aprende cómo se llama cada una y copia un prompt que tu agente de IA puede implementar directamente.',
+      'Mira animaciones web comunes y términos de motion graphics en acción, aprende cómo se llama cada uno y copia un prompt que tu agente de IA puede implementar directamente.',
     tagline: 'Animaciones web en vivo. Prompts listos para pegar.',
     intro:
-      'Reconoces la animación cuando la ves, pero no sabes cómo se llama. Mira cada una en movimiento, aprende su nombre y copia un prompt que le indica a tu agente de IA exactamente cómo construirla.',
+      'Reconoces la animación cuando la ves, pero no sabes cómo se llama. Mira cada una en movimiento, aprende su nombre y copia un prompt que le indica a tu agente de IA exactamente cómo construirla. Los movimientos de cámara, los cortes y otros términos de vídeo están en Motion Graphics.',
     count: (n) => (n === 1 ? '1 animación' : `${n} animaciones`),
     languageLabel: 'Idioma',
     replay: 'Repetir',
@@ -176,6 +238,35 @@ export const ui: Record<Locale, UiStrings> = {
     toLight: 'Cambiar a modo claro',
     toDark: 'Cambiar a modo oscuro',
     sectionsLabel: 'Ir a una categoría',
+    areasLabel: 'Secciones',
+    mg: {
+      stage3d: 'Demo en 3D',
+      controls: {
+        duration: 'Duración',
+        short: 'Corta',
+        normal: 'Normal',
+        long: 'Larga',
+        depth: 'Profundidad',
+        shallow: 'Poca',
+        deep: 'Mucha',
+        view: 'Vista',
+        screen: 'Pantalla',
+        top: 'Desde arriba',
+      },
+      categoryDescription: (c, n) =>
+        `${c}: ${n === 1 ? '1 término' : `${n} términos`} de motion graphics en acción, cada uno con un prompt listo para copiar en tu agente de IA.`,
+      searchPlaceholder: 'Busca por nombre o por lo que hace (p. ej., pan, jump cut, cámara)',
+      metaTitle:
+        'Términos de motion graphics — ShowMotion',
+      metaDescription:
+        'Mira en acción movimientos de cámara, cortes y términos de ritmo del vídeo y los motion graphics, aprende cómo se llama cada uno y copia un prompt que tu agente de IA puede seguir.',
+      tagline:
+        'Términos de motion graphics en vivo. Prompts listos para pegar.',
+      intro:
+        'Los movimientos de cámara, los cortes y el ritmo también tienen nombre. Pulsa reproducir para ver cada uno, aprende cómo se llama y copia un prompt que se lo pide a tu agente de IA por su nombre.',
+      promptNote:
+        'Sustituye [escena] por tu escena y [duración] por lo que debe durar, y pega el prompt en tu agente de IA. Cada prompt incluye el nombre de la técnica, así la próxima vez puedes pedirla solo por su nombre.',
+    },
     back: 'Volver',
     notFoundTitle: 'Página no encontrada',
     notFoundBody: 'Esta página no existe o se ha movido. Explora todas las animaciones o busca por nombre.',
@@ -184,6 +275,7 @@ export const ui: Record<Locale, UiStrings> = {
     variants: 'Variantes',
     related: (c) => `Más en ${c}`,
     promptHeading: 'Prompt',
+    source: 'Código',
     viewSource: 'Ver el código de la demo',
     similar: 'Animaciones parecidas',
     hint: {
@@ -195,12 +287,12 @@ export const ui: Record<Locale, UiStrings> = {
     },
   },
   de: {
-    metaTitle: 'ShowMotion — Web-Animationen mit kopierfertigen Prompts für KI-Agenten',
+    metaTitle: 'ShowMotion — Web-Animationen & Motion Graphics mit KI-Prompts',
     metaDescription:
-      'Sieh dir gängige Web-Animationen live an, lerne, wie sie heißen, und kopiere einen Prompt, den dein KI-Coding-Agent direkt umsetzen kann.',
+      'Sieh dir gängige Web-Animationen und Motion-Graphics-Begriffe live an, lerne, wie sie heißen, und kopiere einen Prompt, den dein KI-Coding-Agent direkt umsetzen kann.',
     tagline: 'Web-Animationen live sehen. Prompts direkt einfügen.',
     intro:
-      'Du erkennst die Animation, wenn du sie siehst, weißt aber nicht, wie sie heißt. Sieh dir jede in Bewegung an, lerne ihren Namen und kopiere einen Prompt, der deinem KI-Coding-Agenten genau sagt, wie er sie umsetzt.',
+      'Du erkennst die Animation, wenn du sie siehst, weißt aber nicht, wie sie heißt. Sieh dir jede in Bewegung an, lerne ihren Namen und kopiere einen Prompt, der deinem KI-Coding-Agenten genau sagt, wie er sie umsetzt. Kamerabewegungen, Schnitte und andere Videobegriffe findest du unter Motion Graphics.',
     count: (n) => (n === 1 ? '1 Animation' : `${n} Animationen`),
     languageLabel: 'Sprache',
     replay: 'Erneut abspielen',
@@ -229,6 +321,35 @@ export const ui: Record<Locale, UiStrings> = {
     toLight: 'Zum hellen Modus wechseln',
     toDark: 'Zum dunklen Modus wechseln',
     sectionsLabel: 'Zu einer Kategorie springen',
+    areasLabel: 'Bereiche',
+    mg: {
+      stage3d: '3D-Demo',
+      controls: {
+        duration: 'Dauer',
+        short: 'Kurz',
+        normal: 'Normal',
+        long: 'Lang',
+        depth: 'Tiefe',
+        shallow: 'Flach',
+        deep: 'Tief',
+        view: 'Ansicht',
+        screen: 'Bild',
+        top: 'Von oben',
+      },
+      categoryDescription: (c, n) =>
+        `${c}: ${n === 1 ? '1 Motion-Graphics-Begriff' : `${n} Motion-Graphics-Begriffe`} live ansehen, jeweils mit einem kopierfertigen Prompt für deinen KI-Agenten.`,
+      searchPlaceholder: 'Nach Name oder Wirkung suchen (z. B. pan, jump cut, Kamera)',
+      metaTitle:
+        'Motion-Graphics-Begriffe — ShowMotion',
+      metaDescription:
+        'Sieh dir Kamerabewegungen, Schnitte und Timing-Begriffe aus Video und Motion Graphics live an, lerne, wie sie heißen, und kopiere einen Prompt, dem dein KI-Agent folgen kann.',
+      tagline:
+        'Motion-Graphics-Begriffe live sehen. Prompts direkt einfügen.',
+      intro:
+        'Auch Kamerabewegungen, Schnitte und Timing haben Namen. Drück auf Abspielen, sieh dir jeden Begriff an, lerne, wie er heißt, und kopiere einen Prompt, der ihn deinem KI-Agenten beim Namen nennt.',
+      promptNote:
+        'Ersetze [Szene] durch deine Szene und [Dauer] durch die gewünschte Länge und füge den Prompt in deinen KI-Agenten ein. Jeder Prompt enthält den Namen der Technik – beim nächsten Mal reicht es, sie beim Namen zu nennen.',
+    },
     back: 'Zurück',
     notFoundTitle: 'Seite nicht gefunden',
     notFoundBody: 'Diese Seite gibt es nicht oder sie wurde verschoben. Sieh dir alle Animationen an oder suche nach dem Namen.',
@@ -237,6 +358,7 @@ export const ui: Record<Locale, UiStrings> = {
     variants: 'Varianten',
     related: (c) => `Mehr aus ${c}`,
     promptHeading: 'Prompt',
+    source: 'Quellcode',
     viewSource: 'Quellcode der Demo ansehen',
     similar: 'Ähnliche Animationen',
     hint: {
@@ -248,12 +370,12 @@ export const ui: Record<Locale, UiStrings> = {
     },
   },
   fr: {
-    metaTitle: 'ShowMotion — Animations web et prompts prêts à copier pour agents IA',
+    metaTitle: 'ShowMotion — Animations web, motion graphics et prompts IA',
     metaDescription:
-      'Regardez des animations web courantes en direct, découvrez leur nom et copiez un prompt que votre agent de code IA peut implémenter directement.',
+      'Regardez des animations web courantes et des termes de motion graphics en direct, découvrez leur nom et copiez un prompt que votre agent de code IA peut implémenter directement.',
     tagline: 'Des animations web en direct. Des prompts prêts à coller.',
     intro:
-      'Vous reconnaissez l’animation quand vous la voyez, mais pas son nom. Regardez chacune en mouvement, apprenez son nom et copiez un prompt qui indique précisément à votre agent de code IA comment la réaliser.',
+      'Vous reconnaissez l’animation quand vous la voyez, mais pas son nom. Regardez chacune en mouvement, apprenez son nom et copiez un prompt qui indique précisément à votre agent de code IA comment la réaliser. Les mouvements de caméra, les coupes et les autres termes de vidéo se trouvent dans Motion Graphics.',
     count: (n) => (n <= 1 ? `${n} animation` : `${n} animations`),
     languageLabel: 'Langue',
     replay: 'Rejouer',
@@ -282,6 +404,35 @@ export const ui: Record<Locale, UiStrings> = {
     toLight: 'Passer en mode clair',
     toDark: 'Passer en mode sombre',
     sectionsLabel: 'Aller à une catégorie',
+    areasLabel: 'Rubriques',
+    mg: {
+      stage3d: 'Démo 3D',
+      controls: {
+        duration: 'Durée',
+        short: 'Courte',
+        normal: 'Normale',
+        long: 'Longue',
+        depth: 'Profondeur',
+        shallow: 'Faible',
+        deep: 'Forte',
+        view: 'Vue',
+        screen: 'Écran',
+        top: 'Du dessus',
+      },
+      categoryDescription: (c, n) =>
+        `${c} : ${n <= 1 ? `${n} terme` : `${n} termes`} de motion graphics en direct, chacun avec un prompt prêt à copier pour votre agent IA.`,
+      searchPlaceholder: 'Chercher par nom ou par effet (ex. : pan, jump cut, caméra)',
+      metaTitle:
+        'Termes de motion graphics — ShowMotion',
+      metaDescription:
+        'Regardez en direct des mouvements de caméra, des coupes et des termes de rythme issus de la vidéo et du motion graphics, découvrez leur nom et copiez un prompt que votre agent IA peut suivre.',
+      tagline:
+        'Les termes du motion graphics en direct. Des prompts prêts à coller.',
+      intro:
+        'Les mouvements de caméra, les coupes et le rythme ont eux aussi un nom. Lancez la lecture pour voir chacun, apprenez son nom et copiez un prompt qui le demande à votre agent IA par son nom.',
+      promptNote:
+        'Remplacez [scène] par votre scène et [durée] par la durée voulue, puis collez le prompt dans votre agent IA. Chaque prompt contient le nom de la technique : la prochaine fois, il vous suffira de la demander par son nom.',
+    },
     back: 'Retour',
     notFoundTitle: 'Page introuvable',
     notFoundBody: 'Cette page n’existe pas ou a été déplacée. Parcourez toutes les animations ou cherchez par nom.',
@@ -290,6 +441,7 @@ export const ui: Record<Locale, UiStrings> = {
     variants: 'Variantes',
     related: (c) => `Autres animations : ${c}`,
     promptHeading: 'Prompt',
+    source: 'Code',
     viewSource: 'Voir le code de la démo',
     similar: 'Animations similaires',
     hint: {
@@ -301,12 +453,12 @@ export const ui: Record<Locale, UiStrings> = {
     },
   },
   ptBR: {
-    metaTitle: 'ShowMotion — Animações web com prompts prontos para agentes de IA',
+    metaTitle: 'ShowMotion — Animações web e motion graphics com prompts de IA',
     metaDescription:
-      'Veja animações web comuns em ação, descubra como cada uma se chama e copie um prompt que seu agente de programação com IA pode implementar direto.',
+      'Veja animações web comuns e termos de motion graphics em ação, descubra como cada um se chama e copie um prompt que seu agente de programação com IA pode implementar direto.',
     tagline: 'Animações web ao vivo. Prompts prontos para colar.',
     intro:
-      'Você reconhece a animação quando vê, mas não sabe o nome. Veja cada uma em movimento, aprenda o nome dela e copie um prompt que diz ao seu agente de IA exatamente como construí-la.',
+      'Você reconhece a animação quando vê, mas não sabe o nome. Veja cada uma em movimento, aprenda o nome dela e copie um prompt que diz ao seu agente de IA exatamente como construí-la. Movimentos de câmera, cortes e outros termos de vídeo ficam em Motion Graphics.',
     count: (n) => (n === 1 ? '1 animação' : `${n} animações`),
     languageLabel: 'Idioma',
     replay: 'Repetir',
@@ -335,6 +487,35 @@ export const ui: Record<Locale, UiStrings> = {
     toLight: 'Mudar para o modo claro',
     toDark: 'Mudar para o modo escuro',
     sectionsLabel: 'Ir para uma categoria',
+    areasLabel: 'Seções',
+    mg: {
+      stage3d: 'Demo em 3D',
+      controls: {
+        duration: 'Duração',
+        short: 'Curta',
+        normal: 'Normal',
+        long: 'Longa',
+        depth: 'Profundidade',
+        shallow: 'Rasa',
+        deep: 'Funda',
+        view: 'Vista',
+        screen: 'Tela',
+        top: 'De cima',
+      },
+      categoryDescription: (c, n) =>
+        `${c}: ${n === 1 ? '1 termo' : `${n} termos`} de motion graphics ao vivo, cada um com um prompt pronto para colar no seu agente de IA.`,
+      searchPlaceholder: 'Busque pelo nome ou pelo que faz (ex.: pan, jump cut, câmera)',
+      metaTitle:
+        'Termos de motion graphics — ShowMotion',
+      metaDescription:
+        'Veja em ação movimentos de câmera, cortes e termos de ritmo do vídeo e do motion graphics, descubra como cada um se chama e copie um prompt que seu agente de IA pode seguir.',
+      tagline:
+        'Termos de motion graphics ao vivo. Prompts prontos para colar.',
+      intro:
+        'Movimentos de câmera, cortes e ritmo também têm nome. Aperte o play para ver cada um, aprenda o nome e copie um prompt que pede isso ao seu agente de IA pelo nome.',
+      promptNote:
+        'Substitua [cena] pela sua cena e [duração] pelo tempo que deve levar e cole o prompt no seu agente de IA. Cada prompt traz o nome da técnica, então da próxima vez basta pedir pelo nome.',
+    },
     back: 'Voltar',
     notFoundTitle: 'Página não encontrada',
     notFoundBody: 'Esta página não existe ou foi movida. Veja todas as animações ou pesquise pelo nome.',
@@ -343,6 +524,7 @@ export const ui: Record<Locale, UiStrings> = {
     variants: 'Variações',
     related: (c) => `Mais em ${c}`,
     promptHeading: 'Prompt',
+    source: 'Código',
     viewSource: 'Ver o código da demo',
     similar: 'Animações parecidas',
     hint: {
@@ -354,12 +536,12 @@ export const ui: Record<Locale, UiStrings> = {
     },
   },
   ja: {
-    metaTitle: 'ShowMotion — Webモーションの実例とAIエージェント用プロンプト',
+    metaTitle: 'ShowMotion — Webモーション・モーショングラフィックスの実例とAIプロンプト',
     metaDescription:
-      'Webでよく使われるモーションを実際に再生して確認し、名前を知り、AIコーディングエージェントにそのまま貼り付けられるプロンプトをコピーできます。',
+      'Webでよく使われるモーションやモーショングラフィックスの用語を実際に再生して確認し、名前を知り、AIコーディングエージェントにそのまま貼り付けられるプロンプトをコピーできます。',
     tagline: 'Webモーションを目で見て、プロンプトはそのままコピー。',
     intro:
-      '見ればわかるのに名前がわからないモーションがあります。実際の動きを見て、正しい名前を知り、AIコーディングエージェントがそのまま実装できるプロンプトをコピーしてください。',
+      '見ればわかるのに名前がわからないモーションがあります。実際の動きを見て、正しい名前を知り、AIコーディングエージェントがそのまま実装できるプロンプトをコピーしてください。カメラワークやカットなどの映像用語は Motion Graphics にあります。',
     count: (n) => `${n}種類のモーション`,
     languageLabel: '言語',
     replay: 'もう一度再生',
@@ -388,6 +570,35 @@ export const ui: Record<Locale, UiStrings> = {
     toLight: 'ライトモードに切り替え',
     toDark: 'ダークモードに切り替え',
     sectionsLabel: 'カテゴリへ移動',
+    areasLabel: 'セクション',
+    mg: {
+      stage3d: '3Dデモ',
+      controls: {
+        duration: '長さ',
+        short: '短く',
+        normal: '標準',
+        long: '長く',
+        depth: '奥行き',
+        shallow: '浅く',
+        deep: '深く',
+        view: '視点',
+        screen: '画面',
+        top: '上から',
+      },
+      categoryDescription: (c, n) =>
+        `${c}の${n}種類のモーショングラフィックス用語を実際に再生して確認し、AIエージェント用のプロンプトをコピーできます。`,
+      searchPlaceholder: '名前や動きの用途で探す(例: パン、jump cut、カメラ)',
+      metaTitle:
+        'モーショングラフィックス用語 — ShowMotion',
+      metaDescription:
+        '映像・モーショングラフィックスのカメラワーク、カット、タイミングの用語を実際に再生して確認し、名前を知り、AIエージェントにそのまま貼り付けられるプロンプトをコピーできます。',
+      tagline:
+        'モーショングラフィックス用語を目で見て、プロンプトはそのままコピー。',
+      intro:
+        'カメラワークやカット、タイミングにも名前があります。再生ボタンを押して動きを見て、正しい名前を知り、AIエージェントに名前で依頼できるプロンプトをコピーしてください。',
+      promptNote:
+        '[シーン] を使いたいシーンに、[長さ] をかけたい時間に置き換えて、AIエージェントに貼り付けてください。プロンプトには技法の名前が入っているので、次からは名前だけで依頼できます。',
+    },
     back: '戻る',
     notFoundTitle: 'ページが見つかりません',
     notFoundBody: 'このページは存在しないか、移動しました。すべてのモーションを見るか、名前で検索してください。',
@@ -396,6 +607,7 @@ export const ui: Record<Locale, UiStrings> = {
     variants: 'バリエーション',
     related: (c) => `${c}のほかのモーション`,
     promptHeading: 'プロンプト',
+    source: 'ソース',
     viewSource: 'デモのソースを見る',
     similar: '似ているモーション',
     hint: {
@@ -407,12 +619,12 @@ export const ui: Record<Locale, UiStrings> = {
     },
   },
   ko: {
-    metaTitle: 'ShowMotion — 웹 모션 예제와 AI 에이전트용 프롬프트',
+    metaTitle: 'ShowMotion — 웹 모션·모션 그래픽 예제와 AI 프롬프트',
     metaDescription:
-      '웹에서 자주 쓰는 모션을 직접 재생해 보고 이름을 확인한 뒤, AI 코딩 에이전트에 바로 붙여 넣을 프롬프트를 복사할 수 있습니다.',
+      '웹에서 자주 쓰는 모션과 모션 그래픽 용어를 직접 재생해 보고 이름을 확인한 뒤, AI 코딩 에이전트에 바로 붙여 넣을 프롬프트를 복사할 수 있습니다.',
     tagline: '웹 모션을 보고, 프롬프트를 바로 복사하세요.',
     intro:
-      '보면 알지만 이름은 모르는 모션이 있습니다. 움직임을 직접 보고 이름을 확인한 뒤, AI에게 전달할 프롬프트를 복사하세요.',
+      '보면 알지만 이름은 모르는 모션이 있습니다. 움직임을 직접 보고 이름을 확인한 뒤, AI에게 전달할 프롬프트를 복사하세요. 카메라 무브나 컷 같은 영상 용어는 Motion Graphics에서 볼 수 있습니다.',
     count: (n) => `모션 ${n}개`,
     languageLabel: '언어',
     replay: '다시 보기',
@@ -441,6 +653,35 @@ export const ui: Record<Locale, UiStrings> = {
     toLight: '라이트 모드로 전환',
     toDark: '다크 모드로 전환',
     sectionsLabel: '카테고리로 이동',
+    areasLabel: '구역',
+    mg: {
+      stage3d: '3D 데모',
+      controls: {
+        duration: '길이',
+        short: '짧게',
+        normal: '보통',
+        long: '길게',
+        depth: '깊이',
+        shallow: '얕게',
+        deep: '깊게',
+        view: '시점',
+        screen: '화면',
+        top: '위에서',
+      },
+      categoryDescription: (c, n) =>
+        `${c} 모션 그래픽 용어 ${n}개를 직접 재생해 보고, AI 에이전트에 붙여 넣을 프롬프트를 복사할 수 있습니다.`,
+      searchPlaceholder: '이름이나 하는 일로 찾기 (예: 팬, jump cut, 카메라)',
+      metaTitle:
+        '모션 그래픽 용어 — ShowMotion',
+      metaDescription:
+        '영상·모션 그래픽에서 쓰는 카메라 무브, 컷, 타이밍 용어를 직접 재생해 보고 이름을 확인한 뒤, AI 에이전트에 바로 붙여 넣을 프롬프트를 복사할 수 있습니다.',
+      tagline:
+        '모션 그래픽 용어를 보고, 프롬프트를 바로 복사하세요.',
+      intro:
+        '카메라 무브와 컷, 타이밍에도 이름이 있습니다. 재생 버튼을 눌러 움직임을 보고 이름을 확인한 뒤, AI에게 전달할 프롬프트를 복사하세요.',
+      promptNote:
+        '[장면]을 원하는 장면으로, [길이]를 걸릴 시간으로 바꿔 AI 에이전트에 붙여 넣으세요. 프롬프트에 기법 이름이 들어 있어, 다음부터는 이름만으로도 요청할 수 있습니다.',
+    },
     back: '돌아가기',
     notFoundTitle: '페이지를 찾을 수 없습니다',
     notFoundBody: '없거나 옮겨진 페이지입니다. 전체 모션을 둘러보거나 이름으로 검색하세요.',
@@ -449,6 +690,7 @@ export const ui: Record<Locale, UiStrings> = {
     variants: '변형',
     related: (c) => `${c}의 다른 모션`,
     promptHeading: '프롬프트',
+    source: '소스',
     viewSource: '데모 소스 보기',
     similar: '비슷한 모션',
     hint: {
@@ -460,12 +702,12 @@ export const ui: Record<Locale, UiStrings> = {
     },
   },
   zhHans: {
-    metaTitle: 'ShowMotion — 网页动效实例与 AI 智能体提示词',
+    metaTitle: 'ShowMotion — 网页动效、动态图形实例与 AI 提示词',
     metaDescription:
-      '实时查看常见的网页动效，了解每种动效的名称，并复制可直接交给 AI 编程智能体实现的提示词。',
+      '实时查看常见的网页动效和动态图形术语，了解每一种的名称，并复制可直接交给 AI 编程智能体实现的提示词。',
     tagline: '网页动效，实时演示。提示词，一键复制。',
     intro:
-      '有些动效一看就懂，却叫不出名字。在这里观看每种动效的实际效果，了解它的准确名称，并复制一段能让 AI 编程智能体直接实现的提示词。',
+      '有些动效一看就懂，却叫不出名字。在这里观看每种动效的实际效果，了解它的准确名称，并复制一段能让 AI 编程智能体直接实现的提示词。运镜、剪辑等视频术语请见 Motion Graphics。',
     count: (n) => `${n} 个动效`,
     languageLabel: '语言',
     replay: '重播',
@@ -493,6 +735,34 @@ export const ui: Record<Locale, UiStrings> = {
     toLight: '切换到浅色模式',
     toDark: '切换到深色模式',
     sectionsLabel: '跳转到分类',
+    areasLabel: '分区',
+    mg: {
+      stage3d: '3D 演示',
+      controls: {
+        duration: '时长',
+        short: '短',
+        normal: '标准',
+        long: '长',
+        depth: '纵深',
+        shallow: '浅',
+        deep: '深',
+        view: '视角',
+        screen: '画面',
+        top: '俯视',
+      },
+      categoryDescription: (c, n) => `实时查看 ${c} 类的 ${n} 个动态图形术语，并复制可直接交给 AI 智能体的提示词。`,
+      searchPlaceholder: '按名称或用途查找(例如：摇镜头、jump cut、镜头)',
+      metaTitle:
+        '动态图形术语 — ShowMotion',
+      metaDescription:
+        '实时查看视频与动态图形中的运镜、剪辑和节奏术语，了解每个术语的名称，并复制可直接交给 AI 智能体的提示词。',
+      tagline:
+        '动态图形术语，实时演示。提示词，一键复制。',
+      intro:
+        '运镜、剪辑和节奏也都有名字。点击播放观看每个术语的实际效果，了解它的准确名称，并复制一段能让 AI 智能体按名称实现的提示词。',
+      promptNote:
+        '将 [场景] 替换为你的场景、[时长] 替换为需要的时长，然后粘贴给 AI 智能体。提示词中包含技法名称，下次只说名称即可提出需求。',
+    },
     back: '返回',
     notFoundTitle: '找不到页面',
     notFoundBody: '此页面不存在或已移动。浏览全部动效，或按名称搜索。',
@@ -501,6 +771,7 @@ export const ui: Record<Locale, UiStrings> = {
     variants: '变体',
     related: (c) => `${c} 中的其他动效`,
     promptHeading: '提示词',
+    source: '源码',
     viewSource: '查看演示源码',
     similar: '相似的动效',
     hint: {
@@ -512,12 +783,12 @@ export const ui: Record<Locale, UiStrings> = {
     },
   },
   zhHant: {
-    metaTitle: 'ShowMotion — 網頁動效實例與 AI 代理提示詞',
+    metaTitle: 'ShowMotion — 網頁動效、動態圖像實例與 AI 提示詞',
     metaDescription:
-      '即時觀看常見的網頁動效，了解每種動效的名稱，並複製可以直接交給 AI 程式設計代理實作的提示詞。',
+      '即時觀看常見的網頁動效和動態圖像術語，了解每一種的名稱，並複製可以直接交給 AI 程式設計代理實作的提示詞。',
     tagline: '網頁動效，即時示範。提示詞，一鍵複製。',
     intro:
-      '有些動效一看就懂，卻叫不出名字。在這裡觀看每種動效的實際效果，了解它的正確名稱，並複製一段能讓 AI 程式設計代理直接實作的提示詞。',
+      '有些動效一看就懂，卻叫不出名字。在這裡觀看每種動效的實際效果，了解它的正確名稱，並複製一段能讓 AI 程式設計代理直接實作的提示詞。運鏡、剪接等影片術語請見 Motion Graphics。',
     count: (n) => `${n} 個動效`,
     languageLabel: '語言',
     replay: '重播',
@@ -545,6 +816,34 @@ export const ui: Record<Locale, UiStrings> = {
     toLight: '切換到淺色模式',
     toDark: '切換到深色模式',
     sectionsLabel: '跳到分類',
+    areasLabel: '分區',
+    mg: {
+      stage3d: '3D 示範',
+      controls: {
+        duration: '時長',
+        short: '短',
+        normal: '標準',
+        long: '長',
+        depth: '縱深',
+        shallow: '淺',
+        deep: '深',
+        view: '視角',
+        screen: '畫面',
+        top: '俯視',
+      },
+      categoryDescription: (c, n) => `即時觀看 ${c} 類的 ${n} 個動態圖像術語，並複製可以直接交給 AI 代理的提示詞。`,
+      searchPlaceholder: '依名稱或用途尋找(例如：橫搖、jump cut、鏡頭)',
+      metaTitle:
+        '動態圖像術語 — ShowMotion',
+      metaDescription:
+        '即時觀看影片與動態圖像中的運鏡、剪接和節奏術語，了解每個術語的名稱，並複製可以直接交給 AI 代理的提示詞。',
+      tagline:
+        '動態圖像術語，即時示範。提示詞，一鍵複製。',
+      intro:
+        '運鏡、剪接和節奏也都有名字。按下播放觀看每個術語的實際效果，了解它的正確名稱，並複製一段能讓 AI 代理依名稱實作的提示詞。',
+      promptNote:
+        '將 [場景] 替換成你的場景、[長度] 替換成需要的長度，再貼給 AI 代理。提示詞中包含技法名稱，下次只要說出名稱就能提出需求。',
+    },
     back: '返回',
     notFoundTitle: '找不到頁面',
     notFoundBody: '此頁面不存在或已移動。瀏覽全部動效，或依名稱搜尋。',
@@ -553,6 +852,7 @@ export const ui: Record<Locale, UiStrings> = {
     variants: '變體',
     related: (c) => `${c} 中的其他動效`,
     promptHeading: '提示詞',
+    source: '原始碼',
     viewSource: '查看示範原始碼',
     similar: '相似的動效',
     hint: {

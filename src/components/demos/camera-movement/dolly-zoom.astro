@@ -1,0 +1,53 @@
+---
+// Dolly Zoom 데모 — 카메라가 움직이는 만큼 렌즈가 반대로 줌한다. 가운데 B 는 크기가 그대로인데 뒤 레이어와 앞 레이어가 서로 반대로 커지고 줄어든다
+// Dolly · Zoom 과 나란히 보면 차이가 보인다: 그 둘은 B 가 커지고, 여기서는 B 만 그대로다
+// 배율 = 카메라 거리 × 레이어 거리 ÷ (레이어 거리 + 카메라 거리 − 1). 카메라 거리는 B 까지의 거리(가까운 자리 1, 물러난 자리 2) — B(거리 1)는 늘 1 배다
+// 배율의 중심은 지평선(화면 위에서 68% = B 의 한가운데). 바닥선은 뒤 레이어의 밑변이라 뒤 레이어와 같은 비율로 움직인다
+// 변형: dolly-in-zoom-out(기본 — 다가가며 줌을 푼다. 배경이 줄어들며 멀어진다) · dolly-out-zoom-in(물러나며 줌을 당긴다. 배경이 커지며 다가온다)
+// 깊이: 레이어 사이가 멀수록 뒤·앞이 달라지는 정도가 커진다
+import MgFrame from '../../mg/MgFrame.astro';
+import MgScene from '../../mg/MgScene.astro';
+---
+<div class="mg-dolly-zoom" data-demo-root aria-hidden="true">
+  <MgFrame duration="3s">
+    <MgScene bleed />
+  </MgFrame>
+</div>
+
+<style>
+  .mg-dolly-zoom {
+    --mg-dolly-zoom-from: 2;
+    --mg-dolly-zoom-to: 1;
+  }
+  .mg-dolly-zoom[data-variant='dolly-out-zoom-in'] {
+    --mg-dolly-zoom-from: 1;
+    --mg-dolly-zoom-to: 2;
+  }
+  .mg-dolly-zoom :global(.mgs-far),
+  .mg-dolly-zoom :global(.mgs-ground) {
+    --mg-dolly-zoom-z: var(--mg-z-far);
+  }
+  .mg-dolly-zoom :global(.mgs-near) {
+    --mg-dolly-zoom-z: var(--mg-z-near);
+  }
+  .mg-dolly-zoom :global(.mgs-far),
+  .mg-dolly-zoom :global(.mgs-near),
+  .mg-dolly-zoom :global(.mgs-ground) {
+    transform-origin: 50% 68%;
+    scale: calc(var(--mg-dolly-zoom-from) * var(--mg-dolly-zoom-z) / (var(--mg-dolly-zoom-z) + var(--mg-dolly-zoom-from) - 1));
+  }
+  /* 바닥은 화면 아래쪽 24% 띠다 — 지평선은 그 윗변에서 화면 높이의 8%(4.5cqw) 위에 있다 */
+  .mg-dolly-zoom :global(.mgs-ground) {
+    transform-origin: 50% -4.5cqw;
+  }
+  .mg-dolly-zoom.is-playing :global(.mgs-far),
+  .mg-dolly-zoom.is-playing :global(.mgs-near),
+  .mg-dolly-zoom.is-playing :global(.mgs-ground) {
+    animation: mg-dolly-zoom-warp var(--mg-duration) ease-in-out forwards;
+  }
+  @keyframes mg-dolly-zoom-warp {
+    to {
+      scale: calc(var(--mg-dolly-zoom-to) * var(--mg-dolly-zoom-z) / (var(--mg-dolly-zoom-z) + var(--mg-dolly-zoom-to) - 1));
+    }
+  }
+</style>

@@ -1,0 +1,67 @@
+---
+// Pull-Back Reveal 데모 — B 에 바짝 붙은 장면에서 카메라가 뒤로, 그리고 위로 날아 물러난다. B 는 화면 한가운데에서 작아지고 둘레(앞 기둥 A, 뒤 줄 C, 넓은 바닥)가 화면 안으로 들어온다
+// Dolly(out)와 나란히 보면 차이가 보인다: Dolly 는 눈높이에서 조금 물러날 뿐이다. 여기서는 훨씬 가까이에서 시작해 훨씬 멀리 가고, 오르면서 내려다봐서 바닥선이 올라가고 앞 기둥이 B 아래로 내려간다
+// 카메라의 앞뒤 자리 d(B 까지의 거리를 1 로 본 값)와 높이 h(가운데 레이어가 밀리는 cqw)를 숫자 변수로 등록해 움직이고, 레이어가 그 값에서 배율과 이동량을 계산한다
+//   배율 = 거리 ÷ (거리 − d) · 세로 이동 = h × (배율 ÷ 거리 − 1 ÷ (1 − d)) — 뒤 항이 B 를 붙잡는 기울임이다(B 는 늘 0)
+//   처음에는 앞 레이어가 카메라 곁이나 뒤에 있다 — 배율이 아주 커서 화면 밖이다(max 로 0 나누기를 막는다)
+// 깊이: 레이어 사이가 멀수록 앞 기둥이 늦게, 더 아래에 들어온다
+import MgFrame from '../../mg/MgFrame.astro';
+import MgScene from '../../mg/MgScene.astro';
+---
+<div class="mg-pull-back-reveal" data-demo-root aria-hidden="true">
+  <MgFrame duration="4s">
+    <MgScene bleed />
+  </MgFrame>
+</div>
+
+<style>
+  @property --mg-pull-back-reveal-d {
+    syntax: '<number>';
+    inherits: true;
+    initial-value: 0;
+  }
+  @property --mg-pull-back-reveal-h {
+    syntax: '<number>';
+    inherits: true;
+    initial-value: 0;
+  }
+  .mg-pull-back-reveal {
+    --mg-pull-back-reveal-d: 0.42;
+  }
+  .mg-pull-back-reveal :global(.mgs-far),
+  .mg-pull-back-reveal :global(.mgs-ground) {
+    --mg-pull-back-reveal-z: var(--mg-z-far);
+  }
+  .mg-pull-back-reveal :global(.mgs-mid) {
+    --mg-pull-back-reveal-z: 1;
+  }
+  .mg-pull-back-reveal :global(.mgs-near) {
+    --mg-pull-back-reveal-z: var(--mg-z-near);
+  }
+  /* 배율의 중심은 지평선(화면 위에서 68% = B 의 한가운데). 바닥선은 뒤 레이어의 밑변이라 뒤 레이어와 같이 움직인다 */
+  .mg-pull-back-reveal :global(.mgs-layer),
+  .mg-pull-back-reveal :global(.mgs-ground) {
+    --mg-pull-back-reveal-s: calc(var(--mg-pull-back-reveal-z) / max(var(--mg-pull-back-reveal-z) - var(--mg-pull-back-reveal-d), 0.05));
+    transform-origin: 50% 68%;
+    translate: 0 calc(var(--mg-pull-back-reveal-h) * 1cqw * (var(--mg-pull-back-reveal-s) / var(--mg-pull-back-reveal-z) - 1 / (1 - var(--mg-pull-back-reveal-d))));
+    scale: var(--mg-pull-back-reveal-s);
+  }
+  .mg-pull-back-reveal :global(.mgs-ground) {
+    transform-origin: 50% -4.5cqw;
+  }
+  /* 화면 밖까지 잇는 것(bleed)은 바닥만 쓴다 — 내려다본 장면에서는 기둥의 밑동이 보여야 한다. 장면의 규칙보다 앞서도록 선택자를 길게 쓴다 */
+  .mg-pull-back-reveal :global(.mgs.mgs-bleed .mgs-a)::after {
+    content: none;
+  }
+  /* 변수는 장면(.mgs)에서 움직인다 — 길이(--mg-duration)가 화면 틀 안에서만 잡힌다
+     가까울 때는 조금만 물러나도 크게 줄어든다 — 천천히 떼어야 줄어드는 빠르기가 고르게 보인다 */
+  .mg-pull-back-reveal.is-playing :global(.mgs) {
+    animation: mg-pull-back-reveal-away var(--mg-duration) cubic-bezier(0.65, 0, 0.5, 1) forwards;
+  }
+  @keyframes mg-pull-back-reveal-away {
+    to {
+      --mg-pull-back-reveal-d: -1;
+      --mg-pull-back-reveal-h: 60;
+    }
+  }
+</style>

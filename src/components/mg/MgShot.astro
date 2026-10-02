@@ -1,0 +1,110 @@
+---
+// 모션 그래픽 데모의 둘째 샷 — 컷·전환 데모에서 공통 장면(MgScene) 다음에 오는 샷 (규약: docs/content/prompt_writing_guide.md §모션 그래픽 데모)
+// 화면 틀을 가득 채우는 불투명한 한 샷이다. 틀 안에서 <MgScene /> 뒤에 두면 장면을 덮는다 — 감추고 드러내는 것은 데모가 한다
+// (컷: visibility 를 step-end 로 바꾼다 / 밀고 들어오기: translate / 지우기: clip-path / 겹치기: opacity)
+// 어느 순간에 봐도 어느 샷인지 구분되게 바탕 톤과 큰 도형의 모양·자리가 장면과도 서로와도 다르다:
+//   d — 바탕이 뒤집힌 톤(--ink). 왼쪽의 큰 원 + 오른쪽 위의 작은 원
+//   e — 바탕이 강조색(--accent). 오른쪽의 세로로 긴 블록 + 왼쪽 끝에서 뻗은 가로 막대
+//   f — 바탕이 중간 회색(--demo-muted). 한가운데의 큰 마름모 + 그 뒤를 가로지르는 밝은 띠
+// 데모는 자기 루트 아래에서 :global(.mgsh | .mgsh-d | .mgsh-e | .mgsh-f | .mgsh-subject | .mgsh-prop) 를 잡는다
+//   .mgsh-subject — 글자가 든 큰 도형(샷의 주인공). 움직일 때는 개별 translate·scale 을 쓴다(f 의 마름모는 rotate 를 쓰고 있다)
+//   .mgsh-prop — 곁의 도형
+// 이 파일의 선택자는 모두 클래스 하나짜리다 — 데모의 `.mg-{id} :global(.mgsh-subject)` 가 늘 이겨서 자리·크기까지 바꿀 수 있다(Match Cut)
+// 같은 샷을 한 데모에 두 번 넣을 때는 데모가 각각을 자기 div(position: absolute; inset: 0)로 감싸 그 div 로 가른다(Montage)
+// 이 파일은 demos/ 밖에 둔다 — demos/registry.ts 가 demos/*/ 의 파일을 모두 데모로 본다
+interface Props {
+  shot: 'd' | 'e' | 'f';
+}
+
+const { shot } = Astro.props;
+---
+<div class={`mgsh mgsh-${shot}`}>
+  <span class={`mgsh-prop mgsh-prop-${shot}`}></span>
+  <span class={`mgsh-subject mgsh-subject-${shot}`}><span class={`mgsh-letter-${shot}`}>{shot.toUpperCase()}</span></span>
+</div>
+
+<style>
+  /* 샷 밖으로 나간 것은 잘린다 — 샷이 통째로 밀려 들어오거나 일부만 드러날 때 도형이 샷 밖으로 삐져나오지 않는다 */
+  .mgsh {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    font-weight: 700;
+    line-height: 1;
+  }
+  .mgsh-prop,
+  .mgsh-subject {
+    position: absolute;
+  }
+  .mgsh-subject {
+    display: grid;
+    place-items: center;
+    font-size: 10cqw;
+  }
+
+  .mgsh-d {
+    background: var(--ink);
+  }
+  .mgsh-subject-d {
+    top: 13cqw;
+    left: 14cqw;
+    width: 28cqw;
+    aspect-ratio: 1;
+    color: var(--ink);
+    background: var(--surface);
+    border-radius: 50%;
+  }
+  .mgsh-prop-d {
+    top: 8cqw;
+    right: 13cqw;
+    width: 9cqw;
+    aspect-ratio: 1;
+    background: var(--muted);
+    border-radius: 50%;
+  }
+
+  .mgsh-e {
+    background: var(--accent);
+  }
+  .mgsh-subject-e {
+    top: 8cqw;
+    right: 14cqw;
+    width: 22cqw;
+    height: 40cqw;
+    color: var(--accent);
+    background: var(--on-accent);
+    border-radius: 3px;
+  }
+  .mgsh-prop-e {
+    bottom: 10cqw;
+    left: 0;
+    width: 46cqw;
+    height: 6cqw;
+    background: var(--highlight);
+    border-radius: 0 3px 3px 0;
+  }
+
+  .mgsh-f {
+    background: var(--demo-muted);
+  }
+  .mgsh-subject-f {
+    top: 15cqw;
+    left: calc(50% - 13cqw);
+    width: 26cqw;
+    aspect-ratio: 1;
+    color: var(--surface);
+    background: var(--ink);
+    border-radius: 3px;
+    rotate: 45deg;
+  }
+  .mgsh-letter-f {
+    rotate: -45deg;
+  }
+  .mgsh-prop-f {
+    top: 20cqw;
+    right: 0;
+    left: 0;
+    height: 16cqw;
+    background: var(--surface);
+  }
+</style>

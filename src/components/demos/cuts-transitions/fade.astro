@@ -1,0 +1,59 @@
+---
+// Fade 데모 — 화면이 검정으로 서서히 어두워지거나 검정에서 서서히 나타난다. 둘째 샷은 없다(겹치지 않는다) — B 가 걷는 한 샷뿐이다
+// 시간 막대의 띠가 페이드 구간이다. 키프레임의 %와 같은 값이어야 한다
+// 변형: out(기본 — 55~100% 에 검정으로 어두워진다) · in(0~45% 에 검정에서 나타난다 — 재생 전 화면이 검정이다)
+//       in 은 같은 키프레임을 거꾸로 돌린 것이다(등속이라 구간이 그대로 뒤집힌다)
+// 검정은 용어가 가리키는 색 그 자체라 토큰 대신 #000 을 쓴다 — 다크 테마에서 --ink 는 밝은 색이다
+// Dip to Black 은 검정을 거쳐 다음 샷으로 넘어간다
+import MgFrame from '../../mg/MgFrame.astro';
+import MgScene from '../../mg/MgScene.astro';
+
+const ranges: Record<string, [number, number][]> = {
+  out: [[55, 100]],
+  in: [[0, 45]],
+};
+---
+<div class="mg-fade" data-demo-root aria-hidden="true">
+  <MgFrame duration="4s" ranges={ranges}>
+    <MgScene />
+    <span class="mg-fade-black"></span>
+  </MgFrame>
+</div>
+
+<style>
+  .mg-fade :global(.mgs-b) {
+    translate: -12cqw 0;
+  }
+  .mg-fade-black {
+    position: absolute;
+    inset: 0;
+    background: #000;
+    opacity: 0;
+  }
+  .mg-fade[data-variant='in'] .mg-fade-black {
+    opacity: 1;
+  }
+  .mg-fade.is-playing :global(.mgs-b) {
+    animation: mg-fade-walk var(--mg-duration) linear forwards;
+  }
+  .mg-fade.is-playing .mg-fade-black {
+    animation: mg-fade-out var(--mg-duration) linear forwards;
+  }
+  .mg-fade[data-variant='in'].is-playing .mg-fade-black {
+    animation-direction: reverse;
+  }
+  @keyframes mg-fade-walk {
+    to {
+      translate: 12cqw 0;
+    }
+  }
+  @keyframes mg-fade-out {
+    0%,
+    55% {
+      opacity: 0;
+    }
+    100% {
+      opacity: 1;
+    }
+  }
+</style>

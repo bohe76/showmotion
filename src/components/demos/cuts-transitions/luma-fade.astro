@@ -1,0 +1,78 @@
+---
+// Luma Fade 데모 — 앞 샷의 밝기를 따라 넘어간다: 가장 어두운 것부터 차례로 그 모양 그대로 다음 샷(E)으로 바뀌고, 가장 밝은 바탕이 마지막이다
+// 시간 막대의 띠가 전환 구간이다(28~72%). 화면 전체가 고르게 겹쳐 넘어가는 Dissolve 와 달리, 넘어가는 도중에 앞 샷의 어두운 물체 모양으로 다음 샷이 먼저 비친다
+// 장면의 밝기 차례(라이트 테마): 앞 기둥 A(--ink) → B(--accent) → 뒤 막대 C(--demo-muted) → 바닥(--stage) → 바탕(--surface)
+//   다크 테마에서는 토큰의 밝기가 뒤집혀 같은 차례가 "밝은 것부터"가 된다 — 어느 쪽이든 밝기 차례다
+// 단계마다 다음 샷을 한 겹씩 두고, 그 단계에 해당하는 물체의 자리만 뚫은 마스크를 씌워 차례로 나타나게 한다(한 단계 12%, 8% 간격으로 겹친다)
+// 마스크의 자리는 MgScene 의 값을 화면 틀 기준으로 옮긴 것이다 — MgScene 의 배치가 바뀌면 여기도 같이 고쳐야 한다
+//   가로: 레이어는 화면 폭의 2 배이고 왼쪽으로 50cqw 나가 있다 → 레이어의 x% = 화면의 (2x - 50)cqw. 세로: 화면 높이 56.25cqw 의 %
+//   그래서 B 는 걷지 않고 제자리에 있다
+import MgFrame from '../../mg/MgFrame.astro';
+import MgScene from '../../mg/MgScene.astro';
+import MgShot from '../../mg/MgShot.astro';
+
+const tiers = ['a', 'b', 'c', 'ground', 'rest'];
+---
+<div class="mg-luma-fade" data-demo-root aria-hidden="true">
+  <MgFrame duration="4s" ranges={[[28, 72]]}>
+    <MgScene />
+    {
+      tiers.map((tier, i) => (
+        <div class={`mg-luma-fade-tier mg-luma-fade-${tier}`} style={`--mg-luma-fade-i: ${i}`}>
+          <MgShot shot="e" />
+        </div>
+      ))
+    }
+  </MgFrame>
+</div>
+
+<style>
+  .mg-luma-fade-tier {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    mask-repeat: no-repeat;
+  }
+  /* 앞 기둥 둘: 폭 14cqw, 높이는 화면의 반 */
+  .mg-luma-fade-a {
+    mask-image: linear-gradient(#000 0 0), linear-gradient(#000 0 0);
+    mask-position:
+      left 4cqw bottom 0,
+      left 84cqw bottom 0;
+    mask-size: 14cqw 50%;
+  }
+  /* B: 한 변 18cqw, 바닥에서 16%(9cqw) 위 */
+  .mg-luma-fade-b {
+    mask-image: linear-gradient(#000 0 0);
+    mask-position: left 41cqw bottom 9cqw;
+    mask-size: 18cqw 18cqw;
+  }
+  /* 화면에 걸친 뒤 막대 넷: 폭 16cqw, 바닥 띠(24% = 13.5cqw) 위에 선다 */
+  .mg-luma-fade-c {
+    mask-image: linear-gradient(#000 0 0), linear-gradient(#000 0 0), linear-gradient(#000 0 0), linear-gradient(#000 0 0);
+    mask-position:
+      left -2cqw bottom 13.5cqw,
+      left 21cqw bottom 13.5cqw,
+      left 63cqw bottom 13.5cqw,
+      left 86cqw bottom 13.5cqw;
+    mask-size:
+      16cqw 36%,
+      16cqw 50%,
+      16cqw 40%,
+      16cqw 48%;
+  }
+  .mg-luma-fade-ground {
+    mask-image: linear-gradient(#000 0 0);
+    mask-position: left bottom;
+    mask-size: 100% 24%;
+  }
+  .mg-luma-fade.is-playing .mg-luma-fade-tier {
+    animation: mg-luma-fade-in calc(var(--mg-duration) * 0.12) linear calc(var(--mg-duration) * (0.28 + var(--mg-luma-fade-i) * 0.08))
+      forwards;
+  }
+  @keyframes mg-luma-fade-in {
+    to {
+      opacity: 1;
+    }
+  }
+</style>

@@ -1,0 +1,154 @@
+---
+// Lower Third 데모 — 화면 아래 3분의 1, 한쪽 구석에 이름·직함 그래픽이 들어와 머물다가 나간다. 본 화면(주인공 B)을 가리지 않는다
+// Callout 은 그림 안의 한 지점을 가리키지만, Lower Third 는 아무것도 가리키지 않고 늘 같은 자리(아래 띠)에 놓인다
+// 시간 막대의 띠가 들어오는 구간(8~24%)과 나가는 구간(76~92%)이다 — 그 사이가 유지. 키프레임의 %와 같은 값이어야 한다
+// 들어옴: 세로 막대가 서고 → 이름 판이 막대 뒤에서 밀려 나오고 → 직함 띠가 뒤따른다. 나감은 그 거꾸로다
+// 자막 그래픽은 영상 위에 얹는 것이라 밑에 장면을 깐다. B 는 그래픽이 없는 쪽으로 조용히 걷는다
+// 글자는 자리 채움이다: 이름 줄(굵은 낱말 둘) + 직함 줄(작은 낱말 둘)
+import MgFrame from '../../mg/MgFrame.astro';
+import MgScene from '../../mg/MgScene.astro';
+---
+<div class="mg-lower-third" data-demo-root aria-hidden="true">
+  <MgFrame duration="5s" ranges={[[8, 24], [76, 92]]}>
+    <MgScene />
+    <div class="mg-lower-third-strap">
+      <span class="mg-lower-third-bar"></span>
+      <span class="mg-lower-third-name">ABC DEF</span>
+      <span class="mg-lower-third-role">GHIJ KLM</span>
+    </div>
+  </MgFrame>
+</div>
+
+<style>
+  /* 화면 아래 3분의 1(높이 18.75cqw) 안, 왼쪽 — 앞 기둥 A 와 주인공 B 사이의 빈 바닥 위 */
+  .mg-lower-third-strap {
+    position: absolute;
+    bottom: 4cqw;
+    left: 19.5cqw;
+    display: grid;
+    grid-template-columns: auto auto;
+    column-gap: 0.8cqw;
+    justify-items: start;
+    font-weight: 800;
+    line-height: 1;
+    white-space: nowrap;
+  }
+  .mg-lower-third-bar {
+    grid-row: 1 / span 2;
+    width: 1cqw;
+    background: var(--accent);
+    transform-origin: 50% 100%;
+    scale: 1 0;
+  }
+  .mg-lower-third-name,
+  .mg-lower-third-role {
+    clip-path: inset(0 100% 0 0);
+    translate: -3cqw 0;
+  }
+  .mg-lower-third-name {
+    padding: 1cqw 1.6cqw;
+    font-size: 4.4cqw;
+    color: var(--ink);
+    background: var(--surface);
+  }
+  .mg-lower-third-role {
+    padding: 0.7cqw 1.6cqw;
+    font-size: 3cqw;
+    letter-spacing: 0.08em;
+    color: var(--on-accent);
+    background: var(--accent);
+  }
+  .mg-lower-third :global(.mgs-b) {
+    translate: 4cqw 0;
+  }
+  .mg-lower-third.is-playing :global(.mgs-b) {
+    animation: mg-lower-third-walk var(--mg-duration) linear forwards;
+  }
+  .mg-lower-third.is-playing .mg-lower-third-bar {
+    animation: mg-lower-third-bar var(--mg-duration) linear forwards;
+  }
+  .mg-lower-third.is-playing .mg-lower-third-name {
+    animation: mg-lower-third-name var(--mg-duration) linear forwards;
+  }
+  .mg-lower-third.is-playing .mg-lower-third-role {
+    animation: mg-lower-third-role var(--mg-duration) linear forwards;
+  }
+  @keyframes mg-lower-third-walk {
+    to {
+      translate: 16cqw 0;
+    }
+  }
+  /* 막대: 8% 에 서기 시작해 14% 에 다 서고, 86% 부터 92% 까지 눕는다 */
+  @keyframes mg-lower-third-bar {
+    0% {
+      scale: 1 0;
+    }
+    8% {
+      scale: 1 0;
+      animation-timing-function: ease-out;
+    }
+    14% {
+      scale: 1 1;
+    }
+    86% {
+      scale: 1 1;
+      animation-timing-function: ease-in;
+    }
+    92%,
+    100% {
+      scale: 1 0;
+    }
+  }
+  /* 이름 판: 11~21% 에 밀려 나오고 79~89% 에 들어간다 */
+  @keyframes mg-lower-third-name {
+    0% {
+      clip-path: inset(0 100% 0 0);
+      translate: -3cqw 0;
+    }
+    11% {
+      clip-path: inset(0 100% 0 0);
+      translate: -3cqw 0;
+      animation-timing-function: ease-out;
+    }
+    21% {
+      clip-path: inset(0 0 0 0);
+      translate: 0 0;
+    }
+    79% {
+      clip-path: inset(0 0 0 0);
+      translate: 0 0;
+      animation-timing-function: ease-in;
+    }
+    89%,
+    100% {
+      clip-path: inset(0 100% 0 0);
+      translate: -3cqw 0;
+    }
+  }
+  /* 직함 띠: 이름 판을 뒤따라 14~24% 에 나오고, 먼저(76~86%) 들어간다 */
+  @keyframes mg-lower-third-role {
+    0% {
+      clip-path: inset(0 100% 0 0);
+      translate: -3cqw 0;
+    }
+    14% {
+      clip-path: inset(0 100% 0 0);
+      translate: -3cqw 0;
+      animation-timing-function: ease-out;
+    }
+    24% {
+      clip-path: inset(0 0 0 0);
+      translate: 0 0;
+    }
+    76% {
+      clip-path: inset(0 0 0 0);
+      translate: 0 0;
+      animation-timing-function: ease-in;
+    }
+    86%,
+    100% {
+      clip-path: inset(0 100% 0 0);
+      translate: -3cqw 0;
+    }
+  }
+</style>

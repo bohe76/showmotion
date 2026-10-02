@@ -1,0 +1,93 @@
+---
+// Displacement Distortion 데모 — 뜨거운 공기 너머로 보듯 영상이 일렁인다. 픽셀이 흐르는 잡음 무늬에 밀려 제자리에서 조금씩 어긋난다
+// 처음에는 또렷하다. 시간 막대의 띠가 일렁이는 구간이다(26~86%): 일렁임이 차오르고(26~36%) 머물다가 가라앉는다(76~86%). 샷은 바뀌지 않는다 —
+//   일렁이면서 다른 샷으로 넘어가는 Ripple Dissolve 와 다르다. 저쪽은 가로 줄무늬 물결이고, 이쪽은 가로·세로로 다 밀리는 아지랑이다
+// 겹은 둘이다: 밑에 또렷한 영상, 그 위에 같은 영상을 일그러뜨린 겹(.mg-displacement-distortion-haze). 위 겹의 투명도가 일렁임의 세기다 — 필터의 세기는 CSS 로 움직일 수 없다
+// 일그러짐은 SVG 필터다: 잡음(feTurbulence)의 빨강이 가로로, 초록이 세로로 민다(feDisplacementMap). 필터 자체는 멈춰 있다 — 저절로 움직이는 것이 없다
+//   아지랑이가 피어오르는 것은 겹을 위로 옮기면서(필터가 겹을 따라간다) 그 안의 그림은 같은 만큼 아래로 되돌려서 만든다 — 그림은 제자리, 잡음 무늬만 올라간다
+// 위 겹은 화면 틀보다 넓다(아래로 20cqw · 위 4cqw · 좌우 6cqw): 위로 옮겨 가도 틀을 덮고, 밀어낼 때 가장자리에 빈 곳이 딸려 오지 않는다(장면은 bleed 로 틀 밖까지 잇는다)
+// 미는 세기는 겹 크기에 대한 비율(objectBoundingBox)이라 카드와 상세에서 같다. 필터 주소는 루트의 인라인 스타일에 둔다
+import MgFrame from '../../mg/MgFrame.astro';
+import MgFxFootage from '../../mg/MgFxFootage.astro';
+---
+<div class="mg-displacement-distortion" data-demo-root aria-hidden="true" style="--mg-displacement-distortion-warp: url(#mg-displacement-distortion-warp)">
+  <MgFrame duration="4s" ranges={[[26, 86]]}>
+    <MgFxFootage />
+    <div class="mg-displacement-distortion-haze">
+      <div class="mg-displacement-distortion-view">
+        <MgFxFootage bleed />
+      </div>
+    </div>
+  </MgFrame>
+  <svg class="mg-displacement-distortion-defs" width="0" height="0" focusable="false">
+    <defs>
+      <filter id="mg-displacement-distortion-warp" x="0" y="0" width="1" height="1" primitiveUnits="objectBoundingBox" color-interpolation-filters="sRGB">
+        <feTurbulence type="fractalNoise" baseFrequency="0.012 0.026" numOctaves="2" seed="7" result="noise"></feTurbulence>
+        <feDisplacementMap in="SourceGraphic" in2="noise" scale="0.036" xChannelSelector="R" yChannelSelector="G"></feDisplacementMap>
+      </filter>
+    </defs>
+  </svg>
+</div>
+
+<style>
+  .mg-displacement-distortion-defs {
+    position: absolute;
+  }
+  .mg-displacement-distortion-haze {
+    position: absolute;
+    inset: -4cqw -6cqw -20cqw;
+    /* 넘친 것을 잘라 둔다 — 넘친 것까지 필터의 기준 상자로 치는 브라우저에서는 미는 세기가 그만큼 커진다 */
+    overflow: hidden;
+    background: var(--surface);
+    opacity: 0;
+  }
+  /* 화면 틀과 같은 자리 */
+  .mg-displacement-distortion-view {
+    position: absolute;
+    inset: 4cqw 6cqw 20cqw;
+  }
+  .mg-displacement-distortion.is-playing .mg-displacement-distortion-haze {
+    filter: var(--mg-displacement-distortion-warp);
+    animation:
+      mg-displacement-distortion-swell var(--mg-duration) linear forwards,
+      mg-displacement-distortion-rise var(--mg-duration) linear forwards;
+  }
+  .mg-displacement-distortion.is-playing .mg-displacement-distortion-view {
+    animation: mg-displacement-distortion-hold var(--mg-duration) linear forwards;
+  }
+  @keyframes mg-displacement-distortion-swell {
+    0%,
+    26% {
+      opacity: 0;
+    }
+    36%,
+    76% {
+      opacity: 1;
+    }
+    86%,
+    100% {
+      opacity: 0;
+    }
+  }
+  /* 겹이 올라가는 만큼 안의 그림이 내려간다 — 둘의 이동량이 늘 같아야 그림이 제자리에 있다 */
+  @keyframes mg-displacement-distortion-rise {
+    0%,
+    26% {
+      translate: 0 0;
+    }
+    86%,
+    100% {
+      translate: 0 -14cqw;
+    }
+  }
+  @keyframes mg-displacement-distortion-hold {
+    0%,
+    26% {
+      translate: 0 0;
+    }
+    86%,
+    100% {
+      translate: 0 14cqw;
+    }
+  }
+</style>

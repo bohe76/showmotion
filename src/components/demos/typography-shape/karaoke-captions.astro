@@ -1,0 +1,121 @@
+---
+// Karaoke Captions 데모 — 자막 전체가 처음부터 끝까지 떠 있고, 말하는 낱말만 차례로 켜진다
+// Pop Captions 와 같은 낱말·같은 박자다: 저쪽은 낱말이 하나씩 튀어나와 앞의 것을 대신하고, 여기는 아무 낱말도 나타나거나 사라지지 않는다
+// 시간 막대의 눈금이 다음 낱말로 넘어가는 지점이다(20·40·60·80%) — 낱말 하나가 길이의 1/5 씩 차지한다. 지연·길이의 비율과 같은 값이어야 한다
+// 자막은 영상 위에 얹는 것이라 밑에 장면을 깐다. B 는 조용히 걷는다
+// 낱말의 켜짐은 숫자 변수 둘로 움직인다: on(0→1 켜짐, 낱말이 끝나면 0) · hop(켜지는 순간 0→1→0 한 번 튄다)
+// 변형은 그 숫자를 무엇으로 보여 주느냐다: color(기본 — 색만) · block(낱말 뒤 바탕 블록) · scale(커진다) · bounce(위로 튄다)
+import MgFrame from '../../mg/MgFrame.astro';
+import MgScene from '../../mg/MgScene.astro';
+import MgWords from '../../mg/MgWords.astro';
+---
+<div class="mg-karaoke-captions" data-demo-root aria-hidden="true">
+  <MgFrame duration="4s" cuts={[20, 40, 60, 80]}>
+    <MgScene />
+    <div class="mg-karaoke-captions-cap"><MgWords outline /></div>
+  </MgFrame>
+</div>
+
+<style>
+  @property --mg-karaoke-captions-on {
+    syntax: '<number>';
+    inherits: false;
+    initial-value: 0;
+  }
+  @property --mg-karaoke-captions-hop {
+    syntax: '<number>';
+    inherits: false;
+    initial-value: 0;
+  }
+  .mg-karaoke-captions :global(.mgs-b) {
+    translate: -8cqw 0;
+  }
+  .mg-karaoke-captions-cap {
+    position: absolute;
+    right: 0;
+    bottom: 3cqw;
+    left: 0;
+    display: flex;
+    justify-content: center;
+  }
+  .mg-karaoke-captions :global(.mgw-word) {
+    --mg-karaoke-captions-lit: calc(var(--mg-karaoke-captions-on) * 100%);
+    color: color-mix(in srgb, var(--accent) var(--mg-karaoke-captions-lit), var(--ink));
+  }
+  /* block: 낱말 뒤에 바탕 블록이 깔린다. 블록은 그림자로 넓혀 낱말 자리를 밀지 않는다. 외곽선은 블록과 같은 색이 되어 사라진다 */
+  .mg-karaoke-captions[data-variant='block'] :global(.mgw-word) {
+    --mg-karaoke-captions-block: color-mix(in srgb, var(--accent) var(--mg-karaoke-captions-lit), transparent);
+    color: color-mix(in srgb, var(--on-accent) var(--mg-karaoke-captions-lit), var(--ink));
+    background: var(--mg-karaoke-captions-block);
+    border-radius: 0.1em;
+    box-shadow: 0 0 0 0.2em var(--mg-karaoke-captions-block);
+    -webkit-text-stroke-color: color-mix(in srgb, var(--accent) var(--mg-karaoke-captions-lit), var(--surface));
+  }
+  .mg-karaoke-captions[data-variant='scale'] :global(.mgw-word) {
+    scale: calc(1 + var(--mg-karaoke-captions-on) * 0.22 + var(--mg-karaoke-captions-hop) * 0.12);
+  }
+  .mg-karaoke-captions[data-variant='bounce'] :global(.mgw-word) {
+    translate: 0 calc(var(--mg-karaoke-captions-hop) * -2.2cqw);
+  }
+  .mg-karaoke-captions.is-playing :global(.mgs-b) {
+    animation: mg-karaoke-captions-walk var(--mg-duration) linear forwards;
+  }
+  /* 낱말마다 길이의 1/5 — 자기 차례(--i)가 올 때까지 기다렸다가 켜지고, 차례가 끝나면 꺼진다. 마지막 낱말은 켜진 채 끝난다 */
+  .mg-karaoke-captions.is-playing :global(.mgw-word) {
+    animation: mg-karaoke-captions-word calc(var(--mg-duration) * 0.2) linear calc(var(--mg-duration) * 0.2 * var(--i)) forwards;
+  }
+  .mg-karaoke-captions.is-playing :global(.mgw-word:last-child) {
+    animation-name: mg-karaoke-captions-last;
+  }
+  @keyframes mg-karaoke-captions-walk {
+    to {
+      translate: 8cqw 0;
+    }
+  }
+  @keyframes mg-karaoke-captions-word {
+    0% {
+      --mg-karaoke-captions-on: 0;
+      --mg-karaoke-captions-hop: 0;
+      animation-timing-function: ease-out;
+    }
+    12% {
+      --mg-karaoke-captions-on: 1;
+    }
+    20% {
+      --mg-karaoke-captions-hop: 1;
+      animation-timing-function: ease-in;
+    }
+    42% {
+      --mg-karaoke-captions-hop: 0;
+    }
+    99.99% {
+      --mg-karaoke-captions-on: 1;
+      --mg-karaoke-captions-hop: 0;
+    }
+    100% {
+      --mg-karaoke-captions-on: 0;
+      --mg-karaoke-captions-hop: 0;
+    }
+  }
+  @keyframes mg-karaoke-captions-last {
+    0% {
+      --mg-karaoke-captions-on: 0;
+      --mg-karaoke-captions-hop: 0;
+      animation-timing-function: ease-out;
+    }
+    12% {
+      --mg-karaoke-captions-on: 1;
+    }
+    20% {
+      --mg-karaoke-captions-hop: 1;
+      animation-timing-function: ease-in;
+    }
+    42% {
+      --mg-karaoke-captions-hop: 0;
+    }
+    100% {
+      --mg-karaoke-captions-on: 1;
+      --mg-karaoke-captions-hop: 0;
+    }
+  }
+</style>

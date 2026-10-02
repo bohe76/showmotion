@@ -1,0 +1,62 @@
+---
+// Slide 데모 — 새 샷(D)이 밀고 들어와 앞 샷을 덮는다. 앞 샷은 제자리에 있다: 같이 밀려 나가지 않고 그 자리에서 가려진다
+// 시간 막대의 띠가 전환 구간이다(35~65%). 키프레임의 %와 같은 값이어야 한다
+// B 는 그동안 제 걸음으로 천천히 걷는다 — 장면(C 막대·A 기둥)이 움직이지 않는 것이 보인다
+// 변형: 새 샷이 나아가는 방향이다 — left(기본 — 오른쪽 끝에서 들어와 왼쪽으로) · right · up(아래에서 위로) · down
+//       --mg-slide-from 이 새 샷이 출발하는 자리다(자기 크기의 %)
+import MgFrame from '../../mg/MgFrame.astro';
+import MgScene from '../../mg/MgScene.astro';
+import MgShot from '../../mg/MgShot.astro';
+---
+<div class="mg-slide" data-demo-root aria-hidden="true">
+  <MgFrame duration="4s" ranges={[[35, 65]]}>
+    <MgScene />
+    <MgShot shot="d" />
+  </MgFrame>
+</div>
+
+<style>
+  .mg-slide {
+    --mg-slide-from: 100% 0;
+  }
+  .mg-slide[data-variant='right'] {
+    --mg-slide-from: -100% 0;
+  }
+  .mg-slide[data-variant='up'] {
+    --mg-slide-from: 0 100%;
+  }
+  .mg-slide[data-variant='down'] {
+    --mg-slide-from: 0 -100%;
+  }
+  .mg-slide :global(.mgs-b) {
+    translate: -8cqw 0;
+  }
+  .mg-slide :global(.mgsh) {
+    translate: var(--mg-slide-from);
+  }
+  .mg-slide.is-playing :global(.mgs-b) {
+    animation: mg-slide-walk var(--mg-duration) linear forwards;
+  }
+  .mg-slide.is-playing :global(.mgsh) {
+    animation: mg-slide-over var(--mg-duration) linear forwards;
+  }
+  @keyframes mg-slide-walk {
+    to {
+      translate: 8cqw 0;
+    }
+  }
+  /* 35% 에서 떠나 65% 에 자리 잡는다 — 그 사이만 천천히 출발해 천천히 멈춘다 */
+  @keyframes mg-slide-over {
+    0% {
+      translate: var(--mg-slide-from);
+    }
+    35% {
+      translate: var(--mg-slide-from);
+      animation-timing-function: ease-in-out;
+    }
+    65%,
+    100% {
+      translate: 0 0;
+    }
+  }
+</style>

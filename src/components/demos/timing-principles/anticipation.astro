@@ -1,0 +1,21 @@
+---
+// Anticipation 데모 — 본 움직임 전에 B 가 반대쪽으로 살짝 빠진다(출발선 뒤로 물러난다). 그 뒤 앞으로 튀어 나가 가장 빠른 채로 도착선에 닿는다
+// 아래 옅은 블록은 같은 거리를 등속으로 간다 — B 가 뒤로 빠지는 동안 대조 블록은 이미 떠나 있다
+// Overshoot 의 출발 쪽 짝이다: 곡선이 Overshoot(back-out)의 거울상(back-in)이라 넘는 양도 같다. 시간 막대의 띠(0~68%)는 B 가 출발선 뒤에 있는 구간이다
+import MgFrame from '../../mg/MgFrame.astro';
+import MgTrack from '../../mg/MgTrack.astro';
+---
+<div class="mg-anticipation" data-demo-root aria-hidden="true">
+  <MgFrame duration="3s" ranges={[[0, 68]]}>
+    <MgTrack />
+  </MgFrame>
+</div>
+
+<style>
+  .mg-anticipation {
+    --mgtr-curve: cubic-bezier(0.36, 0, 0.66, -0.7);
+  }
+  .mg-anticipation.is-playing :global(.mgtr-hero) {
+    animation: mg-track-run var(--mg-duration) var(--mgtr-curve) forwards;
+  }
+</style>

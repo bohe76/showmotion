@@ -1,0 +1,122 @@
+---
+// Shockwave 데모 — B 가 바닥에 떨어지는 순간(첫 착지, 36%) 그 자리에서 고리가 터져 화면 끝까지 퍼져 나간다. 고리가 지나가는 자리의 화면이 바깥으로 밀려 어긋나 보인다
+// 시간 막대의 눈금이 충격의 순간이고 띠가 고리가 퍼지는 구간이다(36~62%). 처음에 빠르고 퍼질수록 느려지며 옅어진다. 키프레임의 % 와 같은 값이어야 한다
+// 등장하는 요소 뒤의 장식 고리(Circle Burst)와 다르다: 여기는 고리가 화면 자체를 일그러뜨린다 — 뒤 막대와 기둥의 윤곽이 고리 안에서 끊겨 밀린다
+// 변형: ring(기본 — 가는 고리가 사방으로) · distortion-dome(바닥 위로 부푸는 반구. 반구 안 전체가 볼록 렌즈처럼 부풀어 보이고 옅은 색이 낀다)
+//   --mg-shockwave-band(일그러지는 띠의 두께 — 반구는 속까지 다) · --mg-shockwave-fill(안에 끼는 색) · 반구는 바닥 아래를 잘라 낸다
+// 일그러짐은 같은 영상의 사본(.mg-shockwave-lens)이다: 충격 지점을 중심으로 조금 키운 사본을 고리 모양 마스크 안에서만 보인다
+//   밀리는 양이 고리 어디서나 같도록(약 4.5cqw) 배율을 반지름에 맞춰 줄여 간다. 반지름은 등록한 숫자 변수 하나(--mg-shockwave-r, 단위 cqw)다
+//   퍼질수록 세기(--mg-shockwave-k, 1 → 0)가 줄어 밀리는 양과 선·색이 같이 잦아든다 — 다 퍼졌을 때는 원본과 똑같아서 사본을 치워도 티가 나지 않는다
+// 사본의 B 도 같은 애니메이션을 받아 원본과 같은 자리에 있다. 영상은 원래 속도(길이의 75%)로 한 번 흐른다
+import MgFrame from '../../mg/MgFrame.astro';
+import MgClip from '../../mg/MgClip.astro';
+---
+<div class="mg-shockwave" data-demo-root aria-hidden="true">
+  <MgFrame duration="3.2s" cuts={[36]} ranges={[[36, 62]]}>
+    <MgClip />
+    <div class="mg-shockwave-wave">
+      <div class="mg-shockwave-lens">
+        <MgClip />
+      </div>
+    </div>
+  </MgFrame>
+</div>
+
+<style>
+  @property --mg-shockwave-r {
+    syntax: '<number>';
+    inherits: true;
+    initial-value: 0;
+  }
+  @property --mg-shockwave-k {
+    syntax: '<number>';
+    inherits: true;
+    initial-value: 1;
+  }
+  .mg-shockwave {
+    --mg-shockwave-band: 8;
+    --mg-shockwave-fill: transparent;
+    /* 충격 지점: 첫 착지 때 B 의 발밑 */
+    --mg-shockwave-at: 49.2cqw 47.25cqw;
+    --mg-shockwave-edge: color-mix(in srgb, var(--ink) 60%, transparent);
+  }
+  .mg-shockwave[data-variant='distortion-dome'] {
+    --mg-shockwave-band: 200;
+    --mg-shockwave-fill: color-mix(in srgb, var(--highlight) 30%, transparent);
+  }
+  .mg-shockwave-wave {
+    position: absolute;
+    inset: 0;
+    visibility: hidden;
+    mask-image: radial-gradient(
+      circle at var(--mg-shockwave-at),
+      transparent calc((var(--mg-shockwave-r) - var(--mg-shockwave-band)) * 1cqw),
+      #000 calc((var(--mg-shockwave-r) - var(--mg-shockwave-band)) * 1cqw + 0.3cqw),
+      #000 calc(var(--mg-shockwave-r) * 1cqw),
+      transparent calc(var(--mg-shockwave-r) * 1cqw + 0.2cqw)
+    );
+  }
+  .mg-shockwave[data-variant='distortion-dome'] .mg-shockwave-wave {
+    clip-path: inset(0 0 9cqw 0);
+  }
+  /* 고리의 앞머리 선과 안에 끼는 색 */
+  .mg-shockwave-wave::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(
+      circle at var(--mg-shockwave-at),
+      var(--mg-shockwave-fill) calc(var(--mg-shockwave-r) * 1cqw - 0.7cqw),
+      var(--mg-shockwave-edge) calc(var(--mg-shockwave-r) * 1cqw - 0.7cqw)
+    );
+    opacity: var(--mg-shockwave-k);
+  }
+  .mg-shockwave-lens {
+    position: absolute;
+    inset: 0;
+    background: var(--surface);
+    transform-origin: var(--mg-shockwave-at);
+    scale: calc(1 + 4.5 * var(--mg-shockwave-k) / max(var(--mg-shockwave-r), 12));
+  }
+  .mg-shockwave.is-playing :global(.mgs-b) {
+    animation: mg-clip-run calc(var(--mg-duration) * 0.75) linear forwards;
+  }
+  .mg-shockwave.is-playing .mg-shockwave-wave {
+    animation:
+      mg-shockwave-spread var(--mg-duration) linear forwards,
+      mg-shockwave-fade var(--mg-duration) linear forwards;
+  }
+  /* 끝 반지름 78cqw 는 충격 지점에서 가장 먼 귀퉁이(68cqw)를 띠가 다 지나가는 크기다 */
+  @keyframes mg-shockwave-spread {
+    0%,
+    35.99% {
+      visibility: hidden;
+      --mg-shockwave-r: 0;
+    }
+    36% {
+      visibility: visible;
+      --mg-shockwave-r: 0;
+      animation-timing-function: cubic-bezier(0.25, 0.55, 0.55, 1);
+    }
+    62% {
+      visibility: visible;
+      --mg-shockwave-r: 78;
+    }
+    62.01%,
+    100% {
+      visibility: hidden;
+      --mg-shockwave-r: 78;
+    }
+  }
+  /* 겹을 옅게 하지 않고 세기를 줄인다 — 옅게 하면 밀린 그림과 제자리 그림이 겹쳐 두 겹으로 보인다 */
+  @keyframes mg-shockwave-fade {
+    0%,
+    46% {
+      --mg-shockwave-k: 1;
+    }
+    62%,
+    100% {
+      --mg-shockwave-k: 0;
+    }
+  }
+</style>

@@ -1,0 +1,122 @@
+---
+// Whip Pan 데모 — Pan 과 같은 제자리 회전(세 레이어가 같은 거리만큼 밀린다)인데, 번져 보일 만큼 빠르다
+// Pan 과 나란히 보면 차이가 보인다: 멈춰 있다가 짧은 구간에 훨씬 멀리 휙 돌고, 그동안 화면이 움직이는 방향으로 번진다
+// 시간 막대의 띠가 도는 구간이다(40~52%). 키프레임의 %와 같은 값이어야 한다
+// 변형: left(기본 — 카메라가 왼쪽으로 돌아 화면이 오른쪽으로 밀린다) · right · up(위로 — 화면이 아래로 밀린다. Whip Tilt) · down
+// 번짐은 한 방향으로만 흐리는 SVG 필터다(CSS blur 는 사방으로 번진다). 세기는 화면 크기에 대한 비율(objectBoundingBox)이라 카드와 상세에서 같다
+// 필터 주소는 루트의 인라인 스타일에 둔다 — 따로 떨어진 CSS 파일 안의 url(#…) 을 그 파일 기준으로 찾는 브라우저가 있다
+// 바닥은 레이어가 아니지만 세로로 밀 때 같이 가야 해서 함께 움직인다. 위로 밀려 있을 때 밑이 비지 않게 화면 밖까지 잇는다(bleed)
+import MgFrame from '../../mg/MgFrame.astro';
+// 3D 무대에서는 같은 번짐을 캔버스에 건다(화면 보기일 때만 — 번지는 것은 찍힌 화면이지 밖에서 본 무대가 아니다)
+// 위에서 보기: 카메라가 제자리에서 휙 돈다(left · right). up · down 은 위에서 보면 달라지는 것이 없다
+import MgScene from '../../mg/MgScene.astro';
+import MgTopView from '../../mg/MgTopView.astro';
+---
+<div
+  class="mg-whip-pan"
+  data-demo-root
+  aria-hidden="true"
+  style="--mg-whip-pan-blur-x: url(#mg-whip-pan-blur-x); --mg-whip-pan-blur-y: url(#mg-whip-pan-blur-y)"
+>
+  <MgFrame duration="3s" ranges={[[40, 52]]}>
+    <MgScene bleed />
+    <MgTopView />
+  </MgFrame>
+  <svg class="mg-whip-pan-defs" width="0" height="0" focusable="false">
+    <defs>
+      <filter id="mg-whip-pan-blur-x" x="-0.25" y="0" width="1.5" height="1" primitiveUnits="objectBoundingBox" color-interpolation-filters="sRGB">
+        <feGaussianBlur stdDeviation="0.06 0"></feGaussianBlur>
+      </filter>
+      <filter id="mg-whip-pan-blur-y" x="0" y="-0.25" width="1" height="1.5" primitiveUnits="objectBoundingBox" color-interpolation-filters="sRGB">
+        <feGaussianBlur stdDeviation="0 0.08"></feGaussianBlur>
+      </filter>
+    </defs>
+  </svg>
+</div>
+
+<style>
+  .mg-whip-pan {
+    --mg-whip-pan-from: -24cqw 0;
+    --mg-whip-pan-to: 24cqw 0;
+    --mg-whip-pan-blur: var(--mg-whip-pan-blur-x);
+    /* 위에서 보기의 회전각: 화면이 폭의 24% 밀리는 각 — 시야 반각의 탄젠트가 1.15 일 때 약 28.9° */
+    --mg-whip-pan-turn: 28.9deg;
+  }
+  .mg-whip-pan[data-variant='right'] {
+    --mg-whip-pan-from: 24cqw 0;
+    --mg-whip-pan-to: -24cqw 0;
+    --mg-whip-pan-turn: -28.9deg;
+  }
+  .mg-whip-pan:is([data-variant='up'], [data-variant='down']) {
+    --mg-whip-pan-turn: 0deg;
+  }
+  /* 세로는 뒤 막대와 B 가 화면 안에 남는 범위에서 돈다 — 위로는 여유가 많고 아래로는 적다 */
+  .mg-whip-pan[data-variant='up'] {
+    --mg-whip-pan-from: 0 -14cqw;
+    --mg-whip-pan-to: 0 7cqw;
+    --mg-whip-pan-blur: var(--mg-whip-pan-blur-y);
+  }
+  .mg-whip-pan[data-variant='down'] {
+    --mg-whip-pan-from: 0 7cqw;
+    --mg-whip-pan-to: 0 -14cqw;
+    --mg-whip-pan-blur: var(--mg-whip-pan-blur-y);
+  }
+  .mg-whip-pan-defs {
+    position: absolute;
+  }
+  .mg-whip-pan :global(.mgs-layer),
+  .mg-whip-pan :global(.mgs-ground) {
+    translate: var(--mg-whip-pan-from);
+  }
+  .mg-whip-pan.is-playing :global(.mgs-layer),
+  .mg-whip-pan.is-playing :global(.mgs-ground) {
+    animation: mg-whip-pan-move var(--mg-duration) linear forwards;
+  }
+  .mg-whip-pan.is-playing :global(.mgs),
+  .mg-whip-pan:not([data-view='top']).is-playing :global(canvas) {
+    animation: mg-whip-pan-smear var(--mg-duration) linear forwards;
+  }
+  .mg-whip-pan :global(.mgt-cam) {
+    rotate: var(--mg-whip-pan-turn);
+  }
+  .mg-whip-pan.is-playing :global(.mgt-cam) {
+    animation: mg-whip-pan-turn var(--mg-duration) linear forwards;
+  }
+  @keyframes mg-whip-pan-turn {
+    0%,
+    40% {
+      rotate: var(--mg-whip-pan-turn);
+      animation-timing-function: cubic-bezier(0.6, 0, 0.4, 1);
+    }
+    52%,
+    100% {
+      rotate: calc(var(--mg-whip-pan-turn) * -1);
+    }
+  }
+  @keyframes mg-whip-pan-move {
+    0%,
+    40% {
+      translate: var(--mg-whip-pan-from);
+      animation-timing-function: cubic-bezier(0.6, 0, 0.4, 1);
+    }
+    52%,
+    100% {
+      translate: var(--mg-whip-pan-to);
+    }
+  }
+  /* 번짐은 돌기 시작한 직후에 켜지고 멈추기 직전에 꺼진다 — 멈춰 있는 화면은 또렷하다 */
+  @keyframes mg-whip-pan-smear {
+    0%,
+    41% {
+      filter: none;
+    }
+    41.01%,
+    51% {
+      filter: var(--mg-whip-pan-blur);
+    }
+    51.01%,
+    100% {
+      filter: none;
+    }
+  }
+</style>

@@ -1,0 +1,24 @@
+---
+// Slow Motion 데모 — 같은 영상(B 가 뛰어올라 튀며 간다)이 처음부터 끝까지 한 가지 속도로 느리게 흐른다. B 가 공중에 오래 떠 있다
+// 속도는 바뀌지 않는다(등속) — 한 샷 안에서 속도가 바뀌는 것은 Speed Ramp 다
+// 원래 속도는 이 묶음의 다른 데모(Freeze Frame · Echo · Stop Motion Look 등)에서 한 번 뛰어 건너는 데 2.4초다. 여기는 2.5배 느리다:
+//   같은 길이를 줘도 영상이 덜 나아간다 — 4.8초 동안 두 번째 착지(시각 0.8)까지만 간다
+import MgFrame from '../../mg/MgFrame.astro';
+import MgClip from '../../mg/MgClip.astro';
+---
+<div class="mg-slow-motion" data-demo-root aria-hidden="true">
+  <MgFrame duration="4.8s">
+    <MgClip />
+  </MgFrame>
+</div>
+
+<style>
+  .mg-slow-motion.is-playing :global(.mgs-b) {
+    animation: mg-slow-motion-run var(--mg-duration) linear forwards;
+  }
+  @keyframes mg-slow-motion-run {
+    to {
+      --mg-clip-t: 0.8;
+    }
+  }
+</style>

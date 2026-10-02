@@ -1,12 +1,13 @@
 ---
-import type { Motion } from '../data/types';
+import type { AnyMotion } from '../data/types';
 import { localized, motionTitle, searchTerms, searchWords } from '../data/motions';
-import { ui, localeMeta, pageHref, motionSubpath, type Locale } from '../i18n/locales';
+import { motionSubpathOf } from '../data/sections';
+import { ui, localeMeta, pageHref, type Locale } from '../i18n/locales';
 import DemoStage from './DemoStage.astro';
 import CircleArrowRight from '@lucide/astro/icons/circle-arrow-right';
 
 interface Props {
-  motion: Motion;
+  motion: AnyMotion;
   locale: Locale;
   // 제목 수준 — 전체 페이지는 카테고리 제목(h2) 아래라 h3
   headingLevel?: 2 | 3;
@@ -23,7 +24,7 @@ const description = localized(motion.description, locale);
 const useFor = localized(motion.useFor, locale);
 const prompt = localized(motion.prompt, locale);
 const promptLang = prompt.fallback ? 'en' : localeMeta[locale].tag;
-const detailHref = pageHref(locale, motionSubpath(motion.id));
+const detailHref = pageHref(locale, motionSubpathOf(motion));
 ---
 <!-- 카드의 직계 자식 5개(stage, head, description, use-for, actions)가 그리드 subgrid 행에 맞춰 정렬된다 -->
 <article

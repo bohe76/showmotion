@@ -1,30 +1,36 @@
 ---
 import SiteLayout from './SiteLayout.astro';
 import MotionCard from './MotionCard.astro';
-import { motions, motionsIn } from '../data/motions';
-import { categories, categoryName, type CategoryId } from '../data/categories';
-import { categorySubpath, pageHref, siteName, ui, type Locale } from '../i18n/locales';
+import { categoryName, type AnyCategoryId } from '../data/categories';
+import { catalog, categorySubpathIn, listSubpath, type SectionId } from '../data/sections';
+import { pageHref, siteName, ui, type Locale } from '../i18n/locales';
 import { splitPlaceholders } from '../i18n/placeholder';
 import { categoryData, homeData } from '../layouts/structured-data';
 
-// 목록 페이지 — 전체(카테고리 없음) 또는 카테고리 하나
+// 목록 페이지 — 한 구역(Web / Motion Graphics)의 전체(카테고리 없음) 또는 카테고리 하나
 interface Props {
   locale: Locale;
-  category?: CategoryId;
+  section: SectionId;
+  category?: AnyCategoryId;
 }
 
-const { locale, category } = Astro.props;
+const { locale, section, category } = Astro.props;
 const t = ui[locale];
-const note = splitPlaceholders(t.promptNote);
+const { categories, motions, motionsIn, name: sectionName } = catalog(section);
+// 구역마다 다른 문구 — 전체 페이지의 제목·소개·메타, 프롬프트 안내
+const copy = section === 'mg' ? t.mg : t;
+const note = splitPlaceholders(copy.promptNote);
 const list = category ? motionsIn(category) : motions;
 const name = category ? categoryName(category) : null;
-const title = name ? `${name} — ${siteName}` : t.metaTitle;
-const description = name ? t.categoryDescription(name, list.length) : t.metaDescription;
-const jsonLd = category ? categoryData(Astro.site!, locale, category) : homeData(Astro.site!, locale);
+// 카테고리 제목에는 웹이 아닌 구역 이름을 끼워 넣는다 — "Camera Movement — Motion Graphics — ShowMotion"
+const title = name ? `${name} — ${section === 'web' ? '' : `${sectionName} — `}${siteName}` : copy.metaTitle;
+const description = name ? copy.categoryDescription(name, list.length) : copy.metaDescription;
+const jsonLd = category ? categoryData(Astro.site!, locale, section, category) : homeData(Astro.site!, locale, section);
 ---
 <SiteLayout
   locale={locale}
-  subpath={category ? categorySubpath(category) : ''}
+  section={section}
+  subpath={category ? categorySubpathIn(section, category) : listSubpath(section)}
   title={title}
   description={description}
   current={category ?? 'all'}
@@ -32,8 +38,8 @@ const jsonLd = category ? categoryData(Astro.site!, locale, category) : homeData
   jsonLd={jsonLd}
 >
   <section class="intro">
-    {name ? <h1 lang="en">{name}</h1> : <h1>{t.tagline}</h1>}
-    {!name && <p>{t.intro}</p>}
+    {name ? <h1 lang="en">{name}</h1> : <h1>{copy.tagline}</h1>}
+    {!name && <p>{copy.intro}</p>}
     <p class="meta">
       <span class="count" data-list-count>{t.count(list.length)}</span>
       <span>{note.map((s) => (s.placeholder ? <mark class="ph">{s.text}</mark> : s.text))}</span>
@@ -53,8 +59,8 @@ const jsonLd = category ? categoryData(Astro.site!, locale, category) : homeData
     </div>
   ) : (
     <>
-      <!-- 카테고리 레일: 넓은 화면에서 오른쪽 여백 가운데에 눈금 15개. 올리면(포커스하면) 이름이 눈금 왼쪽에 한꺼번에 나온다.
-           카드보다 앞에 둬서 키보드로도 카드 259개를 지나기 전에 닿는다 -->
+      <!-- 카테고리 레일: 넓은 화면에서 오른쪽 여백 가운데에 눈금(카테고리마다 하나, 웹은 15개). 올리면(포커스하면) 이름이 눈금 왼쪽에 한꺼번에 나온다.
+           카드보다 앞에 둬서 키보드로도 카드 수백 장을 지나기 전에 닿는다 -->
       <nav class="rail" aria-label={t.sectionsLabel} data-rail>
         <ol>
           {categories.map((c) => (
@@ -74,7 +80,7 @@ const jsonLd = category ? categoryData(Astro.site!, locale, category) : homeData
           return (
             <section class="section" id={c.id} data-section aria-labelledby={`section-${c.id}`}>
               <h2 class="section-title" id={`section-${c.id}`}>
-                <a href={pageHref(locale, categorySubpath(c.id))} lang="en">{c.name}</a>
+                <a href={pageHref(locale, categorySubpathIn(section, c.id))} lang="en">{c.name}</a>
                 <span class="section-count" data-section-count>{items.length}</span>
               </h2>
               <div class="grid">

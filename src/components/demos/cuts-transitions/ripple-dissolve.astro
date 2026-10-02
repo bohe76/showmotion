@@ -1,0 +1,153 @@
+---
+// Ripple Dissolve 데모 — 화면이 물결처럼 일렁이면서 앞 샷이 다음 샷(D)으로 겹쳐 넘어간다. 시간 막대의 띠가 전환 구간이다(30~70%)
+// 일렁임이 차오르고(30~38%) → 일렁이는 채로 두 샷이 겹쳐 넘어가고(38~62%) → 일렁임이 가라앉는다(62~70%). 또렷한 채로 겹치는 Dissolve 와 다르다
+// 겹은 셋이다: 맨 밑에 또렷한 앞 샷, 그 위에 또렷한 다음 샷(50% 에 켜진다 — 그때는 물결 겹에 가려 있다), 맨 위에 물결 겹(.mg-ripple-dissolve-water)
+//   물결 겹에는 두 샷이 한 번씩 더 들어 있고 그 안에서 겹쳐 넘어간다. 물결 겹의 투명도가 일렁임의 세기다 — 필터의 세기는 CSS 로 움직일 수 없다
+// 물결은 SVG 필터다: 세로로만 변하는 잡음(feTurbulence)으로 줄마다 가로로 밀어낸다(feDisplacementMap). 필터 자체는 멈춰 있다 — 저절로 움직이는 것이 없다
+//   물결이 흐르는 것은 겹을 아래로 옮기면서(필터가 겹을 따라간다) 그 안의 그림은 같은 만큼 위로 되돌려서 만든다 — 그림은 제자리, 물결 무늬만 지나간다
+// 물결 겹은 화면 틀보다 넓다(위아래 12cqw · 좌우 6cqw): 옮겨 가도 틀을 덮고, 밀어낼 때 가장자리에 빈 곳이 딸려 오지 않는다
+//   (장면은 bleed 로 틀 밖까지 잇고, 다음 샷은 제 바탕색을 틀 밖까지 깐다 — D 의 바탕색 --ink)
+// 필터 id 는 한 페이지에 이 데모가 여러 번 나와도 내용이 같아 어느 것이 잡혀도 된다
+import MgFrame from '../../mg/MgFrame.astro';
+import MgScene from '../../mg/MgScene.astro';
+import MgShot from '../../mg/MgShot.astro';
+---
+<div class="mg-ripple-dissolve" data-demo-root aria-hidden="true">
+  <svg class="mg-ripple-dissolve-defs" width="0" height="0">
+    <filter id="mg-ripple-dissolve-wave" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
+      <feTurbulence type="fractalNoise" baseFrequency="0 0.03" numOctaves="1" seed="4"></feTurbulence>
+      <!-- 빨강(가로로 미는 양)만 남긴다: 초록은 가운데 값(세로로는 밀지 않는다), 알파는 1 -->
+      <feColorMatrix values="1 0 0 0 0  0 0 0 0 0.5  0 0 0 0 0.5  0 0 0 0 1" result="wave"></feColorMatrix>
+      <feDisplacementMap in="SourceGraphic" in2="wave" scale="40" xChannelSelector="R" yChannelSelector="G"></feDisplacementMap>
+    </filter>
+  </svg>
+  <MgFrame duration="4s" ranges={[[30, 70]]}>
+    <MgScene />
+    <div class="mg-ripple-dissolve-after">
+      <MgShot shot="d" />
+    </div>
+    <div class="mg-ripple-dissolve-water">
+      <div class="mg-ripple-dissolve-view">
+        <MgScene bleed />
+        <div class="mg-ripple-dissolve-next">
+          <MgShot shot="d" />
+        </div>
+      </div>
+    </div>
+  </MgFrame>
+</div>
+
+<style>
+  .mg-ripple-dissolve-defs {
+    position: absolute;
+  }
+  .mg-ripple-dissolve-after {
+    position: absolute;
+    inset: 0;
+    visibility: hidden;
+  }
+  .mg-ripple-dissolve-water {
+    position: absolute;
+    inset: -12cqw -6cqw;
+    background: var(--surface);
+    opacity: 0;
+  }
+  /* 화면 틀과 같은 자리 */
+  .mg-ripple-dissolve-view {
+    position: absolute;
+    inset: 12cqw 6cqw;
+  }
+  .mg-ripple-dissolve-next {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+  }
+  .mg-ripple-dissolve-next::before {
+    content: '';
+    position: absolute;
+    inset: -24cqw -6cqw;
+    background: var(--ink);
+  }
+  .mg-ripple-dissolve :global(.mgs-b),
+  .mg-ripple-dissolve :global(.mgsh-subject) {
+    translate: -8cqw 0;
+  }
+  .mg-ripple-dissolve.is-playing :global(.mgs-b),
+  .mg-ripple-dissolve.is-playing :global(.mgsh-subject) {
+    animation: mg-ripple-dissolve-move var(--mg-duration) linear forwards;
+  }
+  .mg-ripple-dissolve.is-playing .mg-ripple-dissolve-after {
+    animation: mg-ripple-dissolve-after var(--mg-duration) step-end forwards;
+  }
+  .mg-ripple-dissolve.is-playing .mg-ripple-dissolve-water {
+    filter: url(#mg-ripple-dissolve-wave);
+    animation:
+      mg-ripple-dissolve-swell var(--mg-duration) linear forwards,
+      mg-ripple-dissolve-flow var(--mg-duration) linear forwards;
+  }
+  .mg-ripple-dissolve.is-playing .mg-ripple-dissolve-view {
+    animation: mg-ripple-dissolve-hold var(--mg-duration) linear forwards;
+  }
+  .mg-ripple-dissolve.is-playing .mg-ripple-dissolve-next {
+    animation: mg-ripple-dissolve-next var(--mg-duration) linear forwards;
+  }
+  @keyframes mg-ripple-dissolve-move {
+    to {
+      translate: 8cqw 0;
+    }
+  }
+  @keyframes mg-ripple-dissolve-after {
+    0% {
+      visibility: hidden;
+    }
+    50%,
+    100% {
+      visibility: visible;
+    }
+  }
+  @keyframes mg-ripple-dissolve-swell {
+    0%,
+    30% {
+      opacity: 0;
+    }
+    38%,
+    62% {
+      opacity: 1;
+    }
+    70%,
+    100% {
+      opacity: 0;
+    }
+  }
+  /* 물결 겹이 내려가는 만큼 안의 그림이 올라간다 — 둘의 이동량이 늘 같아야 그림이 제자리에 있다 */
+  @keyframes mg-ripple-dissolve-flow {
+    0%,
+    30% {
+      translate: 0 0;
+    }
+    70%,
+    100% {
+      translate: 0 10cqw;
+    }
+  }
+  @keyframes mg-ripple-dissolve-hold {
+    0%,
+    30% {
+      translate: 0 0;
+    }
+    70%,
+    100% {
+      translate: 0 -10cqw;
+    }
+  }
+  @keyframes mg-ripple-dissolve-next {
+    0%,
+    38% {
+      opacity: 0;
+    }
+    62%,
+    100% {
+      opacity: 1;
+    }
+  }
+</style>

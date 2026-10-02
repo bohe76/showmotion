@@ -1,0 +1,42 @@
+---
+// Ease In-Out 데모 — B 가 천천히 떠나 가운데에서 빨라졌다가 천천히 멈춘다. 아래 옅은 블록은 같은 거리를 등속으로 간다
+// 처음에는 대조 블록이 앞서고, 가운데에서 B 가 따라잡아 앞서며, 끝에서 다시 만난다 — 눈금은 양 끝이 촘촘하고 가운데가 성기다
+// 변형은 곡선의 이름이다 — 인벤토리의 일곱 곡선 모두(2026-10-03 사용자 결정. 처음에는 눈으로 구분되는 cubic·sine·expo 만 뒀다)
+//   약한 쪽부터 sine(등속과 차이가 작다) · quad · cubic(기본) · quart · quint · expo(양 끝에서 거의 멈춰 있다가 가운데를 확 지난다). 이웃한 곡선끼리는 차이가 작다 — 눈금을 견줘야 보인다
+//   circ 는 세기가 아니라 모양이 다르다(원호 둘) — 가운데를 가장 급하게 지난다
+//   값은 easings.net 의 cubic-bezier 근사다
+import MgFrame from '../../mg/MgFrame.astro';
+import MgTrack from '../../mg/MgTrack.astro';
+---
+<div class="mg-ease-in-out" data-demo-root aria-hidden="true">
+  <MgFrame duration="3s">
+    <MgTrack />
+  </MgFrame>
+</div>
+
+<style>
+  .mg-ease-in-out {
+    --mgtr-curve: cubic-bezier(0.65, 0, 0.35, 1);
+  }
+  .mg-ease-in-out[data-variant='sine'] {
+    --mgtr-curve: cubic-bezier(0.37, 0, 0.63, 1);
+  }
+  .mg-ease-in-out[data-variant='quad'] {
+    --mgtr-curve: cubic-bezier(0.45, 0, 0.55, 1);
+  }
+  .mg-ease-in-out[data-variant='quart'] {
+    --mgtr-curve: cubic-bezier(0.76, 0, 0.24, 1);
+  }
+  .mg-ease-in-out[data-variant='quint'] {
+    --mgtr-curve: cubic-bezier(0.83, 0, 0.17, 1);
+  }
+  .mg-ease-in-out[data-variant='expo'] {
+    --mgtr-curve: cubic-bezier(0.87, 0, 0.13, 1);
+  }
+  .mg-ease-in-out[data-variant='circ'] {
+    --mgtr-curve: cubic-bezier(0.85, 0, 0.15, 1);
+  }
+  .mg-ease-in-out.is-playing :global(.mgtr-hero) {
+    animation: mg-track-run var(--mg-duration) var(--mgtr-curve) forwards;
+  }
+</style>

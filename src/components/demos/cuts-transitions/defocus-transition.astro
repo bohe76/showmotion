@@ -1,0 +1,89 @@
+---
+// Defocus Transition 데모 — 앞 샷이 초점이 나가며 흐려지고, 가장 흐린 동안 다음 샷(D)으로 바뀐 뒤 초점이 맞으며 또렷해진다
+// 시간 막대의 띠가 전환 구간이다(30~70%). 한가운데(50%)에서 가장 흐리고, 그 앞뒤(42~58%)에 두 샷이 겹쳐 넘어간다 — 흐려서 넘어가는 줄 모른다
+// 흐림은 렌즈 하나(.mg-defocus-transition-lens)에 건다 — 두 샷이 같은 렌즈로 찍힌 것처럼 함께 흐려진다
+// 렌즈는 화면 틀보다 사방으로 8cqw 넓다: 흐림은 가장자리에서 바깥의 빈 곳을 섞어 넣어 테두리가 옅어지므로, 틀 밖까지 그림을 이어 둔다
+//   (장면은 bleed 로 잇고, 다음 샷은 제 바탕색을 틀 밖까지 깐다 — D 의 바탕색 --ink)
+// Dissolve 는 또렷한 채로 겹쳐 넘어가고, Dip to Black 은 단색을 거친다
+import MgFrame from '../../mg/MgFrame.astro';
+import MgScene from '../../mg/MgScene.astro';
+import MgShot from '../../mg/MgShot.astro';
+---
+<div class="mg-defocus-transition" data-demo-root aria-hidden="true">
+  <MgFrame duration="4s" ranges={[[30, 70]]}>
+    <div class="mg-defocus-transition-lens">
+      <div class="mg-defocus-transition-view">
+        <MgScene bleed />
+        <div class="mg-defocus-transition-next">
+          <MgShot shot="d" />
+        </div>
+      </div>
+    </div>
+  </MgFrame>
+</div>
+
+<style>
+  .mg-defocus-transition-lens {
+    position: absolute;
+    inset: -8cqw;
+    background: var(--surface);
+  }
+  /* 화면 틀과 같은 자리 */
+  .mg-defocus-transition-view {
+    position: absolute;
+    inset: 8cqw;
+  }
+  .mg-defocus-transition-next {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+  }
+  .mg-defocus-transition-next::before {
+    content: '';
+    position: absolute;
+    inset: -8cqw;
+    background: var(--ink);
+  }
+  .mg-defocus-transition :global(.mgs-b),
+  .mg-defocus-transition :global(.mgsh-subject) {
+    translate: -8cqw 0;
+  }
+  .mg-defocus-transition.is-playing :global(.mgs-b),
+  .mg-defocus-transition.is-playing :global(.mgsh-subject) {
+    animation: mg-defocus-transition-move var(--mg-duration) linear forwards;
+  }
+  .mg-defocus-transition.is-playing .mg-defocus-transition-lens {
+    animation: mg-defocus-transition-focus var(--mg-duration) ease-in-out forwards;
+  }
+  .mg-defocus-transition.is-playing .mg-defocus-transition-next {
+    animation: mg-defocus-transition-swap var(--mg-duration) linear forwards;
+  }
+  @keyframes mg-defocus-transition-move {
+    to {
+      translate: 8cqw 0;
+    }
+  }
+  @keyframes mg-defocus-transition-focus {
+    0%,
+    30% {
+      filter: blur(0);
+    }
+    50% {
+      filter: blur(3cqw);
+    }
+    70%,
+    100% {
+      filter: blur(0);
+    }
+  }
+  @keyframes mg-defocus-transition-swap {
+    0%,
+    42% {
+      opacity: 0;
+    }
+    58%,
+    100% {
+      opacity: 1;
+    }
+  }
+</style>

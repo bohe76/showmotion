@@ -1,0 +1,68 @@
+---
+// Streaming Text 데모 — 글줄이 화면 가득 쏟아져 내려 읽을 글이 아니라 질감이 된다
+// 크기가 다른 세 겹(작고 흐린 먼 겹 · 가운데 겹 · 크고 진한 가까운 겹)이 서로 다른 빠르기로 흐른다 — 큰 글줄일수록 빨라 깊이가 생긴다
+// 웹 구역의 Matrix Text 는 낱글자가 세로 기둥으로 떨어지며 꼬리가 흐려진다. 여기는 낱말이 이어진 글줄이 덩어리째 흐른다
+// 첫 장면부터 화면이 글줄로 차 있다. 기둥은 화면 아래에 맞춰 위로 길게 뻗어 있다가, 재생하면 자기 위 끝이 화면 위 끝에 닿을 때까지 내려온다
+//   기둥의 길이가 글자 크기에 비례하므로 같은 시간에 큰 글줄이 더 멀리 간다(빠르기를 따로 주지 않는다)
+import MgFrame from '../../mg/MgFrame.astro';
+import MgLines from '../../mg/MgLines.astro';
+
+// left: 화면 왼쪽에서의 자리(cqw) · skip: 글자를 건너뛰어 기둥마다 다른 글이 되게 한다
+const columns = [
+  { depth: 'far', left: 2, skip: 0 },
+  { depth: 'far', left: 27, skip: 9 },
+  { depth: 'far', left: 52, skip: 17 },
+  { depth: 'far', left: 77, skip: 5 },
+  { depth: 'mid', left: 3, skip: 12 },
+  { depth: 'mid', left: 73, skip: 20 },
+  { depth: 'near', left: 33, skip: 7 },
+];
+---
+<div class="mg-streaming-text" data-demo-root aria-hidden="true">
+  <MgFrame duration="5s">
+    {columns.map((col) => (
+      <div class={`mg-streaming-text-col mg-streaming-text-${col.depth}`} style={`left: ${col.left}cqw`}>
+        <MgLines blocks={8} lines={4} heads={false} skip={col.skip} />
+      </div>
+    ))}
+  </MgFrame>
+</div>
+
+<style>
+  .mg-streaming-text-col {
+    position: absolute;
+    bottom: 0;
+  }
+  .mg-streaming-text :global(.mgl),
+  .mg-streaming-text :global(.mgl-block) {
+    align-items: flex-start;
+  }
+  /* 글줄마다 들여쓰기를 달리해 가지런한 문단이 아니라 쏟아지는 데이터로 보이게 한다 */
+  .mg-streaming-text :global(.mgl-line:nth-child(3n + 2)) {
+    margin-left: 1.6em;
+  }
+  .mg-streaming-text :global(.mgl-line:nth-child(4n)) {
+    margin-left: 0.8em;
+  }
+  .mg-streaming-text-far :global(.mgl) {
+    font-size: 2.4cqw;
+    color: var(--demo-muted);
+  }
+  .mg-streaming-text-mid :global(.mgl) {
+    font-size: 3.4cqw;
+    color: var(--muted);
+  }
+  .mg-streaming-text-near :global(.mgl) {
+    font-size: 4.6cqw;
+    color: var(--accent);
+  }
+  .mg-streaming-text.is-playing .mg-streaming-text-col {
+    animation: mg-streaming-text-fall var(--mg-duration) linear forwards;
+  }
+  /* 기둥의 위 끝이 화면 위 끝(화면 높이 56.25cqw)보다 1cqw 위에서 멈춘다 — 위가 비지 않는다 */
+  @keyframes mg-streaming-text-fall {
+    to {
+      translate: 0 calc(100% - 57.25cqw);
+    }
+  }
+</style>

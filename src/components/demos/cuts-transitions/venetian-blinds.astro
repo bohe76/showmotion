@@ -1,0 +1,70 @@
+---
+// Venetian Blinds 데모 — 나란한 띠들이 한꺼번에 열리며 다음 샷(E)이 드러난다. 블라인드의 살이 돌아 열리는 모양이다
+// 띠는 모두 같은 때에 같은 빠르기로 자란다 — 한 변이 화면을 가로질러 가는 Wipe 와 다르다. 시간 막대의 띠가 전환 구간이다(35~65%)
+// 변형: horizontal(기본 — 가로로 누운 띠 여섯) · vertical(세로로 선 띠 여덟)
+// 마스크는 되풀이하는 줄무늬이고, 띠 하나가 열린 폭(--mg-venetian-blinds-open = 띠 폭 × 열린 정도)으로 그린다
+//   열린 정도(--mg-venetian-blinds-p, 0 → 1)를 등록해서 움직인다 — 등록하지 않은 변수는 중간값이 없다. 키프레임에는 숫자만 둔다(var() 가 든 값은 Firefox 가 중간값 없이 건너뛴다)
+//   --mg-venetian-blinds-dir(띠가 자라는 방향) · --mg-venetian-blinds-band(띠 하나의 폭 — 화면 높이 56.25cqw ÷ 6, 화면 폭 100cqw ÷ 8)
+import MgFrame from '../../mg/MgFrame.astro';
+import MgScene from '../../mg/MgScene.astro';
+import MgShot from '../../mg/MgShot.astro';
+---
+<div class="mg-venetian-blinds" data-demo-root aria-hidden="true">
+  <MgFrame duration="4s" ranges={[[35, 65]]}>
+    <MgScene />
+    <MgShot shot="e" />
+  </MgFrame>
+</div>
+
+<style>
+  @property --mg-venetian-blinds-p {
+    syntax: '<number>';
+    inherits: false;
+    initial-value: 0;
+  }
+  .mg-venetian-blinds {
+    --mg-venetian-blinds-dir: to bottom;
+    --mg-venetian-blinds-band: 9.375cqw;
+  }
+  .mg-venetian-blinds[data-variant='vertical'] {
+    --mg-venetian-blinds-dir: to right;
+    --mg-venetian-blinds-band: 12.5cqw;
+  }
+  .mg-venetian-blinds :global(.mgs-b),
+  .mg-venetian-blinds :global(.mgsh-subject) {
+    translate: -8cqw 0;
+  }
+  .mg-venetian-blinds :global(.mgsh) {
+    --mg-venetian-blinds-open: calc(var(--mg-venetian-blinds-band) * var(--mg-venetian-blinds-p));
+    mask-image: repeating-linear-gradient(
+      var(--mg-venetian-blinds-dir),
+      #000 0 var(--mg-venetian-blinds-open),
+      transparent 0 var(--mg-venetian-blinds-band)
+    );
+  }
+  .mg-venetian-blinds.is-playing :global(.mgs-b),
+  .mg-venetian-blinds.is-playing :global(.mgsh-subject) {
+    animation: mg-venetian-blinds-move var(--mg-duration) linear forwards;
+  }
+  .mg-venetian-blinds.is-playing :global(.mgsh) {
+    animation: mg-venetian-blinds-open var(--mg-duration) linear forwards;
+  }
+  @keyframes mg-venetian-blinds-move {
+    to {
+      translate: 8cqw 0;
+    }
+  }
+  @keyframes mg-venetian-blinds-open {
+    0% {
+      --mg-venetian-blinds-p: 0;
+    }
+    35% {
+      --mg-venetian-blinds-p: 0;
+      animation-timing-function: ease-in-out;
+    }
+    65%,
+    100% {
+      --mg-venetian-blinds-p: 1;
+    }
+  }
+</style>

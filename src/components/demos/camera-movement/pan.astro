@@ -1,0 +1,47 @@
+---
+// Pan 데모 — 카메라가 제자리에서 돈다. 세 레이어가 모두 같은 거리만큼 반대쪽으로 밀린다(깊이 차이 없음)
+// Truck 과 나란히 보면 차이가 보인다: 가운데 레이어(B)의 이동량은 두 데모가 같다
+// 변형: left(기본 — 카메라가 왼쪽으로 돌아 화면이 오른쪽으로 밀린다) · right. --mg-dir 이 방향이다(왼쪽 -1, 오른쪽 1)
+// 위에서 보기: 카메라가 자리를 지킨 채 시야만 돈다
+import MgFrame from '../../mg/MgFrame.astro';
+import MgScene from '../../mg/MgScene.astro';
+import MgTopView from '../../mg/MgTopView.astro';
+---
+<div class="mg-pan" data-demo-root aria-hidden="true">
+  <MgFrame duration="3s">
+    <MgScene />
+    <MgTopView />
+  </MgFrame>
+</div>
+
+<style>
+  .mg-pan {
+    --mg-dir: -1;
+  }
+  .mg-pan[data-variant='right'] {
+    --mg-dir: 1;
+  }
+  .mg-pan :global(.mgs-layer) {
+    translate: calc(9cqw * var(--mg-dir)) 0;
+  }
+  .mg-pan.is-playing :global(.mgs-layer) {
+    animation: mg-pan-move var(--mg-duration) ease-in-out forwards;
+  }
+  @keyframes mg-pan-move {
+    to {
+      translate: calc(-9cqw * var(--mg-dir)) 0;
+    }
+  }
+  /* 위에서 보기: 화면이 폭의 18% 밀리는 회전각 — 시야 반각의 탄젠트가 1.15 일 때 약 23°(±11.7°) */
+  .mg-pan :global(.mgt-cam) {
+    rotate: calc(-11.7deg * var(--mg-dir));
+  }
+  .mg-pan.is-playing :global(.mgt-cam) {
+    animation: mg-pan-turn var(--mg-duration) ease-in-out forwards;
+  }
+  @keyframes mg-pan-turn {
+    to {
+      rotate: calc(11.7deg * var(--mg-dir));
+    }
+  }
+</style>

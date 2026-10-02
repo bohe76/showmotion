@@ -1,0 +1,91 @@
+---
+// Pop Captions 데모 — 낱말이 말하는 순서대로 하나씩 튀어나와, 같은 자리에서 앞의 낱말을 대신한다. 문장 전체가 한꺼번에 보이는 때가 없다
+// Karaoke Captions 와 같은 낱말·같은 박자다: 저쪽은 자막 전체가 떠 있고 강조만 옮겨 가고, 여기는 낱말 자체가 나타났다 사라진다
+// 시간 막대의 눈금이 다음 낱말로 바뀌는 지점이다(20·40·60·80%) — 낱말 하나가 길이의 1/5 씩 차지한다. 지연·길이의 비율과 같은 값이어야 한다
+// 자막은 영상 위에 얹는 것이라 밑에 장면을 깐다. B 는 조용히 걷는다
+// 첫 장면에 첫 낱말이 떠 있고(빈 자막으로 시작하지 않는다), 끝 장면에는 마지막 낱말이 남는다
+import MgFrame from '../../mg/MgFrame.astro';
+import MgScene from '../../mg/MgScene.astro';
+import MgWords from '../../mg/MgWords.astro';
+---
+<div class="mg-pop-captions" data-demo-root aria-hidden="true">
+  <MgFrame duration="4s" cuts={[20, 40, 60, 80]}>
+    <MgScene />
+    <div class="mg-pop-captions-cap"><MgWords outline /></div>
+  </MgFrame>
+</div>
+
+<style>
+  .mg-pop-captions :global(.mgs-b) {
+    translate: -8cqw 0;
+  }
+  .mg-pop-captions-cap {
+    position: absolute;
+    right: 0;
+    bottom: 3cqw;
+    left: 0;
+    display: flex;
+    justify-content: center;
+  }
+  /* 낱말을 모두 같은 칸에 포갠다 — 한 번에 하나만 보인다 */
+  .mg-pop-captions :global(.mgw) {
+    display: grid;
+    justify-items: center;
+  }
+  .mg-pop-captions :global(.mgw-word) {
+    grid-area: 1 / 1;
+    visibility: hidden;
+  }
+  .mg-pop-captions :global(.mgw-word:first-child) {
+    visibility: visible;
+  }
+  .mg-pop-captions.is-playing :global(.mgs-b) {
+    animation: mg-pop-captions-walk var(--mg-duration) linear forwards;
+  }
+  /* 낱말마다 길이의 1/5 — 자기 차례(--i)에 튀어나오고, 차례가 끝나면 사라진다. 마지막 낱말은 남는다 */
+  .mg-pop-captions.is-playing :global(.mgw-word) {
+    animation: mg-pop-captions-word calc(var(--mg-duration) * 0.2) ease-out calc(var(--mg-duration) * 0.2 * var(--i)) forwards;
+  }
+  .mg-pop-captions.is-playing :global(.mgw-word:last-child) {
+    animation-name: mg-pop-captions-last;
+  }
+  @keyframes mg-pop-captions-walk {
+    to {
+      translate: 8cqw 0;
+    }
+  }
+  @keyframes mg-pop-captions-word {
+    0% {
+      visibility: visible;
+      scale: 0.4;
+    }
+    22% {
+      scale: 1.16;
+    }
+    36% {
+      scale: 1;
+    }
+    99.99% {
+      visibility: visible;
+      scale: 1;
+    }
+    100% {
+      visibility: hidden;
+      scale: 1;
+    }
+  }
+  @keyframes mg-pop-captions-last {
+    0% {
+      visibility: visible;
+      scale: 0.4;
+    }
+    22% {
+      scale: 1.16;
+    }
+    36%,
+    100% {
+      visibility: visible;
+      scale: 1;
+    }
+  }
+</style>

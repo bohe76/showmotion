@@ -1,0 +1,52 @@
+---
+// Punch In 데모 — 같은 대상의 더 좁은 구도로 즉시 건너뛴다. 시간 막대의 눈금이 컷 지점이다(50%)
+// 줌처럼 커지는 과정이 없다: 컷에서 구도가 한 번에 바뀐다. B 는 끊기지 않고 걷는다 — 시간은 잘리지 않는다(Jump Cut 은 시간이 잘려 B 가 건너뛴다)
+// 구도는 B 의 한가운데를 중심으로 곧장 좁아진다(같은 축) — Jump Cut 의 spatial 처럼 옆으로 비끼지 않는다
+// 변형: in(기본 — 넓은 구도 → 좁은 구도) · out(좁은 구도 → 넓은 구도). --mg-punch-in-from·--mg-punch-in-to 가 컷 앞뒤의 배율이다
+import MgFrame from '../../mg/MgFrame.astro';
+import MgScene from '../../mg/MgScene.astro';
+---
+<div class="mg-punch-in" data-demo-root aria-hidden="true">
+  <MgFrame duration="4s" cuts={[50]}>
+    <MgScene />
+  </MgFrame>
+</div>
+
+<style>
+  .mg-punch-in {
+    --mg-punch-in-from: 1;
+    --mg-punch-in-to: 1.7;
+  }
+  .mg-punch-in[data-variant='out'] {
+    --mg-punch-in-from: 1.7;
+    --mg-punch-in-to: 1;
+  }
+  /* 중심 = B 의 한가운데(화면 높이의 68%) */
+  .mg-punch-in :global(.mgs) {
+    transform-origin: 50% 68%;
+    scale: var(--mg-punch-in-from);
+  }
+  .mg-punch-in :global(.mgs-b) {
+    translate: -5cqw 0;
+  }
+  .mg-punch-in.is-playing :global(.mgs) {
+    animation: mg-punch-in-cut var(--mg-duration) step-end forwards;
+  }
+  .mg-punch-in.is-playing :global(.mgs-b) {
+    animation: mg-punch-in-walk var(--mg-duration) linear forwards;
+  }
+  @keyframes mg-punch-in-cut {
+    0% {
+      scale: var(--mg-punch-in-from);
+    }
+    50%,
+    100% {
+      scale: var(--mg-punch-in-to);
+    }
+  }
+  @keyframes mg-punch-in-walk {
+    to {
+      translate: 5cqw 0;
+    }
+  }
+</style>

@@ -104,9 +104,9 @@ function setupSuggestions(form: HTMLFormElement, input: HTMLInputElement) {
   let loading: Promise<void> | null = null;
   let active = -1;
 
-  // 이름 목록은 검색창에 처음 들어갈 때 한 번만 받는다 — 낱말 색인이 언어마다 달라 페이지 언어의 파일을 받는다
+  // 이름 목록은 검색창에 처음 들어갈 때 한 번만 받는다 — 낱말 색인이 언어마다 달라 페이지 언어의 파일을 받는다 (구역마다 파일이 다르다)
   const load = () =>
-    (loading ??= fetch(`/search-index/${labels.locale}.json`)
+    (loading ??= fetch(labels.searchIndex!)
       .then((response) => response.json() as Promise<IndexEntry[]>)
       .then((entries) => {
         index = entries.map((entry) => ({ ...entry, norm: entry.terms.map(normalize), wordList: entry.words.split(' ') }));

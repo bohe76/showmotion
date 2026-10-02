@@ -1,0 +1,46 @@
+---
+// Fast Motion 데모 — 같은 영상(B 가 뛰어올라 튀며 간다)이 처음부터 끝까지 한 가지 속도로 빠르게 흐른다. 끊기지 않는다 — 이어진 영상을 빨리 돌린 것이다
+// 속도는 바뀌지 않는다(등속) — 한 샷 안에서 속도가 바뀌는 것은 Speed Ramp, 긴 간격으로 찍어 끊기며 흐르는 것은 Time-Lapse 다
+// 원래 속도는 이 묶음의 다른 데모에서 한 번 건너는 데 2.4초다. 여기는 2.4배 빠르다:
+//   같은 길이에 영상이 더 많이 들어간다 — 3초 동안 건너갔다가, 되돌아 뛰었다가, 다시 건너간다(33.3% · 66.7% 에서 방향이 바뀐다)
+import MgFrame from '../../mg/MgFrame.astro';
+import MgClip from '../../mg/MgClip.astro';
+---
+<div class="mg-fast-motion" data-demo-root aria-hidden="true">
+  <MgFrame duration="3s">
+    <MgClip />
+  </MgFrame>
+</div>
+
+<style>
+  .mg-fast-motion.is-playing :global(.mgs-b) {
+    animation: mg-fast-motion-run var(--mg-duration) linear forwards;
+  }
+  /* --mgc-flip 은 등록하지 않은 변수라 보간되지 않고 두 키프레임의 한가운데에서 바뀐다 — 방향이 바뀌는 순간에 딱 붙은 키프레임 둘을 둔다 */
+  @keyframes mg-fast-motion-run {
+    0% {
+      --mg-clip-t: 0;
+      --mgc-flip: 0;
+    }
+    33.33% {
+      --mg-clip-t: 1;
+      --mgc-flip: 0;
+    }
+    33.34% {
+      --mg-clip-t: 0;
+      --mgc-flip: 1;
+    }
+    66.66% {
+      --mg-clip-t: 1;
+      --mgc-flip: 1;
+    }
+    66.67% {
+      --mg-clip-t: 0;
+      --mgc-flip: 0;
+    }
+    100% {
+      --mg-clip-t: 1;
+      --mgc-flip: 0;
+    }
+  }
+</style>

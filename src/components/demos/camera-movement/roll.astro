@@ -1,0 +1,30 @@
+---
+// Roll 데모 — 카메라가 렌즈 축을 중심으로 돈다. 장면 전체가 화면 한가운데를 축으로 수평에서 18° 돌아 수평선이 기운다(이동도 배율 변화도 없다)
+// 변형: clockwise(기본 — 카메라가 시계 방향으로 돌아 화면은 시계 반대 방향으로 돈다) · counter-clockwise. --mg-dir 이 방향이다(시계 1, 반시계 -1)
+// 기울었을 때 귀퉁이가 비지 않게 바닥과 기둥을 화면 밖까지 잇는다(bleed)
+import MgFrame from '../../mg/MgFrame.astro';
+import MgScene from '../../mg/MgScene.astro';
+---
+<div class="mg-roll" data-demo-root aria-hidden="true">
+  <MgFrame duration="3s">
+    <MgScene bleed />
+  </MgFrame>
+</div>
+
+<style>
+  .mg-roll {
+    --mg-dir: 1;
+  }
+  .mg-roll[data-variant='counter-clockwise'] {
+    --mg-dir: -1;
+  }
+  /* 첫 장면은 수평이다 — 재생 전 카드가 목록에서 혼자 기울어 있지 않게. 돌아간 채로 끝난다(기운 채 멈춘 것이 Dutch angle) */
+  .mg-roll.is-playing :global(.mgs) {
+    animation: mg-roll-turn var(--mg-duration) ease-in-out forwards;
+  }
+  @keyframes mg-roll-turn {
+    to {
+      rotate: calc(-18deg * var(--mg-dir));
+    }
+  }
+</style>

@@ -1,0 +1,68 @@
+---
+// Dolly 데모 — 카메라 몸이 앞으로 나아가거나 물러난다. 가까운 레이어일수록 더 많이 커진다(원근이 바뀐다)
+// Zoom 과 나란히 보면 차이가 보인다: 가운데 B 가 커지는 정도는 두 데모가 같다(0.8 → 1.25 배). 앞 기둥은 화면 밖으로 밀려나고 뒤 막대는 조금만 커진다
+// 배율 = 레이어까지의 거리 ÷ (거리 − 카메라가 나아간 거리). 카메라 위치는 B 까지의 거리를 1 로 본 값(-0.25 = 물러난 자리, 0.2 = 다가간 자리)
+// 배율의 중심은 지평선(화면 위에서 68% = B 의 한가운데). 바닥선은 뒤 레이어의 밑변이라 뒤 레이어와 같은 비율로 움직인다
+// 변형: in(기본 — 다가간다) · out. 깊이: 레이어 사이가 멀수록 앞·뒤가 커지는 정도의 차이가 벌어진다. 가운데(B)는 그대로다
+import MgFrame from '../../mg/MgFrame.astro';
+// 위에서 보기: 카메라가 같은 방향을 본 채 앞뒤로 간다
+import MgScene from '../../mg/MgScene.astro';
+import MgTopView from '../../mg/MgTopView.astro';
+---
+<div class="mg-dolly" data-demo-root aria-hidden="true">
+  <MgFrame duration="3s">
+    <MgScene bleed />
+    <MgTopView />
+  </MgFrame>
+</div>
+
+<style>
+  .mg-dolly {
+    --mg-dolly-from: -0.25;
+    --mg-dolly-to: 0.2;
+  }
+  .mg-dolly[data-variant='out'] {
+    --mg-dolly-from: 0.2;
+    --mg-dolly-to: -0.25;
+  }
+  .mg-dolly :global(.mgs-far),
+  .mg-dolly :global(.mgs-ground) {
+    --mg-dolly-z: var(--mg-z-far);
+  }
+  .mg-dolly :global(.mgs-mid) {
+    --mg-dolly-z: 1;
+  }
+  .mg-dolly :global(.mgs-near) {
+    --mg-dolly-z: var(--mg-z-near);
+  }
+  .mg-dolly :global(.mgs-layer),
+  .mg-dolly :global(.mgs-ground) {
+    transform-origin: 50% 68%;
+    scale: calc(var(--mg-dolly-z) / (var(--mg-dolly-z) - var(--mg-dolly-from)));
+  }
+  /* 바닥은 화면 아래쪽 24% 띠다 — 지평선은 그 윗변에서 화면 높이의 8%(4.5cqw) 위에 있다 */
+  .mg-dolly :global(.mgs-ground) {
+    transform-origin: 50% -4.5cqw;
+  }
+  .mg-dolly.is-playing :global(.mgs-layer),
+  .mg-dolly.is-playing :global(.mgs-ground) {
+    animation: mg-dolly-travel var(--mg-duration) ease-in-out forwards;
+  }
+  @keyframes mg-dolly-travel {
+    to {
+      scale: calc(var(--mg-dolly-z) / (var(--mg-dolly-z) - var(--mg-dolly-to)));
+    }
+  }
+  /* 위에서 보기: 카메라 위치 × 가운데 줄까지의 거리만큼 앞(위)으로 간다 */
+  .mg-dolly :global(.mgt-cam) {
+    translate: 0 calc(var(--mgt-unit) * var(--mg-dolly-from) * -1);
+  }
+  .mg-dolly.is-playing :global(.mgt-cam) {
+    animation: mg-dolly-walk var(--mg-duration) ease-in-out forwards;
+  }
+  @keyframes mg-dolly-walk {
+    to {
+      translate: 0 calc(var(--mgt-unit) * var(--mg-dolly-to) * -1);
+    }
+  }
+</style>

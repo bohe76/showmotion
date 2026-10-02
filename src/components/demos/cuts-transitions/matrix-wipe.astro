@@ -1,0 +1,104 @@
+---
+// Matrix Wipe 데모 — 화면을 격자로 나눈 칸들이 하나씩 뒤집히며 다음 샷(E)으로 바뀐다. 시간 막대의 띠가 전환 구간이다(30~70%)
+// 칸은 6 × 4 이고, 칸마다 다음 샷의 제 몫(화면에서 그 칸이 놓인 자리)을 담고 있다 — 다 뒤집히면 한 장의 샷이 된다
+// 변형: checkerboard(기본) — 체스판의 한 색 칸들이 왼쪽 위부터 차례로 뒤집히고, 이어서 나머지 색 칸들이 뒤집힌다
+//       random-blocks — 정해 둔 뒤섞인 순서로 뒤집힌다
+// 칸이 뒤집히는 차례(--mg-matrix-wipe-k, 0~23)가 곧 지연이다: 30% 에서 첫 칸이 뒤집히기 시작해 70% 에 마지막 칸이 끝난다(칸 하나가 뒤집히는 데 6%)
+import MgFrame from '../../mg/MgFrame.astro';
+import MgScene from '../../mg/MgScene.astro';
+import MgShot from '../../mg/MgShot.astro';
+
+const cols = 6;
+const rows = 4;
+// 칸(왼쪽 위부터 가로로 센 차례)마다의 뒤집히는 차례 — random-blocks 용
+const shuffled = [13, 2, 20, 7, 17, 0, 10, 23, 5, 15, 8, 19, 3, 22, 11, 1, 16, 6, 21, 9, 14, 4, 18, 12];
+const tiles = Array.from({ length: cols * rows }, (_, i) => {
+  const col = i % cols;
+  const row = Math.floor(i / cols);
+  // 체스판: 한 줄에 같은 색 칸이 셋씩 있다. 첫 색 칸들이 0~11, 나머지 색 칸들이 12~23
+  const second = (col + row) % 2;
+  const checker = second * (cols * rows) / 2 + row * (cols / 2) + Math.floor(col / 2);
+  return { col, row, checker, random: shuffled[i] };
+});
+---
+<div class="mg-matrix-wipe" data-demo-root aria-hidden="true">
+  <MgFrame duration="4s" ranges={[[30, 70]]}>
+    <MgScene />
+    {
+      tiles.map((t) => (
+        <div
+          class="mg-matrix-wipe-tile"
+          style={`--mg-matrix-wipe-c: ${t.col}; --mg-matrix-wipe-r: ${t.row}; --mg-matrix-wipe-a: ${t.checker}; --mg-matrix-wipe-b: ${t.random}`}
+        >
+          <MgShot shot="e" />
+        </div>
+      ))
+    }
+    <div class="mg-matrix-wipe-done">
+      <MgShot shot="e" />
+    </div>
+  </MgFrame>
+</div>
+
+<style>
+  .mg-matrix-wipe :global(.mgs-b) {
+    translate: -8cqw 0;
+  }
+  /* 칸은 제 몫보다 0.5px 넓고 높다 — 딱 맞대면 이웃 칸과의 사이에 앞 샷이 실금으로 비친다 */
+  .mg-matrix-wipe-tile {
+    --mg-matrix-wipe-k: var(--mg-matrix-wipe-a);
+    position: absolute;
+    top: calc(var(--mg-matrix-wipe-r) * 100% / 4);
+    left: calc(var(--mg-matrix-wipe-c) * 100% / 6);
+    width: calc(100% / 6 + 0.5px);
+    height: calc(100% / 4 + 0.5px);
+    overflow: hidden;
+    scale: 0 1;
+  }
+  .mg-matrix-wipe[data-variant='random-blocks'] .mg-matrix-wipe-tile {
+    --mg-matrix-wipe-k: var(--mg-matrix-wipe-b);
+  }
+  /* 칸 안의 샷은 화면 틀과 같은 크기·같은 자리다(칸의 여섯 배 폭, 네 배 높이 — 덧댄 0.5px 은 뺀다) */
+  .mg-matrix-wipe-tile :global(.mgsh) {
+    inset: auto;
+    top: calc((100% - 0.5px) * -1 * var(--mg-matrix-wipe-r));
+    left: calc((100% - 0.5px) * -1 * var(--mg-matrix-wipe-c));
+    width: calc((100% - 0.5px) * 6);
+    height: calc((100% - 0.5px) * 4);
+  }
+  /* 마지막 칸이 다 뒤집히면(70%) 온전한 샷 한 장이 그 위를 덮는다 — 칸은 배율이 걸려 있어 화면 틀의 맨 아래 한 줄을 못 채우는 일이 있다 */
+  .mg-matrix-wipe-done {
+    position: absolute;
+    inset: 0;
+    visibility: hidden;
+  }
+  .mg-matrix-wipe.is-playing :global(.mgs-b) {
+    animation: mg-matrix-wipe-walk var(--mg-duration) linear forwards;
+  }
+  .mg-matrix-wipe.is-playing .mg-matrix-wipe-done {
+    animation: mg-matrix-wipe-done var(--mg-duration) step-end forwards;
+  }
+  .mg-matrix-wipe.is-playing .mg-matrix-wipe-tile {
+    animation: mg-matrix-wipe-flip calc(var(--mg-duration) * 0.06) ease-out
+      calc(var(--mg-duration) * (0.3 + var(--mg-matrix-wipe-k) * 0.0148)) forwards;
+  }
+  @keyframes mg-matrix-wipe-walk {
+    to {
+      translate: 8cqw 0;
+    }
+  }
+  @keyframes mg-matrix-wipe-flip {
+    to {
+      scale: 1 1;
+    }
+  }
+  @keyframes mg-matrix-wipe-done {
+    0% {
+      visibility: hidden;
+    }
+    70%,
+    100% {
+      visibility: visible;
+    }
+  }
+</style>

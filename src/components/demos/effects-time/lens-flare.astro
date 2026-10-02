@@ -1,0 +1,148 @@
+---
+// Lens Flare 데모 — 밝은 광원이 화면 위쪽을 지나가는 동안 렌즈 안에서 흩어진 빛이 별 모양·줄기·고리로 나타나 미끄러진다
+// 처음에는 아무것도 없다. 시간 막대의 띠가 광원이 화면 안에 있는 구간이다(22~88%): 왼쪽 위에서 들어와 오른쪽 위로 빠져나간다. 밑의 영상은 그대로 흐른다
+// 모양이 있다 — 광원 자리의 별 모양(가로로 긴 줄기 + 짧은 줄기들)과, 광원에서 화면 한가운데를 지나는 직선 위에 늘어선 고리·원반·육각형(고스트)
+//   고스트는 광원의 반대쪽으로 움직인다: 광원이 오른쪽으로 가면 가운데 너머의 고스트는 왼쪽으로 간다. 이 "한 줄로 꿰여 미끄러지는" 것이 렌즈 플레어의 모습이다
+//   모양 없이 가장자리에서 번져 드는 Light Leak, 물체에서 나와 물체를 따라가는 Bloom 과 다르다
+// 광원의 자리는 등록한 길이 변수 둘(--mg-lens-flare-x · -y, 화면 한가운데가 원점)이다. 고스트마다 그 값에 제 배수(--k)를 곱한 자리에 선다 — 음수면 가운데 너머 반대쪽이다
+// 색은 토큰이 아니라 고정색이다(2026-10-02 사용자 결정) — 광원은 따뜻한 흰색과 호박색, 고스트는 렌즈 코팅에 비친 빛처럼 저마다 다른 색이다. 라이트·다크에서 같은 색을 쓴다
+//   그라데이션이 곧 효과다 — 빛의 중심과 줄기는 가장자리로 스며 사라진다
+import MgFrame from '../../mg/MgFrame.astro';
+import MgFxFootage from '../../mg/MgFxFootage.astro';
+
+// 고스트: 배수(광원 쪽이 양수) · 지름(cqw) · 모양 · 색
+const ghosts = [
+  { k: 0.55, size: 5, kind: 'disc', color: '#ffb23e' },
+  { k: 0.22, size: 11, kind: 'ring', color: '#5aa7ff' },
+  { k: -0.3, size: 6, kind: 'hex', color: '#3fd08a' },
+  { k: -0.62, size: 16, kind: 'ring', color: '#b57bff' },
+  { k: -1, size: 9, kind: 'disc', color: '#ff7a59' },
+  { k: -1.45, size: 24, kind: 'ring', color: '#5aa7ff' },
+];
+// 별 모양의 짧은 줄기들(가로로 긴 줄기는 따로 있다): 기운 각도
+const spikes = [60, 90, 120];
+---
+<div class="mg-lens-flare" data-demo-root aria-hidden="true">
+  <MgFrame duration="4s" ranges={[[22, 88]]}>
+    <MgFxFootage />
+    <div class="mg-lens-flare-rig">
+      {ghosts.map(({ k, size, kind, color }) => (
+        <span class={`mg-lens-flare-part mg-lens-flare-${kind}`} style={`--k: ${k}; --c: ${color}; width: ${size}cqw`}></span>
+      ))}
+      <span class="mg-lens-flare-part mg-lens-flare-streak" style="--k: 1"></span>
+      {spikes.map((angle) => (
+        <span class="mg-lens-flare-part mg-lens-flare-spike" style={`--k: 1; rotate: ${angle}deg`}></span>
+      ))}
+      <span class="mg-lens-flare-part mg-lens-flare-core" style="--k: 1"></span>
+    </div>
+  </MgFrame>
+</div>
+
+<style>
+  @property --mg-lens-flare-x {
+    syntax: '<length>';
+    inherits: true;
+    initial-value: 0px;
+  }
+  @property --mg-lens-flare-y {
+    syntax: '<length>';
+    inherits: true;
+    initial-value: 0px;
+  }
+  .mg-lens-flare {
+    /* 광원(중심·줄기)의 색. 고스트는 저마다의 색(--c)으로 아래 두 값을 다시 계산한다 */
+    --c: #ffa726;
+    --mg-lens-flare-hot: #fff4cf;
+  }
+  .mg-lens-flare-part {
+    --mg-lens-flare-glow: color-mix(in srgb, var(--c) 62%, transparent);
+    --mg-lens-flare-faint: color-mix(in srgb, var(--c) 32%, transparent);
+  }
+  /* 원점이 화면 한가운데다. 재생 전에는 광원이 왼쪽 위 화면 밖에 있고 통째로 보이지 않는다 */
+  .mg-lens-flare-rig {
+    --mg-lens-flare-x: -62cqw;
+    --mg-lens-flare-y: -22cqw;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    opacity: 0;
+  }
+  .mg-lens-flare-part {
+    position: absolute;
+    top: 0;
+    left: 0;
+    translate: calc(-50% + var(--mg-lens-flare-x) * var(--k)) calc(-50% + var(--mg-lens-flare-y) * var(--k));
+  }
+  .mg-lens-flare-disc,
+  .mg-lens-flare-ring,
+  .mg-lens-flare-hex,
+  .mg-lens-flare-core {
+    aspect-ratio: 1;
+    border-radius: 50%;
+  }
+  .mg-lens-flare-disc {
+    background: var(--mg-lens-flare-faint);
+  }
+  .mg-lens-flare-ring {
+    border: 0.5cqw solid var(--mg-lens-flare-glow);
+    background: radial-gradient(closest-side, transparent 60%, var(--mg-lens-flare-faint));
+  }
+  .mg-lens-flare-hex {
+    clip-path: polygon(25% 6.7%, 75% 6.7%, 100% 50%, 75% 93.3%, 25% 93.3%, 0 50%);
+    background: var(--mg-lens-flare-glow);
+    border-radius: 0;
+  }
+  .mg-lens-flare-core {
+    width: 13cqw;
+    background: radial-gradient(closest-side, var(--mg-lens-flare-hot) 22%, var(--mg-lens-flare-glow) 46%, transparent);
+  }
+  .mg-lens-flare-streak,
+  .mg-lens-flare-spike {
+    height: 0.7cqw;
+    background: linear-gradient(90deg, transparent, var(--mg-lens-flare-glow) 35%, var(--mg-lens-flare-hot) 50%, var(--mg-lens-flare-glow) 65%, transparent);
+    border-radius: 0.35cqw;
+  }
+  .mg-lens-flare-streak {
+    width: 84cqw;
+  }
+  .mg-lens-flare-spike {
+    width: 24cqw;
+    height: 0.5cqw;
+  }
+  .mg-lens-flare.is-playing .mg-lens-flare-rig {
+    animation:
+      mg-lens-flare-pass var(--mg-duration) linear forwards,
+      mg-lens-flare-show var(--mg-duration) linear forwards;
+  }
+  /* 광원은 화면 위쪽을 얕은 호를 그리며 지나간다 — 가운데 위에서 가장 낮다 */
+  @keyframes mg-lens-flare-pass {
+    0%,
+    22% {
+      --mg-lens-flare-x: -62cqw;
+      --mg-lens-flare-y: -22cqw;
+    }
+    55% {
+      --mg-lens-flare-x: 0cqw;
+      --mg-lens-flare-y: -15cqw;
+    }
+    88%,
+    100% {
+      --mg-lens-flare-x: 62cqw;
+      --mg-lens-flare-y: -22cqw;
+    }
+  }
+  @keyframes mg-lens-flare-show {
+    0%,
+    22% {
+      opacity: 0;
+    }
+    30%,
+    80% {
+      opacity: 1;
+    }
+    88%,
+    100% {
+      opacity: 0;
+    }
+  }
+</style>

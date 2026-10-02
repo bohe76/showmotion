@@ -1,0 +1,71 @@
+---
+// Fly-Through 데모 — 카메라가 좁은 틈을 지나가고, 그 너머의 대상이 드러난다
+// 틈은 앞 레이어다: 이 데모에서만 앞 기둥 A 둘을 바깥쪽과 위로 이어 붙여 벽체 두 쪽으로 만든다 — 그 사이가 틈이 된다
+// 처음에는 멀리서 본다: 벽체 두 쪽이 화면 가운데에 서 있고 그 틈으로 B 가 작게 보인다. 카메라가 나아가면 벽체가 화면을 채우며 틈이 천천히 벌어지다가, 지나가는 순간 화면 밖으로 휙 빠지고 장면이 열린다
+// Dolly 와 나란히 보면 차이가 보인다: Dolly 는 처음부터 다 보이는 장면에 다가갈 뿐이다. 여기서는 가리던 것 사이를 지나가고, 지나간 뒤에 장면이 열린다
+// 벽체를 화면 끝까지 잇지 않는다(폭 44cqw) — 다 이으면 재생 전 카드가 거의 까맣게 덮여 목록에서 혼자 무겁다
+// 카메라의 앞뒤 자리 d(B 까지의 거리를 1 로 본 값)를 고르게 움직이고, 레이어가 배율 = 거리 ÷ (거리 − d) 를 계산한다
+//   — 배율을 곧바로 보간하면 고르게 커져서 "지나가는 순간 휙"이 사라진다
+//   움직이는 것은 진행도(--mg-fly-through-p, 0 → 1)다. d 는 레이어가 진행도에서 계산한다 — 키프레임에는 숫자만 둔다(var() 가 든 값은 Firefox 가 중간값 없이 건너뛴다)
+// 깊이: 처음과 끝 자리를 앞 레이어의 거리에 맞춰 잡는다(틈의 처음 너비는 같다). 벽이 가까울수록 B 는 처음에 더 크게 보이고 끝에는 덜 커진다
+import MgFrame from '../../mg/MgFrame.astro';
+import MgScene from '../../mg/MgScene.astro';
+---
+<div class="mg-fly-through" data-demo-root aria-hidden="true">
+  <MgFrame duration="3.5s">
+    <MgScene bleed />
+  </MgFrame>
+</div>
+
+<style>
+  @property --mg-fly-through-p {
+    syntax: '<number>';
+    inherits: true;
+    initial-value: 0;
+  }
+  .mg-fly-through :global(.mgs-far),
+  .mg-fly-through :global(.mgs-ground) {
+    --mg-fly-through-z: var(--mg-z-far);
+  }
+  .mg-fly-through :global(.mgs-mid) {
+    --mg-fly-through-z: 1;
+  }
+  .mg-fly-through :global(.mgs-near) {
+    --mg-fly-through-z: var(--mg-z-near);
+  }
+  /* 배율의 중심은 지평선(화면 위에서 68% = B 의 한가운데). 바닥선은 뒤 레이어의 밑변이라 뒤 레이어와 같이 움직인다 */
+  /* d — 처음: 틈이 원래 너비의 0.4 배로 보이는 자리(앞 레이어 거리 × −1.5). 끝: 2 배로 보이는 자리(× 0.5 — 벽이 화면 밖에 있다) */
+  .mg-fly-through :global(.mgs-layer),
+  .mg-fly-through :global(.mgs-ground) {
+    --mg-fly-through-d: calc(var(--mg-z-near) * (-1.5 + 2 * var(--mg-fly-through-p)));
+    transform-origin: 50% 68%;
+    scale: calc(var(--mg-fly-through-z) / (var(--mg-fly-through-z) - var(--mg-fly-through-d)));
+  }
+  .mg-fly-through :global(.mgs-ground) {
+    transform-origin: 50% -4.5cqw;
+  }
+  /* 벽체: 기둥의 크기와 글자 자리는 그대로 두고, 같은 색 판을 기둥 뒤에 덧댄다 — 왼쪽 기둥은 왼쪽으로, 오른쪽 기둥은 오른쪽으로, 둘 다 위아래로 */
+  .mg-fly-through :global(.mgs-a)::before {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    bottom: -60cqw;
+    width: 44cqw;
+    height: 220cqw;
+    background: inherit;
+  }
+  .mg-fly-through :global(.mgs-a:first-child)::before {
+    right: 0;
+  }
+  .mg-fly-through :global(.mgs-a:last-child)::before {
+    left: 0;
+  }
+  .mg-fly-through.is-playing :global(.mgs) {
+    animation: mg-fly-through-travel var(--mg-duration) cubic-bezier(0.4, 0, 0.8, 1) forwards;
+  }
+  @keyframes mg-fly-through-travel {
+    to {
+      --mg-fly-through-p: 1;
+    }
+  }
+</style>

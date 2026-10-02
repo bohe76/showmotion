@@ -1,0 +1,100 @@
+---
+// Tracking Shot 데모 — 주인공 B 가 움직이고 카메라가 같은 거리를 두고 같이 간다. B 는 화면에서 제자리이고 크기도 그대로인데, 둘레가 흘러간다(가까울수록 빨리)
+// Truck 과 나란히 보면 차이가 보인다: Truck 은 B 도 다른 레이어와 같이 밀린다. 여기서는 B 만 빼고 흐르고, 훨씬 멀리 간다
+// B 는 걷는 동안 조금씩 들썩인다 — 화면에서 제자리여도 움직이는 쪽이 B 임을 알린다. 가는 내내 같은 빠르기다(이미 가고 있는 중의 한 토막)
+// 변형: side(기본 — 옆에서 나란히 간다. B 가 오른쪽으로 가서 둘레가 왼쪽으로 흐른다. 이동량 = 41cqw ÷ 레이어까지의 거리)
+//       follow(뒤에서 따라간다 — 둘레가 다가오며 커진다) · lead(앞에서 물러나며 찍는다 — 둘레가 멀어지며 줄어든다). 배율은 Dolly 와 같은 식이고 B 만 1 배로 남는다
+// 깊이: 레이어 사이가 멀수록 앞·뒤의 빠르기 차이가 커진다
+import MgFrame from '../../mg/MgFrame.astro';
+// 위에서 보기: 카메라와 B 가 같은 거리를 둔 채 같이 간다
+import MgScene from '../../mg/MgScene.astro';
+import MgTopView from '../../mg/MgTopView.astro';
+---
+<div class="mg-tracking-shot" data-demo-root aria-hidden="true">
+  <MgFrame duration="4s">
+    <MgScene bleed />
+    <MgTopView />
+  </MgFrame>
+</div>
+
+<style>
+  /* run: 옆으로 흐르는 거리(B 의 거리에서 잰 값의 절반 — 처음 +, 끝 −). from · to: 카메라가 앞뒤로 간 자리(B 까지의 거리를 1 로 본 값) */
+  .mg-tracking-shot {
+    --mg-tracking-shot-run: 41cqw;
+    --mg-tracking-shot-from: 0;
+    --mg-tracking-shot-to: 0;
+  }
+  .mg-tracking-shot[data-variant='follow'] {
+    --mg-tracking-shot-run: 0cqw;
+    --mg-tracking-shot-from: -0.25;
+    --mg-tracking-shot-to: 0.2;
+  }
+  .mg-tracking-shot[data-variant='lead'] {
+    --mg-tracking-shot-run: 0cqw;
+    --mg-tracking-shot-from: 0.2;
+    --mg-tracking-shot-to: -0.25;
+  }
+  .mg-tracking-shot :global(.mgs-far),
+  .mg-tracking-shot :global(.mgs-ground) {
+    --mg-tracking-shot-z: var(--mg-z-far);
+  }
+  .mg-tracking-shot :global(.mgs-near) {
+    --mg-tracking-shot-z: var(--mg-z-near);
+  }
+  /* 배율의 중심은 지평선(화면 위에서 68% = B 의 한가운데). 바닥선은 뒤 레이어의 밑변이라 뒤 레이어와 같이 움직인다 */
+  .mg-tracking-shot :global(.mgs-far),
+  .mg-tracking-shot :global(.mgs-near),
+  .mg-tracking-shot :global(.mgs-ground) {
+    transform-origin: 50% 68%;
+    translate: calc(var(--mg-tracking-shot-run) / var(--mg-tracking-shot-z)) 0;
+    scale: calc(var(--mg-tracking-shot-z) / (var(--mg-tracking-shot-z) - var(--mg-tracking-shot-from)));
+  }
+  .mg-tracking-shot :global(.mgs-ground) {
+    transform-origin: 50% -4.5cqw;
+  }
+  .mg-tracking-shot.is-playing :global(.mgs-far),
+  .mg-tracking-shot.is-playing :global(.mgs-near),
+  .mg-tracking-shot.is-playing :global(.mgs-ground) {
+    animation: mg-tracking-shot-travel var(--mg-duration) linear forwards;
+  }
+  @keyframes mg-tracking-shot-travel {
+    to {
+      translate: calc(var(--mg-tracking-shot-run) / var(--mg-tracking-shot-z) * -1) 0;
+      scale: calc(var(--mg-tracking-shot-z) / (var(--mg-tracking-shot-z) - var(--mg-tracking-shot-to)));
+    }
+  }
+  .mg-tracking-shot.is-playing :global(.mgs-b) {
+    animation: mg-tracking-shot-step calc(var(--mg-duration) / 6) ease-in-out 6;
+  }
+  @keyframes mg-tracking-shot-step {
+    50% {
+      translate: 0 -1cqw;
+    }
+  }
+  /* 위에서 보기: 카메라와 B 를 똑같이 옮긴다. side 는 가운데 줄이 화면 폭의 41% 밀리는 만큼 옆으로, follow · lead 는 가운데 줄까지 거리의 0.25 · 0.2 만큼 앞뒤로 */
+  .mg-tracking-shot :global(.mgt) {
+    --mg-tracking-shot-top-from: calc(var(--mgt-mid-width) * -0.41) 0;
+    --mg-tracking-shot-top-to: calc(var(--mgt-mid-width) * 0.41) 0;
+  }
+  .mg-tracking-shot[data-variant='follow'] :global(.mgt) {
+    --mg-tracking-shot-top-from: 0 calc(var(--mgt-unit) * 0.25);
+    --mg-tracking-shot-top-to: 0 calc(var(--mgt-unit) * -0.2);
+  }
+  .mg-tracking-shot[data-variant='lead'] :global(.mgt) {
+    --mg-tracking-shot-top-from: 0 calc(var(--mgt-unit) * -0.2);
+    --mg-tracking-shot-top-to: 0 calc(var(--mgt-unit) * 0.25);
+  }
+  .mg-tracking-shot :global(.mgt-cam),
+  .mg-tracking-shot :global(.mgt-b) {
+    translate: var(--mg-tracking-shot-top-from);
+  }
+  .mg-tracking-shot.is-playing :global(.mgt-cam),
+  .mg-tracking-shot.is-playing :global(.mgt-b) {
+    animation: mg-tracking-shot-along var(--mg-duration) linear forwards;
+  }
+  @keyframes mg-tracking-shot-along {
+    to {
+      translate: var(--mg-tracking-shot-top-to);
+    }
+  }
+</style>

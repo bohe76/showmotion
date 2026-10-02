@@ -1,0 +1,104 @@
+---
+// Hyperlapse 데모 — 타임랩스인데 카메라도 프레임 사이에 먼 거리를 간다. 해가 하늘을 건너가는 동안(Time-Lapse 데모와 같은 해) 카메라가 B 를 향해 공간을 휙휙 지나간다
+// 앞 기둥(A)이 멀리서 나타나 커지다가 화면 밖으로 빠지기를 되풀이한다(기둥 사이를 세 번 지나간다). B 와 뒤 레이어는 멀어서 천천히 커진다
+// 화면의 모든 변화가 같은 박자(스물네 프레임)로 뚝뚝 끊기며 바뀐다 — 프레임 사이에 시간도 거리도 건너뛴다
+// 카메라가 제자리면 Time-Lapse, 끊기지 않고 한 번 다가가면 Dolly 다
+// 시각 변수 --mg-hyperlapse-t(0~1)를 steps() 로 움직이고 해 · B · 뒤 레이어가 그 값에서 계산한다. 배율 = 1 ÷ (1 − 나아간 거리)
+// 앞 기둥은 되풀이라 따로 움직인다: --mg-hyperlapse-near(0 = 멀리, 1 = 카메라 옆)가 톱니처럼 돌고, 배율 = 0.22 ÷ (1.02 − 값) — 가까울수록 급하게 커진다
+//   키프레임의 %(8.333 · 41.667 · 75)는 스물네 프레임의 2 · 10 · 18 번째 경계다. 구간마다 steps() 의 수가 그 구간의 프레임 수와 같아야 박자가 맞는다
+//   처음과 끝은 0.8(배율 1 — 장면의 원래 자리)이다. 멀리 있을 때는 B 뒤에 가려 있다(가운데 레이어를 앞 레이어 위로 올린다)
+import MgFrame from '../../mg/MgFrame.astro';
+import MgScene from '../../mg/MgScene.astro';
+---
+<div class="mg-hyperlapse" data-demo-root aria-hidden="true">
+  <MgFrame duration="4s">
+    <span class="mg-hyperlapse-sun"></span>
+    <MgScene />
+  </MgFrame>
+</div>
+
+<style>
+  @property --mg-hyperlapse-t {
+    syntax: '<number>';
+    inherits: true;
+    initial-value: 0;
+  }
+  @property --mg-hyperlapse-near {
+    syntax: '<number>';
+    inherits: false;
+    initial-value: 0.8;
+  }
+  .mg-hyperlapse.is-playing :global(.mgf-screen) {
+    animation: mg-hyperlapse-time var(--mg-duration) steps(24) forwards;
+  }
+  @keyframes mg-hyperlapse-time {
+    to {
+      --mg-hyperlapse-t: 1;
+    }
+  }
+  /* 해: Time-Lapse 데모와 같은 해. 길은 조금 높고 짧다 — 뒤 레이어가 커지며 다가와도 막대에 걸리지 않게 그 위로 지나간다
+     색은 토큰이 아니라 주황 고정색이다(2026-10-03 사용자 결정). Time-Lapse 의 해, 3D 무대의 해(mg3d/props.ts)와 같은 색이어야 한다 */
+  .mg-hyperlapse-sun {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 7cqw;
+    aspect-ratio: 1;
+    background: #ffb23e;
+    border: max(1px, 0.5cqw) solid #f08000;
+    border-radius: 50%;
+    translate: calc(4.5cqw + 76cqw * var(--mg-hyperlapse-t)) calc(10cqw - 28cqw * var(--mg-hyperlapse-t) * (1 - var(--mg-hyperlapse-t)));
+  }
+  /* 배율의 중심은 지평선(화면 위에서 68% = B 의 한가운데). 바닥선은 뒤 레이어의 밑변이라 뒤 레이어와 같이 움직인다(Dolly 데모와 같다) */
+  .mg-hyperlapse :global(.mgs-layer),
+  .mg-hyperlapse :global(.mgs-ground) {
+    transform-origin: 50% 68%;
+  }
+  .mg-hyperlapse :global(.mgs-ground) {
+    transform-origin: 50% -4.5cqw;
+  }
+  .mg-hyperlapse :global(.mgs-far),
+  .mg-hyperlapse :global(.mgs-ground) {
+    scale: calc(1 / (1 - 0.12 * var(--mg-hyperlapse-t)));
+  }
+  .mg-hyperlapse :global(.mgs-mid) {
+    z-index: 1;
+    scale: calc(1 / (1 - 0.25 * var(--mg-hyperlapse-t)));
+  }
+  .mg-hyperlapse :global(.mgs-near) {
+    scale: calc(0.22 / max(0.02, 1.02 - var(--mg-hyperlapse-near)));
+  }
+  .mg-hyperlapse.is-playing :global(.mgs-near) {
+    animation: mg-hyperlapse-pass var(--mg-duration) forwards;
+  }
+  @keyframes mg-hyperlapse-pass {
+    0% {
+      --mg-hyperlapse-near: 0.8;
+      animation-timing-function: steps(2);
+    }
+    8.333% {
+      --mg-hyperlapse-near: 1.05;
+    }
+    8.334% {
+      --mg-hyperlapse-near: 0.05;
+      animation-timing-function: steps(8);
+    }
+    41.667% {
+      --mg-hyperlapse-near: 1.05;
+    }
+    41.668% {
+      --mg-hyperlapse-near: 0.05;
+      animation-timing-function: steps(8);
+    }
+    75% {
+      --mg-hyperlapse-near: 1.05;
+    }
+    75.001% {
+      --mg-hyperlapse-near: 0.05;
+      animation-timing-function: steps(6);
+    }
+    100% {
+      --mg-hyperlapse-near: 0.8;
+    }
+  }
+</style>
